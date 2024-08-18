@@ -21,13 +21,11 @@ def register():
         confirm_password = data['confirm'] 
 
         user_found = mongo.user.find_one({'username': username})
-        uname = user_found['username']
         email_found = mongo.user.find_one({'email': email})
-        em = email_found['email']
 
-        if uname == username:
+        if user_found:
             message = 'Username already exists!'
-        elif em == email:
+        elif email_found:
             message = 'Email already exists!'
         elif password != confirm_password:
             message = 'Passwords do not match!'
@@ -54,15 +52,40 @@ def login():
         password = data.get('password')
 
         user_found = mongo.user.find_one({'username': username})
-        uname = user_found['username']
-        pword = user_found['password']
+        
 
-        if uname == username and pword == password:
+        if user_found and user_found['password'] == password:
             return render_template('index.html', username = uname)
         else:
             message = 'Invalid username or password!'
 
     return render_template('auth-login.html', message = message)
+
+@app.route('/logout')
+def logout():
+    return render_template('auth-login.html')
+
+@app.route('/forget-password', methods=['POST', 'GET'])
+def forget_password():
+    message = ''
+    if request.method == 'POST':
+        data = request.form
+        email = data.get('email')
+        password = data.get('password')
+        confirm_password = data['confirm']
+
+        email_found = mongo.user.find_one({'email': email})
+
+        if email_found:
+            if password != confirm_password:
+                message = 'Passwords do not match!'
+            else:
+                mongo.user.update_one({'email': email}, {'$set': {'password': password}})
+                message = 'Password updated successfully!'
+                return redirect(url_for('login'), message = message)
+        else:
+            message = 'Email doesn\'t exist!'
+    return render_template('auth-forgot-password.html', message = message)
 
 if __name__ == '__main__':
     app.run(debug=True)
