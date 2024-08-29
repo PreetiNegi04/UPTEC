@@ -8,6 +8,7 @@ app = Flask(__name__)
 app.config['MONGO_URI'] = "mongodb://localhost:27017/mydatabase"
 mongo = PyMongo(app).db
 
+#routes 
 @app.route('/', methods=['POST', 'GET'])
 def index():
     return redirect(url_for('login'))
