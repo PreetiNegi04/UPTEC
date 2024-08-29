@@ -10,7 +10,7 @@ mongo = PyMongo(app).db
 
 #routes 
 @app.route('/', methods=['POST', 'GET'])
-def index():
+def start():
     return redirect(url_for('login'))
 
 @app.route('/register', methods=['POST', 'GET'])
@@ -50,7 +50,7 @@ def register():
             user_data = mongo.user.find_one({'username':username})
             new_username = user_data['username']
 
-            return render_template('index.html', username = new_username)
+            return redirect(url_for('index', username = new_username))
     return render_template('auth-register.html', message=message)
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -65,7 +65,7 @@ def login():
         
 
         if user_found and check_password(user_found['password'], password):
-            return render_template('index.html', username = username)
+            return redirect(url_for('index' , username = username))
         else:
             message = 'Invalid username or password!'
 
@@ -74,6 +74,11 @@ def login():
 @app.route('/logout')
 def logout():
     return render_template('auth-login.html')
+
+@app.route('/index')
+def index():
+    username = request.args.get('username')
+    return render_template('index.html', username = username)
 
 @app.route('/forget-password', methods=['POST', 'GET'])
 def forget_password():
