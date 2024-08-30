@@ -174,5 +174,44 @@ def contact():
     # If GET request, render the contact form
     return render_template('contact.html')
 
+@app.route('/index')
+def dashboard_data():
+    try:
+        # Aggregate registration data by day
+        pipeline = [
+            {
+                "$group": {
+                    "_id": {
+                        "year": {"$year": "$today_date"},
+                        "month": {"$month": "$today_date"},
+                        "day": {"$dayOfMonth": "$today_date"}
+                    },
+                    "count": {"$sum": 1}
+                }
+            },
+            {
+                "$sort": {"_id": 1}  # Sort by date ascending
+            }
+        ]
+        
+        data = list(mongo.db.form_data.aggregate(pipeline))
+
+        # Check if data is empty or malformed
+        if not data:
+            return jsonify({"error": "No data found"}), 404
+
+        # Format the data for the frontend
+        formatted_data = {
+            "dates": [f"{entry['_id']['year']}-{entry['_id']['month']:02d}-{entry['_id']['day']:02d}" for entry in data],
+            "counts": [entry['count'] for entry in data]
+        }
+
+        return jsonify(formatted_data)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+   
+
+
 if __name__ == '__main__':
     app.run(debug=True)
