@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="\static\vendors\bootstrap-icons\bootstrap-icons.css">
+    <link rel="stylesheet" href="\static\css\app.css">
     <title>Document</title>
     <style>
         body {
@@ -25,11 +27,11 @@
 <body>
    <img src="https://i.pinimg.com/originals/32/b6/f2/32b6f2aeeb2d21c5a29382721cdc67f7.gif" alt="Data Saved Successfully">
    <h1 class="success-heading"> Data Saved Successfully</h1>
-   <button class="back-button" onclick="goToIndex()">Go to Home</button>
-   <script>
-    function goToIndex() {
-        window.location.href = 'index.html'; // Redirect to the index page
-    }
-    </script>
+    <br>
+    <br>
+    <div>
+        <button class = "back_button"> <a href="{{ url_for('index') }}">Go to home</a></button>
+    </div>
+   
 </body>
 </html>
