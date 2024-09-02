@@ -50,7 +50,7 @@ def register():
             user_data = mongo.db.user.find_one({'username': username})
             new_username = user_data['username']
 
-            return render_template('index.html', username = new_username)
+            return redirect(url_for('index', username = username))
     return render_template('auth-register.html', message=message)
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -64,7 +64,7 @@ def login():
         user_found = mongo.db.user.find_one({'username': username})
 
         if user_found and user_found['password'] == password:
-            return render_template('index.html', username = username)
+            return render_template('index.html', username = uname)
         else:
             message = 'Invalid username or password!'
 
