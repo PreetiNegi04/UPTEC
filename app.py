@@ -1,9 +1,12 @@
-from flask import Flask, request, jsonify, render_template, url_for, redirect, flash
+from flask import Flask, request, jsonify, render_template, url_for, redirect, flash, session
 from flask_pymongo import PyMongo
 import re
 import bcrypt
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
+
+app.secret_key = 'your_secret_key'
 
 app.config['MONGO_URI'] = "mongodb://localhost:27017/mydatabase"
 mongo = PyMongo(app)
@@ -72,7 +75,8 @@ def login():
 
 @app.route('/logout')
 def logout():
-    return render_template('auth-login.html')
+    session.clear()
+    return redirect(url_for('login'))
 
 @app.route('/dailyreport')
 def dailyreport():
@@ -94,7 +98,18 @@ def table():
 @app.route('/index')
 def index():
     username = request.args.get('username')
-    return render_template('index.html', username = username)
+        # Access the 'form_data' collection
+    collection = mongo.db["form_data"]
+    coll = mongo.db["contacts"]
+    # Get the total number of documents in the collection
+    total_documents = collection.count_documents({})
+    total_enquiries = coll.count_documents({})
+    # Get the current date and calculate the start and end of today
+    today = datetime.today()
+    # Query to count documents with 'today_date' of today
+    query = {"today_date": today.strftime("%Y-%m-%d")}
+    total_today = collection.count_documents(query)
+    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries)
 
 @app.route('/forget-password', methods=['POST', 'GET'])
 def forget_password():
