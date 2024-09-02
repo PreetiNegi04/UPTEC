@@ -63,8 +63,8 @@ def login():
 
         user_found = mongo.db.user.find_one({'username': username})
 
-        if user_found and user_found['password'] == password:
-            return render_template('index.html', username = uname)
+        if user_found and check_password(user_found['password'], password):
+            return redirect(url_for('index', username = username))
         else:
             message = 'Invalid username or password!'
 
@@ -232,6 +232,10 @@ def hash_password(password):
 def check_password(hashed_password, user_password):
     # Check if the provided password matches the hashed password
     return bcrypt.checkpw(user_password.encode('utf-8'), hashed_password)
+
+@app.route('/daily_report', methods=['POST', 'GET'])
+def daily_report():
+    return render_template('dailyreport.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
