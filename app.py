@@ -86,6 +86,10 @@ def Weeklyreport():
 def yearlyreport():
     return render_template('yearlyreport.html')
 
+@app.route('/table')
+def table():
+    return render_template('table.html')
+
 
 @app.route('/index')
 def index():

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Data Table</title>
+    <!-- Including DataTables CSS from CDN -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <!-- Including Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        #studenTable_wrapper {
+            margin: 0 auto;
+            width: fit-content;
+            max-width: 1400px;
+        }
+
+        #studenTable {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #studenTable th, #studenTable td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        #studenTable th {
+            background-color: #007bff;
+            color: #ffffff;
+            text-transform: uppercase;
+            font-size: 14px;
+            cursor: default; /* Remove pointer cursor to indicate no sorting */
+        }
+
+        #studenTable tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .delete-btn, .edit-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background-color: #ff3333;
+        }
+
+        .edit-btn {
+            background-color: #4CAF50;
+        }
+
+        .edit-btn:hover {
+            background-color: #45a049;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .fa-edit {
+            color: #007bff;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .fa-edit:hover {
+            color: #0056b3;
+        }
+
+        /* Make the table scrollable within a fixed height */
+        .dataTables_wrapper {
+            overflow: auto;
+            max-height: 500px; /* Adjust height as needed */
+        }
+
+        .dataTables_scrollBody {
+            max-height: 400px; /* Adjust to make table fit the screen */
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Students Data Management</h1>
+
+    <table id="studenTable" class="display">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Programme</th>
+                <th>Address</th>
+                <th>Centre</th>
+                <th>Hours</th>
+                <th>AM/PM</th>
+                <th>Date</th>
+                <th>Mobile</th>
+                <th>WhatsApp</th>
+                <th>Email</th>
+                <th>DOB</th>
+                <th>Marital Status</th>
+                <th>Qualification</th>
+                <th>College Status</th>
+                <th>Current College</th>
+                <th>Previous College</th>
+                <th>EWS</th>
+                <th>Father's Name</th>
+                <th>Occupation</th>
+                <th>Org. Address</th>
+                <th>Designation</th>
+                <th>Family Mobile</th>
+                <th>Objectives</th>
+                <th>Source</th>
+                <th>Specific Source</th>
+                <th>Course Name</th>
+                <th>New Tech Course Name</th>
+                <th>Short Term Course Name</th>
+                <th>Course Mode</th>
+                <th>Course Duration</th>
+                <th>Fees</th>
+                <th>Secondary Fees</th>
+                <th>Course Advised</th>
+                <th>P</th>
+                <th>T</th>
+                <th>R</th>
+                <th>Approved</th>
+                <th>Fremark</th>
+                <th>
+                    <i class="">Action</i>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be populated here by JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Including jQuery and DataTables JS from CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const table = $('#studenTable').DataTable({
+                ajax: {
+                    url: 'http://localhost:5000/startup/getall', // API endpoint for fetching data
+                    dataSrc: 'result'
+                },
+                columns: [
+                    { data: '_id' },
+                    { data: 'uname' },
+                    { data: 'prog' },
+                    { data: 'address' },
+                    { data: 'centre' },
+                    { data: 'hours' },
+                    { data: 'ampm' },
+                    { data: 'today-date' },
+                    { data: 'mobile' },
+                    { data: 'whatsapp' },
+                    { data: 'email' },
+                    { data: 'dob' },
+                    { data: 'mstatus' },
+                    { data: 'qualification' },
+                    { data: 'college-status' },
+                    { data: 'current-college' },
+                    { data: 'previous-college' },
+                    { data: 'ews' },
+                    { data: 'gname' },
+                    { data: 'occupation' },
+                    { data: 'addoforg' },
+                    { data: 'desg' },
+                    { data: 'mobile' },
+                    { data: 'objectives' },
+                    { data: 'source' },
+                    { data: 'newspaperRadioText' },
+                    { data: 'coursename' },
+                    { data: 'newTechCourseName' },
+                    { data: 'shortTermCourseName' },
+                    { data: 'course_mode' },
+                    { data: 'course_duration' },
+                    { data: 'fees' },
+                    { data: 'secfees' },
+                    { data: 'courseadv' },
+                    { data: 'p' },
+                    { data: 't' },
+                    { data: 'r' },
+                    { data: 'approved' },
+                    { data: 'fremark' },
+                    {
+                        data: null,
+                        sortable: false,
+                        render: function (data, type, row) {
+                            return `
+                                <div class="action-buttons">
+                                    <i class="fa fa-edit edit-btn" data-id="${row._id}" title="Edit"></i>
+                                    <i class="fa fa-trash delete-btn" data-id="${row._id}" title="Delete"></i>
+                                </div>`;
+                        }
+                    }
+                ],
+                paging: true,
+                searching: true,
+                info: true,
+                lengthChange: true,
+                ordering: false // Disable sorting to remove arrows from headers
+            });
+
+            // Handling delete button click
+            $('#studenTable tbody').on('click', '.delete-btn', function () {
+                const id = $(this).data('id');
+                deleteUser(id);
+            });
+
+            // Handling edit button click
+            $('#studenTable tbody').on('click', '.edit-btn', function () {
+                const id = $(this).data('id');
+                editUser(id);
+            });
+
+            const deleteUser = async (id) => {
+                try {
+                    const res = await fetch(`http://localhost:5000/startup/delete/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (res.ok) {
+                        alert('Student Data Deleted Successfully!');
+                        table.ajax.reload();
+                    } else {
+                        alert('Error deleting data. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting data:', error);
+                    alert('An error occurred. Please check the console for details.');
+                }
+            };
+
+            const editUser = (id) => {
+                // Logic to open the edit form and populate fields with the user data
+                alert(`Edit feature is not implemented yet for ID: ${id}`);
+                // You can redirect to an edit form or show a modal to edit the user details.
+            };
+        });
+    </script>
+</body>
+</html>
