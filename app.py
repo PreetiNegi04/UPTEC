@@ -74,6 +74,19 @@ def login():
 def logout():
     return render_template('auth-login.html')
 
+@app.route('/dailyreport')
+def dailyreport():
+    return render_template('dailyreport.html')
+
+@app.route('/Weeklyreport')
+def Weeklyreport():
+    return render_template('Weeklyreport.html')
+
+@app.route('/yearlyreport')
+def yearlyreport():
+    return render_template('yearlyreport.html')
+
+
 @app.route('/index')
 def index():
     username = request.args.get('username')

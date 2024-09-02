@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCC Center EPR Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+
+        .report-container {
+            width: 90%;
+            max-width:max-content;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin: 0 0 20px;
+            font-size: 22px;
+            color: #004080; /* Dark blue for headings */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+            background-color: white;
+        }
+
+        
+
+        /* Styling for 'Total' row */
+        .total-row {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        .headers{
+            background-color: #a2f3c1;
+        }
+
+        /* Styling for 'Total' column */
+        .total-col {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        .sub-headers{
+            background-color: #08e25c;
+        }
+
+        /* Highlight for header columns */
+       
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <h2 id="report-title">UCC Center EPR Report</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="1" class="headers">Centre</th>
+                    <th rowspan="1" class="headers">Year</th>
+                    <th colspan="4" class="headers">Lap Rep / CCHN / DNIM</th>
+                    <th colspan="4" class="headers">ADCA</th>
+                    <th colspan="4" class="headers">Desk Expert / DCA / CPC</th>
+                    <th colspan="4" class="headers">'O' Level</th>
+                    <th colspan="4" class="headers">DCAC</th>
+                    <th colspan="4" class="headers">BCA</th>
+                    <th colspan="4" class="headers">IC</th>
+                    <th colspan="4" class="headers">Internship</th>
+                    <th colspan="4" class="headers">New Tech</th>
+                    <th colspan="4" class="headers">ST</th>
+                    <th colspan="5" class="headers">Total</th>
+                </tr>
+                <tr>
+                    <!-- Sub-columns for each category -->
+                    <th></th><th></th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th>
+                    <th>E</th><th>P</th><th>R</th><th>U</th><th>TR</th>
+                    
+                </tr>
+            </thead>
+            <tbody id="report-body">
+                <!-- Rows will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function generateReport() {
+            const reportBody = document.getElementById('report-body');
+            const reportTitle = document.getElementById('report-title');
+            
+            // Get current year and next year
+            const currentYear = new Date().getFullYear();
+            const startMonth = 3; // April (0 = January, so 3 = April)
+            const endMonth = 2; // March
+            let startYear = currentYear;
+            let endYear = currentYear + 1;
+
+            // Generate report title
+            reportTitle.textContent = `UCC Center EPR Report for ${startYear}-${endYear}`;
+
+            // Month names
+            const months = [
+                "January", "February", "March", "April", "May", "June", "July", "August", 
+                "September", "October", "November", "December"
+            ];
+
+            // Create rows for each month from April to next year's March
+            for (let i = startMonth; i <= 11; i++) {
+                createTableRow(reportBody, months[i], `${startYear} (T)`);
+            }
+            for (let i = 0; i <= endMonth; i++) {
+                createTableRow(reportBody, months[i], `${endYear} (T)`);
+            }
+
+            // Create total row
+            createTotalRow(reportBody, `${startYear}-${endYear} (T)`);
+        }
+
+        function createTableRow(reportBody, month, year) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${month}</td>
+                <td>${year}</td>
+                <td>0</td><td>0</td><td>0</td><td>0</td>
+                <td>1</td><td>1</td><td>1</td><td>0</td>
+                <td>10</td><td>7</td><td>6</td><td>0</td>
+                <td>4</td><td>3</td><td>0</td><td>0</td>
+                <td>3</td><td>0</td><td>0</td>
+                <td>3</td><td>0</td><td>0</td>
+                <td>3</td><td>0</td><td>0</td>
+                <td>3</td><td>0</td><td>0</td>
+                <td>0</td><td>0</td><td>0</td>
+                <td>0</td><td>6</td><td>2</td>
+                
+                <td>2</td><td>2</td><td>1</td>
+                <td>16</td><td >11</td><td >10</td>
+                <td class="total-col">42</td><td class="total-col">29</td><td class="total-col">27</td><td class="total-col">29</td><td class="total-col">1</td>
+            `;
+            reportBody.appendChild(row);
+        }
+
+        function createTotalRow(reportBody, yearRange) {
+            const row = document.createElement('tr');
+            row.classList.add('total-row');
+            row.innerHTML = `
+                <td class="total-col">Total</td>
+                <td class="total-col">${yearRange}</td>
+                <td class="total-col">0</td><td class="total-col">0</td class="total-col"><td class="total-col">0</td><td class="total-col">0</td>
+                <td class="total-col">4</td><td class="total-col">1</td><td class="total-col">2</td><td class="total-col">1</td>
+                <td class="total-col">34</td><td class="total-col">24</td><td class="total-col">26</td><td class="total-col">1</td>
+                <td class="total-col">10</td><td class="total-col">7</td><td class="total-col">8</td><td class="total-col">1</td>
+                <td class="total-col">1</td><td class="total-col">1</td ><td class="total-col">0</td>
+                <td class="total-col">1</td><td class="total-col">1</td><td class="total-col">0</td>
+                <td class="total-col">0</td><td class="total-col">0</td><td class="total-col">0</td>
+                <td class="total-col">0</td><td class="total-col">0</td><td class="total-col">0</td>
+                <td class="total-col">13</td><td class="total-col">9</td><td class="total-col">8</td>
+                <td class="total-col">14</td><td class="total-col">8</td><td class="total-col">7</td>
+                <td class="total-col">67</td><td class="total-col">41</td><td class="total-col">42</td><td class="total-col">43</td><td class="total-col">67</td><td class="total-col">67</td><td class="total-col">67</td><td class="total-col">67</td><td class="total-col">67</td><td class="total-col">67</td><td class="total-col">67</td>
+            `;
+            reportBody.appendChild(row);
+        }
+
+        // Call the function to generate the report on page load
+        window.onload = generateReport;
+    </script>
+</body>
+</html>
