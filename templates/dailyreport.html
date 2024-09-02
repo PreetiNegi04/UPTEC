@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCC General Report</title>
+    <link rel="stylesheet" href="table.css">
+</head>
+<body>
+
+<div class="report-container">
+    <h2>UCC CENTER DAILY REPORT</h2>
+    <p>Date: <span id="current-date"></span></p>
+    <p>Prepared by: Tanya Gupta</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>COURSE</th>
+                <th>E</th>
+                <th>P</th>
+                <th>R</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>O LEVEL</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>DCAC</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>BCA</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>CCNA</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>NEW TECH</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>SHORT TERM</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Total</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="source-section">
+        <h3>Source</h3>
+        <div class="source-row">
+            <div>Friends</div>
+            <div></div>
+        </div>
+        <div class="source-row">
+            <div>Hoarding</div>
+            <div></div>
+        </div>
+        <div class="source-row">
+            <div>Website</div>
+            <div></div>
+        </div>
+        <div class="source-row">
+            <div>Others</div>
+            <div></div>
+        </div>
+    </div>
+
+</div>
+
+<script> // script.js
+    window.onload = function() {
+        var currentDate = new Date();
+        var formattedDate = currentDate.toISOString().split('T')[0];
+        document.getElementById('current-date').textContent = formattedDate;
+    }
+    </script>
+</body>
+</html>

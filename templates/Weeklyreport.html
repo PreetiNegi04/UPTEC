@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCC Center EPR Report</title>
+    <style>
+        /* General styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+
+        .report-container {
+            width: fit-content;
+            max-width: fit-content;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: lightyellow;
+            border: 1px solid #000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin: 0 0 20px;
+            font-size: 22px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .R {
+            background-color: rgb(181, 247, 181);
+        }
+
+        .U {
+            background-color: rgb(250, 199, 207);
+        }
+
+        .T {
+            background-color: rgb(248, 219, 248);
+        }
+
+        .O {
+            background-color: lightcyan;
+        }
+
+        /* Styling for Sunday rows */
+        .sunday-row {
+            background-color: #87CEFA; /* Sky blue background for Sundays */
+            font-weight: bold;
+        }
+
+        /* Media category */
+        .media-category {
+            font-weight: bold;
+            background-color: #e0e0e0;
+        }
+
+        /* Media section sub-columns */
+        .media-sub-columns th {
+            background-color: #FFA07A;
+        }
+
+        /* Total column styling */
+        .total-column {
+            background-color: yellow;
+            font-weight: bold;
+        }
+
+        .E {
+            background-color: white;
+        }
+        .P{
+             background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <h2 id="report-title">UCC CENTER EPR REPORT FOR <span id="month-year"></span></h2>
+        <table id="report-table">
+            <thead>
+                <tr>
+                    <th colspan="1"></th>
+                    <th colspan="4">ADCA</th>
+                    <th colspan="4">'O' Level</th>
+                    <th colspan="4">DCAC</th>
+                    <th colspan="4">BCA</th>
+                    <th colspan="4">IC</th>
+                    <th colspan="4">Internship</th>
+                    <th colspan="4">New Tech</th>
+                    <th colspan="4">ST</th>
+                    <th colspan="5" class="total-column">Total</th>
+                    <th colspan="4" class="media-category">Media</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-U">U</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-TR">TR</th>
+
+                    <th class="high-media">Friends</th>
+                    <th class="high-media">Hoarding</th>
+                    <th class="high-media">Website</th>
+                    <th class="high-media">Others</th>
+                </tr>
+            </thead>
+            <tbody id="report-body">
+                <!-- Rows will be generated here by JavaScript -->
+            </tbody>
+            <tfoot>
+                <tr class="total-column">
+                    <td>Total</td>
+                    <td id="total-adca-e">0</td>
+                    <td id="total-adca-p">0</td>
+                    <td id="total-adca-r">0</td>
+                    <td id="total-adca-u">0</td>
+
+                    <td id="total-o-level-e">0</td>
+                    <td id="total-o-level-p">0</td>
+                    <td id="total-o-level-r">0</td>
+                    <td id="total-o-level-u">0</td>
+
+                    <td id="total-dcac-e">0</td>
+                    <td id="total-dcac-p">0</td>
+                    <td id="total-dcac-r">0</td>
+                    <td id="total-dcac-u">0</td>
+
+                    <td id="total-bca-e">0</td>
+                    <td id="total-bca-p">0</td>
+                    <td id="total-bca-r">0</td>
+                    <td id="total-bca-u">0</td>
+
+                    <td id="total-ic-e">0</td>
+                    <td id="total-ic-p">0</td>
+                    <td id="total-ic-r">0</td>
+                    <td id="total-ic-u">0</td>
+
+                    <td id="total-internship-e">0</td>
+                    <td id="total-internship-p">0</td>
+                    <td id="total-internship-r">0</td>
+                    <td id="total-internship-u">0</td>
+
+                    <td id="total-new-tech-e">0</td>
+                    <td id="total-new-tech-p">0</td>
+                    <td id="total-new-tech-r">0</td>
+                    <td id="total-new-tech-u">0</td>
+
+                    <td id="total-st-e">0</td>
+                    <td id="total-st-p">0</td>
+                    <td id="total-st-r">0</td>
+                    <td id="total-st-u">0</td>
+
+                    <td id="total-total-e">0</td>
+                    <td id="total-total-p">0</td>
+                    <td id="total-total-u">0</td>
+                    <td id="total-total-r">0</td>
+                    <td id="total-total-tr">0</td>
+
+                    <td id="media-friends">0</td>
+                    <td id="media-hoarding">0</td>
+                    <td id="media-website">0</td>
+                    <td id="media-others">0</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <script>
+        function generateTableForMonth() {
+            const tableBody = document.getElementById('report-body');
+            const now = new Date();
+            const month = now.getMonth();
+            const year = now.getFullYear();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            let rows = '';
+
+            document.getElementById('month-year').textContent = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeek = date.getDay();
+                const isSunday = dayOfWeek === 0; // 0 is Sunday
+
+                const rowClass = isSunday ? 'sunday-row' : ''; // Apply the Sunday row class if it's Sunday
+
+                rows += `
+                    <tr class="${rowClass}">
+                        <td>${day}</td>
+                       
+                        <td class="E">0</td>
+                        <td class="P">0</td>
+                        <td class="R">0</td>
+                        <td class="U">0</td>
+
+                        <td class="E">0</td>
+                        <td class="P">0</td>
+                        <td class="R">0</td>
+                        <td class="U">0</td>
+
+                        <td class="E">0</td>
+                        <td class="P">0</td>
+                        <td class="R">0</td>
+                        <td class="U">0</td>
+
+                        <td class="E">0</td>
+                        <td class="P">0</td>
+                        <td class="R">0</td>
+                        <td class="U">0</td>
+
+                        <td class="E">0</td>
+                        <td class="P">0</td>
+                        <td class="R">0</td>
+                        <td class="U">0</td>
+
+                        <td class="E">0</td>
+                        <td class="P">0</td>
+                        <td class="R">0</td>
+                        <td class="U">0</td>
+
+                        <td class="E">0</td>
+                        <td class="P">0</td>
+                        <td class="R">0</td>
+                        <td class="U">0</td>
+
+                        <td class="E">0</td>
+                        <td class="P">0</td>
+                        <td class="R">0</td>
+                        <td class="U">0</td>
+
+                        <td class="T">0</td>
+                        <td class="T">0</td>
+                      
+                        <td class="T">0</td>
+                        <td class="T">0</td>
+                        <td class="T">0</td>
+                        
+                        <td class="O">0</td>
+                        <td class="O">0</td>
+                        <td class="O">0</td>
+                        <td class="O">0</td>
+                        
+                    </tr>
+                `;
+            }
+
+            tableBody.innerHTML = rows;
+        }
+
+        generateTableForMonth();
+    </script>
+</body>
+</html>

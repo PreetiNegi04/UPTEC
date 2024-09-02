@@ -64,7 +64,7 @@ def login():
         user_found = mongo.db.user.find_one({'username': username})
 
         if user_found and user_found['password'] == password:
-            return render_template('index.html', username = uname)
+            return render_template('index.html', username = username)
         else:
             message = 'Invalid username or password!'
 
@@ -101,54 +101,63 @@ def forget_password():
             message = 'Email doesn\'t exist!'
     return render_template('auth-forgot-password.html', message=message)
 
-@app.route('/success', methods=['POST', 'GET'])
-def success():
-    # Get form data
-    form_data = {
-        "name": request.form.get('uname'),
-        "programme": request.form.get('prog'),
-        "address": request.form.get('address'),
-        "centre": request.form.get('centre'),
-        "hours": request.form.get('hours'),
-        "ampm": request.form.get('ampm'),
-        "today_date": request.form.get('today-date'),
-        "mobile": request.form.get('mobile'),
-        "whatsapp": request.form.get('whatsapp'),
-        "email": request.form.get('email'),
-        "dob": request.form.get('dob'),
-        "marital_status": request.form.get('mstatus'),
-        "qualification": request.form.get('qualification'),
-        "college_status": request.form.get('college-status'),
-        "current_college": request.form.get('current-college'),
-        "previous_college": request.form.get('previous-college'),
-        "ews": request.form.get('ews'),
-        "father_name": request.form.get('gname'),
-        "occupation": request.form.get('occupation'),
-        "organization_address": request.form.get('addoforg'),
-        "designation": request.form.get('desg'),
-        "family_mobile": request.form.get('mobile'),
-        "objectives": request.form.getlist('objectives'),
-        "source": request.form.getlist('source'),
-        "specific_source": request.form.get('newspaperRadioText'),
-        "course_name": request.form.get('coursename'),
-        "new_tech_course_name": request.form.get('newTechCourseName'),
-        "short_term_course_name": request.form.get('shortTermCourseName'),
-        "course_mode": request.form.get('course_mode'),
-        "course_duration": request.form.get('course_duration'),
-        "fees": request.form.get('fees'),
-        "secfees": request.form.get('secfees'),
-        "course_advised": request.form.get('courseadv'),
-        "p": request.form.get('p'),
-        "t": request.form.get('t'),
-        "r": request.form.get('r'),
-        "approved": request.form.get('approved'),
-        "fremark": request.form.get('fremark'),
-    }
+@app.route('/student_registration', methods=['POST', 'GET'])
+def student_registration():
+    if request.method == 'POST':
+        # Get form data
+        form_data = {
+            "name": request.form.get('uname'),
+            "programme": request.form.get('prog'),
+            "address": request.form.get('address'),
+            "centre": request.form.get('centre'),
+            "hours": request.form.get('hours'),
+            "ampm": request.form.get('ampm'),
+            "today_date": request.form.get('today-date'),
+            "mobile": request.form.get('mobile'),
+            "whatsapp": request.form.get('whatsapp'),
+            "email": request.form.get('email'),
+            "dob": request.form.get('dob'),
+            "marital_status": request.form.get('mstatus'),
+            "qualification": request.form.get('qualification'),
+            "college_status": request.form.get('college-status'),
+            "current_college": request.form.get('current-college'),
+            "previous_college": request.form.get('previous-college'),
+            "ews": request.form.get('ews'),
+            "father_name": request.form.get('gname'),
+            "occupation": request.form.get('occupation'),
+            "organization_address": request.form.get('addoforg'),
+            "designation": request.form.get('desg'),
+            "family_mobile": request.form.get('mobile'),
+            "objectives": request.form.getlist('objectives'),
+            "source": request.form.getlist('source'),
+            "specific_source": request.form.get('newspaperRadioText'),
+            "course_name": request.form.get('coursename'),
+            "new_tech_course_name": request.form.get('newTechCourseName'),
+            "short_term_course_name": request.form.get('shortTermCourseName'),
+            "course_mode": request.form.get('course_mode'),
+            "course_duration": request.form.get('course_duration'),
+            "fees": request.form.get('fees'),
+            "secfees": request.form.get('secfees'),
+            "course_advised": request.form.get('courseadv'),
+            "p": request.form.get('p'),
+            "t": request.form.get('t'),
+            "r": request.form.get('r'),
+            "approved": request.form.get('approved'),
+            "fremark": request.form.get('fremark'),
+        }
+        try:
+            # Save to MongoDB
+            mongo.db.form_data.insert_one(form_data)
+            return redirect(url_for('success'))  # Replace 'success' with the name of the route you want to redirect to
+        except Exception as e:
+            app.logger.error(f"Error occurred while saving student registration data: {e}")
+            flash("An error occurred while saving your data. Please try again later.", "error")
+            return redirect(url_for('student_registration'))
 
-    # Save to MongoDB
-    mongo.db.form_data.insert_one(form_data)
-
-    return redirect(url_for('success_page'))
+    # If it's a GET request, render the student registration form
+    return render_template('student_registration.html')
+        # Save to MongoDB
+         # Replace with the actual template you are using
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -168,7 +177,7 @@ def contact():
                 'enquiry_status': request.form.get('estatus'),
                 'remark': request.form.get('status')
             }
-
+            
             # Check if all fields are provided (additional checks can be added as needed)
             if not all(contact_data.values()) or not contact_data['follow_up_status']['date'] or not contact_data['follow_up_status']['reason']:
                 flash("All fields are required!", "error")
@@ -189,43 +198,10 @@ def contact():
     # If GET request, render the contact form
     return render_template('contact.html')
 
-@app.route('/index')
-def dashboard_data():
-    try:
-        # Aggregate registration data by day
-        pipeline = [
-            {
-                "$group": {
-                    "_id": {
-                        "year": {"$year": "$today_date"},
-                        "month": {"$month": "$today_date"},
-                        "day": {"$dayOfMonth": "$today_date"}
-                    },
-                    "count": {"$sum": 1}
-                }
-            },
-            {
-                "$sort": {"_id": 1}  # Sort by date ascending
-            }
-        ]
-        
-        data = list(mongo.db.form_data.aggregate(pipeline))
 
-        # Check if data is empty or malformed
-        if not data:
-            return jsonify({"error": "No data found"}), 404
-
-        # Format the data for the frontend
-        formatted_data = {
-            "dates": [f"{entry['_id']['year']}-{entry['_id']['month']:02d}-{entry['_id']['day']:02d}" for entry in data],
-            "counts": [entry['count'] for entry in data]
-        }
-
-        return jsonify(formatted_data)
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-   
+@app.route('/success', methods=['POST', 'GET'])
+def success():
+    return render_template('success.html') 
 
 
 def validate_username(username):
