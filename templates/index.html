@@ -126,17 +126,7 @@
                                 <i class="bi bi-person-badge-fill"></i>
                                 <span>Logout</span>
                             </a>
-                        </li>
-                      
-
-                       
-
-                       
-
-                       
-
-                      
-
+                        </li> 
                     </ul>
                 </div>
                 <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
@@ -317,34 +307,13 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr>
-                                                        <td class="col-3">
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="avatar avatar-md">
-                                                                    <img src="static\images\faces\5.jpg">
-                                                                </div>
-                                                                <p class="font-bold ms-3 mb-0">Si Cantik</p>
-                                                            </div>
-                                                        </td>
-                                                        <td class="col-auto">
-                                                            <p class=" mb-0">Congratulations on your graduation!</p>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="col-3">
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="avatar avatar-md">
-                                                                    <img src="static\images\faces\2.jpg">
-                                                                </div>
-                                                                <p class="font-bold ms-3 mb-0">Si Ganteng</p>
-                                                            </div>
-                                                        </td>
-                                                        <td class="col-auto">
-                                                            <p class=" mb-0">Wow amazing design! Can you make another
-                                                                tutorial for
-                                                                this design?</p>
-                                                        </td>
-                                                    </tr>
+                                                        {% for document in today_documents %}
+                                                        <div class="recent-message d-flex px-4 py-3">
+                                                                <td class="mb-1">{{ document['name'] }}</td>
+                                                                <td class="text-muted mb-0">{{ document['follow_up_status']['reason'] }}</td>
+                                                                <td class="text-muted mb-0">{{ document['contact_number'] }}</td>
+                                                        </div>
+                                                        {% endfor %}
                                                 </tbody>
                                             </table>
                                         </div>
@@ -373,37 +342,16 @@
                                 <h4>Pending Enquiries</h4>
                             </div>
                             <div class="card-content pb-4">
+                                {% for document in pending_documents %}
                                 <div class="recent-message d-flex px-4 py-3">
-                                    <div class="avatar avatar-lg">
-                                        <img src="static\images\faces\4.jpg">
-                                    </div>
                                     <div class="name ms-4">
-                                        <h5 class="mb-1">Hank Schrader</h5>
-                                        <h6 class="text-muted mb-0">@johnducky</h6>
+                                        <h5 class="mb-1">{{ document['name'] }}</h5>
+                                        <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
+                                        <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
                                     </div>
                                 </div>
-                                <div class="recent-message d-flex px-4 py-3">
-                                    <div class="avatar avatar-lg">
-                                        <img src="static\images\faces\5.jpg">
-                                    </div>
-                                    <div class="name ms-4">
-                                        <h5 class="mb-1">Dean Winchester</h5>
-                                        <h6 class="text-muted mb-0">@imdean</h6>
-                                    </div>
-                                </div>
-                                <div class="recent-message d-flex px-4 py-3">
-                                    <div class="avatar avatar-lg">
-                                        <img src="static\images\faces\1.jpg">
-                                    </div>
-                                    <div class="name ms-4">
-                                        <h5 class="mb-1">John Dodol</h5>
-                                        <h6 class="text-muted mb-0">@dodoljohn</h6>
-                                    </div>
-                                </div>
-                                <div class="px-4">
-                                    <button class='btn btn-block btn-xl btn-light-primary font-bold mt-3'>Start
-                                        Conversation</button>
-                                </div>
+                                {% endfor %}
+
                             </div>
                         </div>
                         <div class="card">

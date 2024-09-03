@@ -81,10 +81,6 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-@app.route('/dailyreport')
-def dailyreport():
-    return render_template('dailyreport.html')
-
 @app.route('/Weeklyreport')
 def Weeklyreport():
     return render_template('Weeklyreport.html')
@@ -97,27 +93,34 @@ def yearlyreport():
 def table():
     return render_template('table.html')
 
+@app.route('/dailyreport', methods=['POST', 'GET'])
+def dailyreport():
+    return render_template('dailyreport.html')
+
 
 @app.route('/index')
 def index():
-    #username = request.args.get('username')
 
     username = session.get('username', None)
-        # Access the 'form_data' collection
+    # Access the 'form_data' collection
     collection = mongo.db["form_data"]
     coll = mongo.db["contacts"]
     # Get the total number of documents in the collection
     total_documents = collection.count_documents({})
     total_enquiries = coll.count_documents({})
-
     query = {"enquiry_status" : "pending"}
     pending = coll.count_documents(query)
+
+    pending_documents = find_pending()
+
+    today_documents = find_today()
+    
     # Get the current date and calculate the start and end of today
-    today = datetime.today()
+    today = datetime.today().strftime("%Y-%m-%d")
     # Query to count documents with 'today_date' of today
-    query = {"today_date": today.strftime("%Y-%m-%d")}
+    query = {"today_date": today}
     total_today = collection.count_documents(query)
-    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending)
+    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents)
 
 @app.route('/forget-password', methods=['POST', 'GET'])
 def forget_password():
@@ -274,9 +277,22 @@ def check_password(hashed_password, user_password):
     # Check if the provided password matches the hashed password
     return bcrypt.checkpw(user_password.encode('utf-8'), hashed_password)
 
-@app.route('/daily_report', methods=['POST', 'GET'])
-def daily_report():
-    return render_template('dailyreport.html')
+def find_pending():
+    collection = mongo.db["contacts"]
+    query = {"enquiry_status" : "pending"}
+    # Get the documents that match the query
+    pending_documents = collection.find(query).sort("follow_up_status.date", 1)
+    return list(pending_documents)
 
+
+def find_today():
+    collection = mongo.db["contacts"]
+    # Get the current date and calculate the start and end of today
+    today = datetime.today().strftime("%Y-%m-%d")
+
+    query = {"follow_up_status.date": today, "enquiry_status": "pending"}
+    # Get the documents that match the query
+    today_documents = collection.find(query).sort("follow_up_status.date", 1)
+    return list(today_documents)
 if __name__ == '__main__':
     app.run(debug=True)
