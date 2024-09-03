@@ -159,115 +159,56 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Rows will be populated here by JavaScript -->
+            {% for document in all_documents %}
+            <tr class="recent-message d-flex px-4 py-3">
+                <td>{{ document['_id'] }}</td>
+                <td>{{ document['name'] }}</td>
+                <td>{{ document['programme'] }}</td>
+                <td>{{ document['address'] }}</td>
+                <td>{{ document['centre'] }}</td>
+                <td>{{ document['hours'] }}</td>
+                <td>{{ document['ampm'] }}</td>
+                <td>{{ document['today_date'] }}</td>
+                <td>{{ document['mobile'] }}</td>
+                <td>{{ document['whatsapp'] }}</td>
+                <td>{{ document['email'] }}</td>
+                <td>{{ document['dob'] }}</td>
+                <td>{{ document['marital_status'] }}</td>
+                <td>{{ document['qualification'] }}</td>
+                <td>{{ document['college_status'] }}</td>
+                <td>{{ document['current_college'] }}</td>
+                <td>{{ document['previous_college'] }}</td>
+                <td>{{ document['ews'] }}</td>
+                <td>{{ document['father_name'] }}</td>
+                <td>{{ document['occupation'] }}</td>
+                <td>{{ document['organization_address'] }}</td>
+                <td>{{ document['designation'] }}</td>
+                <td>{{ document['family_mobile'] }}</td>
+                <td>{{ document['objectives'] }}</td>
+                <td>{{ document['source'] }}</td>
+                <td>{{ document['specific_source'] }}</td>
+                <td>{{ document['course_name'] }}</td>
+                <td>{{ document['new_tech_course_name'] }}</td>
+                <td>{{ document['short_term_course_name'] }}</td>
+                <td>{{ document['course_mode'] }}</td>
+                <td>{{ document['course_duration'] }}</td>
+                <td>{{ document['fees'] }}</td>
+                <td>{{ document['secfees'] }}</td>
+                <td>{{ document['course_advised'] }}</td>
+                <td>{{ document['p'] }}</td>
+                <td>{{ document['t'] }}</td>
+                <td>{{ document['r'] }}</td>
+                <td>{{ document['approved'] }}</td>
+                <td>{{ document['fremark'] }}</td>
+            </tr>
+            {% endfor %}
         </tbody>
+        
     </table>
 
     <!-- Including jQuery and DataTables JS from CDN -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            const table = $('#studenTable').DataTable({
-                ajax: {
-                    url: 'http://localhost:5000/startup/getall', // API endpoint for fetching data
-                    dataSrc: 'result'
-                },
-                columns: [
-                    { data: '_id' },
-                    { data: 'uname' },
-                    { data: 'prog' },
-                    { data: 'address' },
-                    { data: 'centre' },
-                    { data: 'hours' },
-                    { data: 'ampm' },
-                    { data: 'today-date' },
-                    { data: 'mobile' },
-                    { data: 'whatsapp' },
-                    { data: 'email' },
-                    { data: 'dob' },
-                    { data: 'mstatus' },
-                    { data: 'qualification' },
-                    { data: 'college-status' },
-                    { data: 'current-college' },
-                    { data: 'previous-college' },
-                    { data: 'ews' },
-                    { data: 'gname' },
-                    { data: 'occupation' },
-                    { data: 'addoforg' },
-                    { data: 'desg' },
-                    { data: 'mobile' },
-                    { data: 'objectives' },
-                    { data: 'source' },
-                    { data: 'newspaperRadioText' },
-                    { data: 'coursename' },
-                    { data: 'newTechCourseName' },
-                    { data: 'shortTermCourseName' },
-                    { data: 'course_mode' },
-                    { data: 'course_duration' },
-                    { data: 'fees' },
-                    { data: 'secfees' },
-                    { data: 'courseadv' },
-                    { data: 'p' },
-                    { data: 't' },
-                    { data: 'r' },
-                    { data: 'approved' },
-                    { data: 'fremark' },
-                    {
-                        data: null,
-                        sortable: false,
-                        render: function (data, type, row) {
-                            return `
-                                <div class="action-buttons">
-                                    <i class="fa fa-edit edit-btn" data-id="${row._id}" title="Edit"></i>
-                                    <i class="fa fa-trash delete-btn" data-id="${row._id}" title="Delete"></i>
-                                </div>`;
-                        }
-                    }
-                ],
-                paging: true,
-                searching: true,
-                info: true,
-                lengthChange: true,
-                ordering: false // Disable sorting to remove arrows from headers
-            });
-
-            // Handling delete button click
-            $('#studenTable tbody').on('click', '.delete-btn', function () {
-                const id = $(this).data('id');
-                deleteUser(id);
-            });
-
-            // Handling edit button click
-            $('#studenTable tbody').on('click', '.edit-btn', function () {
-                const id = $(this).data('id');
-                editUser(id);
-            });
-
-            const deleteUser = async (id) => {
-                try {
-                    const res = await fetch(`http://localhost:5000/startup/delete/${id}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (res.ok) {
-                        alert('Student Data Deleted Successfully!');
-                        table.ajax.reload();
-                    } else {
-                        alert('Error deleting data. Please try again.');
-                    }
-                } catch (error) {
-                    console.error('Error deleting data:', error);
-                    alert('An error occurred. Please check the console for details.');
-                }
-            };
-
-            const editUser = (id) => {
-                // Logic to open the edit form and populate fields with the user data
-                alert(`Edit feature is not implemented yet for ID: ${id}`);
-                // You can redirect to an edit form or show a modal to edit the user details.
-            };
-        });
-    </script>
+    
 </body>
 </html>

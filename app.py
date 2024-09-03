@@ -91,7 +91,14 @@ def yearlyreport():
 
 @app.route('/table')
 def table():
-    return render_template('table.html')
+    collection = mongo.db["form_data"]
+    # Fetch all documents from the collection
+    all_documents = collection.find()
+
+    # Convert the cursor to a list if you need to work with the documents directly
+    all_documents = list(all_documents)
+    return render_template('table.html', all_documents = all_documents)
+
 
 @app.route('/dailyreport', methods=['POST', 'GET'])
 def dailyreport():
