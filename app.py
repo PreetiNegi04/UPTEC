@@ -11,6 +11,7 @@ app.secret_key = 'your_secret_key'
 app.config['MONGO_URI'] = "mongodb://localhost:27017/mydatabase"
 mongo = PyMongo(app)
 
+
 #routes 
 @app.route('/', methods=['POST', 'GET'])
 def start():
@@ -67,7 +68,9 @@ def login():
         user_found = mongo.db.user.find_one({'username': username})
 
         if user_found and check_password(user_found['password'], password):
-            return redirect(url_for('index', username = username))
+            session['username'] = username
+            logged_user = username
+            return redirect(url_for('index'))
         else:
             message = 'Invalid username or password!'
 
@@ -97,19 +100,24 @@ def table():
 
 @app.route('/index')
 def index():
-    username = request.args.get('username')
+    #username = request.args.get('username')
+
+    username = session.get('username', None)
         # Access the 'form_data' collection
     collection = mongo.db["form_data"]
     coll = mongo.db["contacts"]
     # Get the total number of documents in the collection
     total_documents = collection.count_documents({})
     total_enquiries = coll.count_documents({})
+
+    query = {"enquiry_status" : "pending"}
+    pending = coll.count_documents(query)
     # Get the current date and calculate the start and end of today
     today = datetime.today()
     # Query to count documents with 'today_date' of today
     query = {"today_date": today.strftime("%Y-%m-%d")}
     total_today = collection.count_documents(query)
-    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries)
+    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending)
 
 @app.route('/forget-password', methods=['POST', 'GET'])
 def forget_password():
@@ -233,6 +241,7 @@ def contact():
 
 @app.route('/success', methods=['POST', 'GET'])
 def success():
+    username = session.get('username', None)
     return render_template('success.html') 
 
 
