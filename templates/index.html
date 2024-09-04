@@ -332,7 +332,6 @@
                                     <div class="ms-3 name">
                                         <h3>Admin Details</h3>
                                         <h5 class="font-bold">{{username}}</h5>
-                                        <h5 class="font-bold"><a href = "{{ url_for('logout')}}">Logout</a></h5>
                                     </div>
                                 </div>
                             </div>
@@ -344,10 +343,15 @@
                             <div class="card-content pb-4">
                                 {% for document in pending_documents %}
                                 <div class="recent-message d-flex px-4 py-3">
+                                    
                                     <div class="name ms-4">
+
                                         <h5 class="mb-1">{{ document['name'] }}</h5>
                                         <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
                                         <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
+                                        <div class="action-buttons">
+                                        <a href="/enquiry/{{document['_id']}}/action/delete" class="btn-btn-primary">Done</a>
+                                        </div>
                                     </div>
                                 </div>
                                 {% endfor %}

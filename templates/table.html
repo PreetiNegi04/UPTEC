@@ -200,6 +200,12 @@
                 <td>{{ document['r'] }}</td>
                 <td>{{ document['approved'] }}</td>
                 <td>{{ document['fremark'] }}</td>
+                <td> 
+                    <div class="action-buttons">
+                        <a href="{{config.ASSETS_ROOT}}/document/{{document['_id']}}/edit" class="edit-btn">Edit</a>
+                        <a href="/document/{{document['_id']}}/action/delete" class="delete-btn">Delete</a>
+                      </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

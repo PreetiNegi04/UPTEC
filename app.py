@@ -3,6 +3,7 @@ from flask_pymongo import PyMongo
 import re
 import bcrypt
 from datetime import datetime, timedelta
+from bson import ObjectId
 
 app = Flask(__name__)
 
@@ -254,6 +255,21 @@ def success():
     username = session.get('username', None)
     return render_template('success.html') 
 
+@app.route('/document/<string:id>/action/delete')
+def delete_document(id):
+    # Convert the string id to an ObjectId
+    id = ObjectId(id)
+    # Delete the document with the given ID
+    mongo.db.form_data.delete_one({"_id": id})
+    return redirect(url_for('table'))
+
+@app.route('/enquiry/<string:id>/action/delete')
+def delete_enquiry(id):
+    # Convert the string id to an ObjectId
+    id = ObjectId(id)
+    # Delete the document with the given ID
+    mongo.db.contacts.delete_one({"_id": id})
+    return redirect(url_for('index'))
 
 def validate_username(username):
     # Username should be at least 8 characters long, containing at least one uppercase letter, one lowercase letter, and one digit
