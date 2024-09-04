@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UCC General Report</title>
-    <style>/* styles.css */
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>  
+    <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -37,11 +39,11 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            border: 2px solid black; /* Added border to the entire table */
+            border: 2px solid black;
         }
         
         th, td {
-            border: 1px solid black; /* Define a clear border for table cells */
+            border: 1px solid black;
             padding: 5px;
             text-align: center;
         }
@@ -60,7 +62,45 @@
         .source-row:last-child {
             border-bottom: none;
         }
-        </style>
+
+        /* Hide buttons for downloads */
+        .hidden {
+            display: none;
+        }
+
+        /* Styling for download menu */
+        .download-toolbar {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+
+        .download-menu-icon {
+            cursor: pointer;
+        }
+
+        .download-menu {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 30px;
+            right: 0;
+            width: 150px;
+            display: none;
+        }
+
+        .download-menu-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .download-menu-item:hover {
+            background: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
 
@@ -69,7 +109,7 @@
     <p>Date: <span id="current-date"></span></p>
     <p>Prepared by: Tanya Gupta</p>
 
-    <table>
+    <table class="report-content">
         <thead>
             <tr>
                 <th>COURSE</th>
@@ -143,15 +183,103 @@
             <div></div>
         </div>
     </div>
-
 </div>
 
-<script> // script.js
+<div class="download-toolbar">
+    <div class="download-menu-icon" title="Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path fill="none" d="M0 0h24v24H0V0z"></path>
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
+        </svg>
+    </div>
+    <div class="download-menu">
+        <div class="download-menu-item" id="downloadPDF">Download PDF</div>
+        <div class="download-menu-item" id="downloadCSV">Download CSV</div>
+        <div class="download-menu-item" id="downloadImage">Download Image</div>
+    </div>
+</div>
+
+<script>
     window.onload = function() {
         var currentDate = new Date();
         var formattedDate = currentDate.toISOString().split('T')[0];
         document.getElementById('current-date').textContent = formattedDate;
     }
-    </script>
+
+    document.querySelector('.download-menu-icon').addEventListener('click', function() {
+        const menu = document.querySelector('.download-menu');
+        menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
+    });
+
+    document.getElementById('downloadPDF').addEventListener('click', function() {
+        generatePDF();
+    });
+
+    document.getElementById('downloadCSV').addEventListener('click', function() {
+        generateCSV();
+    });
+
+    document.getElementById('downloadImage').addEventListener('click', function() {
+        generateImage();
+    });
+
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        toggleButtonsVisibility(true);
+
+        html2canvas(document.querySelector('.report-container'), { ignoreElements: element => element.classList.contains('download-btn') }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF();
+            pdf.addImage(imgData, 'PNG', 10, 10);
+            pdf.save('report.pdf');
+        }).catch(error => {
+            console.error('Error generating PDF:', error);
+        }).finally(() => {
+            toggleButtonsVisibility(false);
+        });
+    }
+
+    function generateCSV() {
+        toggleButtonsVisibility(true);
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        const rows = document.querySelectorAll('.report-content tr');
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('th, td');
+            const rowArray = Array.from(cells).map(cell => cell.innerText);
+            csvContent += rowArray.join(',') + "\n";
+        });
+
+        const downloadLink = document.createElement('a');
+        downloadLink.setAttribute('href', encodeURI(csvContent));
+        downloadLink.setAttribute('download', 'report.csv');
+        downloadLink.click();
+
+        toggleButtonsVisibility(false);
+    }
+
+    function generateImage() {
+        toggleButtonsVisibility(true);
+
+        html2canvas(document.querySelector('.report-container'), { ignoreElements: element => element.classList.contains('download-btn') }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const downloadLink = document.createElement('a');
+            downloadLink.href = imgData;
+            downloadLink.download = 'report.png';
+            downloadLink.click();
+        }).catch(error => {
+            console.error('Error generating image:', error);
+        }).finally(() => {
+            toggleButtonsVisibility(false);
+        });
+    }
+
+    function toggleButtonsVisibility(hide) {
+        const buttons = document.querySelectorAll('.download-btn');
+        buttons.forEach(button => {
+            button.classList.toggle('hidden', hide);
+        });
+    }
+</script>
 </body>
 </html>
