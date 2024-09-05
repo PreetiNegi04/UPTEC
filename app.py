@@ -1,13 +1,18 @@
 from flask import Flask, request, jsonify, render_template, url_for, redirect, flash, session
 from flask_pymongo import PyMongo
+from pymongo import MongoClient
 import re
 import bcrypt
 from datetime import datetime, timedelta
+from bson import ObjectId
 
 app = Flask(__name__)
 
 app.secret_key = 'your_secret_key'
 
+client = MongoClient('mongodb://localhost:27017/')
+db = client['mydatabase']
+collection = db['form_data'] 
 app.config['MONGO_URI'] = "mongodb://localhost:27017/mydatabase"
 mongo = PyMongo(app)
 
@@ -253,6 +258,42 @@ def contact():
 def success():
     username = session.get('username', None)
     return render_template('success.html') 
+
+
+@app.route('/save', methods=['POST'])
+def save_record():
+    try:
+        data = request.json
+        record_id = data.get('id')
+        updated_data = data.get('data')
+
+        result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': updated_data})
+
+        if result.modified_count > 0:
+            return jsonify({'status': 'success', 'message': 'Record updated successfully!'})
+        else:
+            return jsonify({'status': 'error', 'message': 'No record was updated'}), 500
+    except Exception as e:
+        print(f"Error updating record: {e}")
+        return jsonify({'status': 'error', 'message': 'Failed to update record'}), 500
+
+
+@app.route('/delete', methods=['POST'])
+def delete_record():
+    try:
+        data = request.json
+        record_id = data.get('id')
+
+        result = collection.delete_one({'_id': ObjectId(record_id)})
+
+        if result.deleted_count > 0:
+            return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
+        else:
+            return jsonify({'status': 'error', 'message': 'No record was deleted'}), 500
+    except Exception as e:
+        print(f"Error deleting record: {e}")
+        return jsonify({'status': 'error', 'message': 'Failed to delete record'}), 500
+
 
 
 def validate_username(username):
