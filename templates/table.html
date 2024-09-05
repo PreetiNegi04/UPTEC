@@ -3,6 +3,9 @@
 <head>
     <title>Data Table</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -70,17 +73,11 @@
         .saveButton {
             background-color: #4CAF50;
         }
-        .action-buttons {
-    display: flex;
-    justify-content: space-between; /* Spacing between buttons */
-    gap: 10px; /* Add space between buttons */
-}
-
-.action-buttons button {
-    margin: 0; /* Remove default margin */
-    padding: 5px 10px; /* Adjust padding */
-}
-
+        .action-buttons 
+        {
+        display: inline-flex; /* This makes the buttons align horizontally */
+        gap: 10px; /* Adds some space between the buttons */
+           }
 
         .saveButton:hover {
             background-color: #45a049;
@@ -118,11 +115,24 @@
             border: 1px solid #ddd;
             cursor: not-allowed;
         }
+        .action-buttons {
+    display: flex;
+    justify-content: space-between; /* Spacing between buttons */
+    gap: 10px; /* Add space between buttons */
+}
+
+.action-buttons button {
+    margin: 0; /* Remove default margin */
+    padding: 5px 10px; /* Adjust padding */
+}
     </style>
 </head>
 <body>
 
-<h1>Student Regitration</h1>
+<h1>Student Registrations Data</h1>
+
+
+  
 
 <div class="table-container">
     <table id="dataTable">
@@ -171,47 +181,52 @@
             </tr>
         </thead>
         <tbody>
-            {% for document in all_documents %}
-            <tr class="recent-message d-flex px-4 py-3">
-                <td>{{ document['_id'] }}</td>
-                <td>{{ document['name'] }}</td>
-                <td>{{ document['programme'] }}</td>
-                <td>{{ document['address'] }}</td>
-                <td>{{ document['centre'] }}</td>
-                <td>{{ document['hours'] }}</td>
-                <td>{{ document['ampm'] }}</td>
-                <td>{{ document['today_date'] }}</td>
-                <td>{{ document['mobile'] }}</td>
-                <td>{{ document['whatsapp'] }}</td>
-                <td>{{ document['email'] }}</td>
-                <td>{{ document['dob'] }}</td>
-                <td>{{ document['marital_status'] }}</td>
-                <td>{{ document['qualification'] }}</td>
-                <td>{{ document['college_status'] }}</td>
-                <td>{{ document['current_college'] }}</td>
-                <td>{{ document['previous_college'] }}</td>
-                <td>{{ document['ews'] }}</td>
-                <td>{{ document['father_name'] }}</td>
-                <td>{{ document['occupation'] }}</td>
-                <td>{{ document['organization_address'] }}</td>
-                <td>{{ document['designation'] }}</td>
-                <td>{{ document['family_mobile'] }}</td>
-                <td>{{ document['objectives'] }}</td>
-                <td>{{ document['source'] }}</td>
-                <td>{{ document['specific_source'] }}</td>
-                <td>{{ document['course_name'] }}</td>
-                <td>{{ document['new_tech_course_name'] }}</td>
-                <td>{{ document['short_term_course_name'] }}</td>
-                <td>{{ document['course_mode'] }}</td>
-                <td>{{ document['course_duration'] }}</td>
-                <td>{{ document['fees'] }}</td>
-                <td>{{ document['secfees'] }}</td>
-                <td>{{ document['course_advised'] }}</td>
-                <td>{{ document['p'] }}</td>
-                <td>{{ document['t'] }}</td>
-                <td>{{ document['r'] }}</td>
-                <td>{{ document['approved'] }}</td>
-                <td>{{ document['fremark'] }}</td>
+            {% for doc in all_documents %}
+            <tr data-id="{{ doc._id }}">
+                <td>{{ doc._id }}</td>
+                <td><input type="text" class="name" value="{{ doc.name }}"></td>
+                <td><input type="text" class="programme" value="{{ doc.programme }}"></td>
+                <td><input type="text" class="address" value="{{ doc.address }}"></td>
+                <td><input type="text" class="centre" value="{{ doc.centre }}"></td>
+                <td><input type="text" class="hours" value="{{ doc.hours }}"></td>
+                <td><input type="text" class="ampm" value="{{ doc.ampm }}"></td>
+                <td><input type="text" class="today_date" value="{{ doc.today_date }}"></td>
+                <td><input type="text" class="mobile" value="{{ doc.mobile }}"></td>
+                <td><input type="text" class="whatsapp" value="{{ doc.whatsapp }}"></td>
+                <td><input type="text" class="email" value="{{ doc.email }}"></td>
+                <td><input type="text" class="dob" value="{{ doc.dob }}"></td>
+                <td><input type="text" class="marital_status" value="{{ doc.marital_status }}"></td>
+                <td><input type="text" class="qualification" value="{{ doc.qualification }}"></td>
+                <td><input type="text" class="college_status" value="{{ doc.college_status }}"></td>
+                <td><input type="text" class="current_college" value="{{ doc.current_college }}"></td>
+                <td><input type="text" class="previous_college" value="{{ doc.previous_college }}"></td>
+                <td><input type="text" class="ews" value="{{ doc.ews }}"></td>
+                <td><input type="text" class="father_name" value="{{ doc.father_name }}"></td>
+                <td><input type="text" class="occupation" value="{{ doc.occupation }}"></td>
+                <td><input type="text" class="organization_address" value="{{ doc.organization_address }}"></td>
+                <td><input type="text" class="designation" value="{{ doc.designation }}"></td>
+                <td><input type="text" class="family_mobile" value="{{ doc.family_mobile }}"></td>
+                <td><input type="text" class="objectives" value="{{ doc.objectives|join(', ') }}"></td>
+                <td><input type="text" class="source" value="{{ doc.source|join(', ') }}"></td>
+                <td><input type="text" class="specific_source" value="{{ doc.specific_source }}"></td>
+                <td><input type="text" class="course_name" value="{{ doc.course_name }}"></td>
+                <td><input type="text" class="new_tech_course_name" value="{{ doc.new_tech_course_name }}"></td>
+                <td><input type="text" class="short_term_course_name" value="{{ doc.short_term_course_name }}"></td>
+                <td><input type="text" class="course_mode" value="{{ doc.course_mode }}"></td>
+                <td><input type="text" class="course_duration" value="{{ doc.course_duration }}"></td>
+                <td><input type="text" class="fees" value="{{ doc.fees }}"></td>
+                <td><input type="text" class="secfees" value="{{ doc.secfees }}"></td>
+                <td><input type="text" class="course_advised" value="{{ doc.course_advised }}"></td>
+                <td><input type="text" class="p" value="{{ doc.p }}"></td>
+                <td><input type="text" class="t" value="{{ doc.t }}"></td>
+                <td><input type="text" class="r" value="{{ doc.r }}"></td>
+                <td><input type="text" class="approved" value="{{ doc.approved }}"></td>
+                <td><input type="text" class="fremark" value="{{ doc.fremark }}"></td>
+                <td class="action-buttons">
+                    <button class="editButton" onclick="editRow(this)">Edit</button>
+                    <button class="saveButton" style="display:none;" onclick="saveRow(this)">Save</button>
+                    <button class="deleteButton" onclick="deleteRow(this)">Delete</button>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -219,12 +234,39 @@
 </div>
 
 <script>
+
+
 $(document).ready(function() {
+
+    $('#dataTable').DataTable({
+        "pageLength": 10, // Number of rows per page
+        "lengthMenu": [5, 10, 25, 50], // Options for how many rows to show
+        "searching": true, // Enable search bar
+        "paging": true, // Enable pagination
+        "ordering": true, // Allow column ordering
+        "info": true, // Show table information
+        "autoWidth": false // Disable auto width to prevent table stretching
+    });
+
 
     $('tr').each(function() {
         $(this).find('input').prop('disabled', true);
         $(this).find('.saveButton').prop('disabled', true);
     });
+
+    function searchTable() {
+    var searchTerm = document.getElementById('searchBar').value.toLowerCase();
+    var rows = document.querySelectorAll('#dataTable tbody tr');
+
+    rows.forEach(function(row) {
+        var nameCell = row.cells[1].textContent.toLowerCase();
+        if (nameCell.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
 
     $('.editButton').click(function() {
         var row = $(this).closest('tr');
