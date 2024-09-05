@@ -274,16 +274,14 @@ def delete_enquiry(id):
     # Convert the string id to an ObjectId
     id = ObjectId(id)
     # Delete the document with the given ID
-    mongo.db.contacts.delete_one({"_id": id})
+    mongo.db.contacts.update_one({"_id": id}, {"$set": {"enquiry_status": "not registered"}})
     return redirect(url_for('index'))
 
 @app.route('/enquiry/<string:id>/action/registered')
 def registered(id):
-    # Convert the string id to an ObjectId
     id = ObjectId(id)
-    # Update the document with the given ID
     mongo.db.contacts.update_one({"_id": id}, {"$set": {"enquiry_status": "registered"}})
-    return redirect(url_for('index'))
+    return redirect(url_for('student_registration'))
 
 @app.route('/save', methods=['POST'])
 def save_record():
