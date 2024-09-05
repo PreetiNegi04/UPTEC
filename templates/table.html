@@ -132,6 +132,7 @@
                 <th>Name</th>
                 <th>Programme</th>
                 <th>Address</th>
+                <th>Area</th>
                 <th>Centre</th>
                 <th>Hours</th>
                 <th>AM/PM</th>
@@ -177,6 +178,7 @@
                 <td>{{ document['name'] }}</td>
                 <td>{{ document['programme'] }}</td>
                 <td>{{ document['address'] }}</td>
+                <td>{{ document['area'] }}</td>
                 <td>{{ document['centre'] }}</td>
                 <td>{{ document['hours'] }}</td>
                 <td>{{ document['ampm'] }}</td>
@@ -212,6 +214,13 @@
                 <td>{{ document['r'] }}</td>
                 <td>{{ document['approved'] }}</td>
                 <td>{{ document['fremark'] }}</td>
+                <td>
+                    <div class="action-buttons button">
+                        <button class="editButton">Edit</button>
+                        <button class="saveButton">Save</button>
+                        <button class="deleteButton">Delete</button>
+                </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

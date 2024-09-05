@@ -16,7 +16,41 @@
     <link rel="stylesheet" href="\static\vendors\bootstrap-icons\bootstrap-icons.css">
     <link rel="stylesheet" href="\static\css\app.css">
     <link rel="shortcut icon" href="\static\images\favicon.svg" type="image/x-icon">
-    
+    <style>
+        /* Common button styles */
+        .action-buttons a {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Edit button styles */
+        .action-buttons a.edit-btn {
+            background-color: #4CAF50; /* Green background */
+            color: white; /* White text */
+        }
+
+        .action-buttons a.edit-btn:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        /* Delete button styles */
+        .action-buttons a.delete-btn {
+            background-color: #f44336; /* Red background */
+            color: white; /* White text */
+        }
+
+        .action-buttons a.delete-btn:hover {
+            background-color: #e53935; /* Darker red on hover */
+        }
+
+    </style>
     
 </head>
 
@@ -235,6 +269,7 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
+                                            {% for data in area %}
                                             <div class="col-6">
                                                 <div class="d-flex align-items-center">
                                                     <svg class="bi text-primary" width="32" height="32" fill="blue"
@@ -242,51 +277,13 @@
                                                         <use
                                                             xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
                                                     </svg>
-                                                    <h5 class="mb-0 ms-3">Europe</h5>
+                                                    <h5 class="mb-0 ms-3">{{data['_id']}}</h5>
                                                 </div>
                                             </div>
                                             <div class="col-6">
-                                                <h5 class="mb-0">862</h5>
+                                                <h5 class="mb-0">{{data['total_students']}}</h5>
                                             </div>
-                                            <div class="col-12">
-                                                <div id="chart-europe"></div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <svg class="bi text-success" width="32" height="32" fill="blue"
-                                                        style="width:10px">
-                                                        <use
-                                                            xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
-                                                    </svg>
-                                                    <h5 class="mb-0 ms-3">America</h5>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <h5 class="mb-0">375</h5>
-                                            </div>
-                                            <div class="col-12">
-                                                <div id="chart-america"></div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <svg class="bi text-danger" width="32" height="32" fill="blue"
-                                                        style="width:10px">
-                                                        <use
-                                                            xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
-                                                    </svg>
-                                                    <h5 class="mb-0 ms-3">Indonesia</h5>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <h5 class="mb-0">1025</h5>
-                                            </div>
-                                            <div class="col-12">
-                                                <div id="chart-indonesia"></div>
-                                            </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
@@ -332,10 +329,6 @@
                                     <div class="ms-3 name">
                                         <h3>Admin Details</h3>
                                         <h5 class="font-bold">{{username}}</h5>
-<<<<<<< HEAD
-                                       
-=======
->>>>>>> 0cab998d686a820644c04794aaae9572b2828a66
                                     </div>
                                 </div>
                             </div>
@@ -354,7 +347,8 @@
                                         <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
                                         <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
                                         <div class="action-buttons">
-                                        <a href="/enquiry/{{document['_id']}}/action/delete" class="btn-btn-primary">Done</a>
+                                        <a href="/enquiry/{{document['_id']}}/action/registered" class="edit-btn">Registered</a>
+                                        <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Delete</a>
                                         </div>
                                     </div>
                                 </div>

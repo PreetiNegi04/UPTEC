@@ -127,12 +127,13 @@ def index():
 
     today_documents = find_today()
     
+    area = find_area()
     # Get the current date and calculate the start and end of today
     today = datetime.today().strftime("%Y-%m-%d")
     # Query to count documents with 'today_date' of today
     query = {"today_date": today}
     total_today = collection.count_documents(query)
-    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents)
+    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area)
 
 @app.route('/forget-password', methods=['POST', 'GET'])
 def forget_password():
@@ -164,6 +165,7 @@ def student_registration():
             "name": request.form.get('uname'),
             "programme": request.form.get('prog'),
             "address": request.form.get('address'),
+            "area": request.form.get('area'),
             "centre": request.form.get('centre'),
             "hours": request.form.get('hours'),
             "ampm": request.form.get('ampm'),
@@ -275,6 +277,14 @@ def delete_enquiry(id):
     mongo.db.contacts.delete_one({"_id": id})
     return redirect(url_for('index'))
 
+@app.route('/enquiry/<string:id>/action/registered')
+def registered(id):
+    # Convert the string id to an ObjectId
+    id = ObjectId(id)
+    # Update the document with the given ID
+    mongo.db.contacts.update_one({"_id": id}, {"$set": {"enquiry_status": "registered"}})
+    return redirect(url_for('index'))
+
 @app.route('/save', methods=['POST'])
 def save_record():
     try:
@@ -298,12 +308,13 @@ def delete_record():
     try:
         data = request.json
         record_id = data.get('id')
-
+        collection = mongo.db["form_data"]
         result = collection.delete_one({'_id': ObjectId(record_id)})
 
         if result.deleted_count > 0:
             return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
         else:
+            print(f"Error no record")
             return jsonify({'status': 'error', 'message': 'No record was deleted'}), 500
     except Exception as e:
         print(f"Error deleting record: {e}")
@@ -357,5 +368,26 @@ def find_today():
     # Get the documents that match the query
     today_documents = collection.find(query).sort("follow_up_status.date", 1)
     return list(today_documents)
+
+def find_area():
+    collection = mongo.db['form_data']
+
+    # MongoDB aggregation query to count students in each distinct area
+    pipeline = [
+        {
+            "$group": {
+                "_id": "$area",  # Group by the 'address' or 'area' field
+                "total_students": { "$sum": 1 }  # Count the number of students in each area
+            }
+        },
+        {
+            "$sort": { "total_students": -1 }  # Sort by total students in descending order
+        }
+    ]
+
+    # Execute the aggregation pipeline
+    result = collection.aggregate(pipeline)
+    return result
+
 if __name__ == '__main__':
     app.run(debug=True)
