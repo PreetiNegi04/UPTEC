@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Table</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 0 auto;
+            max-width: 1400px;
+        }
+
+        #dataTable {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #dataTable th, #dataTable td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        #dataTable th {
+            background-color: #007bff;
+            color: #ffffff;
+            text-transform: uppercase;
+            font-size: 14px;
+            cursor: default; /* Remove pointer cursor to indicate no sorting */
+        }
+
+        #dataTable tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .deleteButton, .saveButton {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .deleteButton:hover {
+            background-color: #ff3333;
+        }
+
+        .saveButton {
+            background-color: #4CAF50;
+        }
+        .action-buttons 
+        {
+        display: inline-flex; /* This makes the buttons align horizontally */
+        gap: 10px; /* Adds some space between the buttons */
+           }
+
+        .saveButton:hover {
+            background-color: #45a049;
+        }
+
+       
+
+        .dataTables_wrapper {
+            overflow: auto;
+            max-height: 500px; /* Adjust height as needed */
+        }
+
+        .dataTables_scrollBody {
+            max-height: 400px; /* Adjust to make table fit the screen */
+            overflow-y: auto;
+        }
+        
+        .editButton {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            
+            cursor: pointer;
+            
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .editButton:hover {
+            background-color: #0056b3;
+        }
+
+        input:disabled {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            cursor: not-allowed;
+        }
+        .action-buttons {
+    display: flex;
+    justify-content: space-between; /* Spacing between buttons */
+    gap: 10px; /* Add space between buttons */
+}
+
+.action-buttons button {
+    margin: 0; /* Remove default margin */
+    padding: 5px 10px; /* Adjust padding */
+}
+    </style>
+</head>
+<body>
+
+<h1>Student Registrations Data</h1>  
+<div class="table-container">
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date of enquiry</th>
+                <th>Name</th>
+                <th>Contact Number</th>
+                <th>Type of enquiry</th>
+                <th>Course to enquire</th>
+                <th>Follow up date</th>
+                <th>Follow up Reason</th>
+                <th>Enquiry Status</th>
+                <th>Remarks</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in all_documents %}
+            <tr data-id="{{ doc._id }}">
+                <td>{{ doc._id }}</td>
+                <td><input type="date" class="programme" value="{{ doc.date_of_enquiry }}"></td>
+                <td><input type="text" class="name" value="{{ doc.name }}"></td>
+                <td><input type="text" class="contact_number" value="{{ doc.contact_number }}"></td>
+                <td><input type="text" class="type_of_enquiry" value="{{ doc.type_of_enquiry }}"></td>
+                <td><input type="text" class="course_to_enquire" value="{{ doc.course_to_enquire}}"></td>
+                <td><input type="date" class="date" value="{{ doc.follow_up_status.date }}"></td>
+                <td><input type="text" class="reason" value="{{ doc.follow_up_status.reason }}"></td>
+                <td><input type="text" class="enquiry_status" value="{{ doc.enquiry_status }}"></td>
+                <td><input type="text" class="remark" value="{{ doc.remark }}"></td>
+                <td class="action-buttons">
+                    <button class="editButton" onclick="editRow(this)">Edit</button>
+                    <button class="saveButton" style="display:none;" onclick="saveRow(this)">Save</button>
+                    <button class="deleteButton" onclick="deleteRow(this)">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+
+$(document).ready(function() {
+
+    $('#dataTable').DataTable({
+        "pageLength": 10, // Number of rows per page
+        "lengthMenu": [5, 10, 25, 50], // Options for how many rows to show
+        "searching": true, // Enable search bar
+        "paging": true, // Enable pagination
+        "ordering": true, // Allow column ordering
+        "info": true, // Show table information
+        "autoWidth": false // Disable auto width to prevent table stretching
+    });
+
+
+    $('tr').each(function() {
+        $(this).find('input').prop('disabled', true);
+        $(this).find('.saveButton').prop('disabled', true);
+    });
+
+    function searchTable() {
+    var searchTerm = document.getElementById('searchBar').value.toLowerCase();
+    var rows = document.querySelectorAll('#dataTable tbody tr');
+
+    rows.forEach(function(row) {
+        var nameCell = row.cells[1].textContent.toLowerCase();
+        if (nameCell.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+    $('.editButton').click(function() {
+        var row = $(this).closest('tr');
+        row.find('input').prop('disabled', false);
+        row.find('.saveButton').prop('disabled', false);
+        $(this).prop('disabled', true);  // Disable the Edit button
+    });
+
+    $('.saveButton').click(function() {
+        var row = $(this).closest('tr');
+        var id = row.data('id');
+        var data = {
+            id: id,
+            data: {
+                date_of_enquiry: row.find('.date_of_enquiry').val(),
+                name: row.find('.name').val(),
+                contact_number: row.find('.contact_number').val(),
+                type_of_enquiry: row.find('.type_of_enquiry').val(),
+                course_to_enquire: row.find('.course_to_enquire').val(),
+                follow_up_status: {
+                    date: row.find('.date').val(),
+                    reason: row.find('.reason').val()
+                },
+                enquiry_status: row.find('.enquiry_status').val(),
+                remark: row.find('.remark').val()
+            }
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '/enquiry/save',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                alert('Record updated successfully!');
+                row.find('input').prop('disabled', true);
+                row.find('.saveButton').prop('disabled', true);
+                row.find('.editButton').prop('disabled', false);
+            },
+            error: function(error) {
+                console.error('Error updating record:', error);
+                alert('Failed to update record. Please try again.');
+            }
+        });
+    });
+
+    $('.deleteButton').click(function() {
+        if (confirm('Are you sure you want to delete this record?')) {
+            var row = $(this).closest('tr');
+            var id = row.data('id');
+
+            $.ajax({
+                type: 'POST',
+                url: '/enquiry/delete',
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id }),
+                success: function(response) {
+                    row.remove();
+                    alert('Record deleted successfully!');
+                },
+                error: function(error) {
+                    console.error('Error deleting record:', error);
+                    alert('Failed to delete record. Please try again.');
+                }
+            });
+        }
+    });
+});
+// Function to handle edit button click
+function editRow(editButton) {
+    // Get the parent <td> of the button
+    var actionCell = editButton.parentNode;
+    
+    // Hide the edit button and show the save button
+    var saveButton = actionCell.querySelector(".saveButton");
+    editButton.style.display = "none";
+    saveButton.style.display = "inline-block";
+    
+    // Enable editing for the row (add your own logic here if needed)
+    var row = actionCell.parentNode;
+    // You can enable editing for specific cells here if required
+}
+
+// Function to handle save button click
+function saveRow(saveButton) {
+    // Ask for confirmation
+    if (confirm("Are you sure you want to save changes?")) {
+        // Get the parent <td> of the button
+        var actionCell = saveButton.parentNode;
+
+        // Hide the save button and show the edit button
+        var editButton = actionCell.querySelector(".editButton");
+        saveButton.style.display = "none";
+        editButton.style.display = "inline-block";
+        
+        // Perform the saving action here (add your logic)
+        var row = actionCell.parentNode;
+        // You can save the edited data here if required
+    }
+}
+
+// Function to handle delete button click (optional, can add confirmation if needed)
+function deleteRow(deleteButton) {
+    if (confirm("Are you sure you want to delete this row?")) {
+        var row = deleteButton.parentNode.parentNode;
+        row.remove(); // Or add your delete logic here
+    }
+}
+
+</script>
+
+</body>
+</html>

@@ -104,6 +104,15 @@ def table():
     all_documents = list(all_documents)
     return render_template('table.html', all_documents = all_documents)
 
+@app.route('/contact_table')
+def contact_table():
+    collection = mongo.db["contacts"]
+    # Fetch all documents from the collection
+    all_documents = collection.find()
+
+    # Convert the cursor to a list if you need to work with the documents directly
+    all_documents = list(all_documents)
+    return render_template('contact_table.html', all_documents = all_documents)
 
 @app.route('/dailyreport', methods=['POST', 'GET'])
 def dailyreport():
@@ -128,12 +137,13 @@ def index():
     today_documents = find_today()
     
     area = find_area()
+    courses = find_courses()
     # Get the current date and calculate the start and end of today
     today = datetime.today().strftime("%Y-%m-%d")
     # Query to count documents with 'today_date' of today
     query = {"today_date": today}
     total_today = collection.count_documents(query)
-    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area)
+    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses)
 
 @app.route('/forget-password', methods=['POST', 'GET'])
 def forget_password():
@@ -283,6 +293,12 @@ def registered(id):
     mongo.db.contacts.update_one({"_id": id}, {"$set": {"enquiry_status": "registered"}})
     return redirect(url_for('student_registration'))
 
+@app.route('/enquiry/<string:id>/action/prospectus')
+def prospectus(id):
+    id = ObjectId(id)
+    mongo.db.contacts.update_one({"_id": id}, {"$set": {"enquiry_status": "prospectus"}})
+    return redirect(url_for('index'))
+
 @app.route('/save', methods=['POST'])
 def save_record():
     try:
@@ -318,7 +334,39 @@ def delete_record():
         print(f"Error deleting record: {e}")
         return jsonify({'status': 'error', 'message': 'Failed to delete record'}), 500
 
+@app.route('/enquiry/save', methods=['POST'])
+def save_enquiry():
+    try:
+        data = request.json
+        record_id = data.get('id')
+        updated_data = data.get('data')
+        collection = mongo.db["contacts"]
+        result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': updated_data})
 
+        if result.modified_count > 0:
+            return jsonify({'status': 'success', 'message': 'Record updated successfully!'})
+        else:
+            return jsonify({'status': 'error', 'message': 'No record was updated'}), 500
+    except Exception as e:
+        print(f"Error updating record: {e}")
+        return jsonify({'status': 'error', 'message': 'Failed to update record'}), 500
+
+@app.route('/enquiry/delete', methods=['POST'])
+def deleteEnquiry():
+    try:
+        data = request.json
+        record_id = data.get('id')
+        collection = mongo.db["contacts"]
+        result = collection.delete_one({'_id': ObjectId(record_id)})
+
+        if result.deleted_count > 0:
+            return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
+        else:
+            print(f"Error no record")
+            return jsonify({'status': 'error', 'message': 'No record was deleted'}), 500
+    except Exception as e:
+        print(f"Error deleting record: {e}")
+        return jsonify({'status': 'error', 'message': 'Failed to delete record'}), 500
 
 def validate_username(username):
     # Username should be at least 8 characters long, containing at least one uppercase letter, one lowercase letter, and one digit
@@ -387,5 +435,24 @@ def find_area():
     result = collection.aggregate(pipeline)
     return result
 
+def find_courses():
+    collection = mongo.db['form_data']
+
+    # MongoDB aggregation query to count students in each distinct area
+    pipeline = [
+        {
+            "$group": {
+                "_id": "$course_name",  # Group by the 'address' or 'area' field
+                "total_students": { "$sum": 1 }  # Count the number of students in each area
+            }
+        },
+        {
+            "$sort": { "total_students": -1 }  # Sort by total students in descending order
+        }
+    ]
+
+    # Execute the aggregation pipeline
+    result = collection.aggregate(pipeline)
+    return result
 if __name__ == '__main__':
     app.run(debug=True)

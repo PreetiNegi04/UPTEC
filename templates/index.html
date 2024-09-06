@@ -50,6 +50,14 @@
             background-color: #e53935; /* Darker red on hover */
         }
 
+        .action-buttons a.prospectus-btn {
+            background-color: #2bacf7; /* Blue background */
+            color: white; /* White text */
+        }
+
+        .action-buttons a.prospectus-btn:hover {
+            background-color: #1490d8; /* Darker blue on hover */
+        }
     </style>
     
 </head>
@@ -137,6 +145,13 @@
                                 <span>Datatable</span>
                             </a>
                         </li>    
+
+                        <li class="sidebar-item  ">
+                            <a href="{{ url_for('contact_table') }}" class='sidebar-link'>
+                                <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                                <span>Contacts</span>
+                            </a>
+                        </li>
 
                         <li class="sidebar-title">Enquiries and Follow-Up</li>
 
@@ -249,34 +264,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-12 col-xl-4">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4>Student Registered from Different Area</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            {% for data in area %}
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <svg class="bi text-primary" width="32" height="32" fill="blue"
-                                                        style="width:10px">
-                                                        <use
-                                                            xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
-                                                    </svg>
-                                                    <h5 class="mb-0 ms-3">{{data['_id']}}</h5>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <h5 class="mb-0">{{data['total_students']}}</h5>
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-xl-8">
+                        <div class="row">    
+                            <div class="col-12 col-xl-12">
                                 <div class="card">
                                     <div class="card-header">
                                         <h4> Today's Enquiries</h4>
@@ -306,7 +295,63 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-12 col-xl-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4>Student Registered on Different Courses</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            {% for course in courses %}
+                                            <div class="col-6">
+                                                <div class="d-flex align-items-center">
+                                                    <svg class="bi text-primary" width="32" height="32" fill="blue"
+                                                        style="width:10px">
+                                                        <use
+                                                            xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
+                                                    </svg>
+                                                    <h5 class="mb-0 ms-3">{{course['_id']}}</h5>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <h5 class="mb-0">{{course['total_students']}}</h5>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-xl-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4>Student Registered from Different Area</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            {% for data in area %}
+                                            <div class="col-6">
+                                                <div class="d-flex align-items-center">
+                                                    <svg class="bi text-primary" width="32" height="32" fill="blue"
+                                                        style="width:10px">
+                                                        <use
+                                                            xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
+                                                    </svg>
+                                                    <h5 class="mb-0 ms-3">{{data['_id']}}</h5>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <h5 class="mb-0">{{data['total_students']}}</h5>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
+                    
                     <div class="col-12 col-lg-3">
                         <div class="card">
                             <div class="card-body py-4 px-5">
@@ -336,6 +381,7 @@
                                         <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
                                         <div class="action-buttons">
                                         <a href="/enquiry/{{document['_id']}}/action/registered" class="edit-btn">Registered</a>
+                                        <a href="/enquiry/{{document['_id']}}/action/prospectus" class="prospectus-btn">Prospectus</a>
                                         <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Delete</a>
                                         </div>
                                     </div>
