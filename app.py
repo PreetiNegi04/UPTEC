@@ -123,11 +123,10 @@ def dailyreport():
 def index():
 
     username = session.get('username', None)
-    # Access the 'form_data' collection
-    collection = mongo.db["form_data"]
     coll = mongo.db["contacts"]
     # Get the total number of documents in the collection
-    total_documents = collection.count_documents({})
+    query = {"enquiry_status" : "registered"}
+    total_documents = coll.count_documents(query)
     total_enquiries = coll.count_documents({})
     query = {"enquiry_status" : "pending"}
     pending = coll.count_documents(query)
@@ -291,7 +290,7 @@ def delete_enquiry(id):
 def registered(id):
     id = ObjectId(id)
     mongo.db.contacts.update_one({"_id": id}, {"$set": {"enquiry_status": "registered"}})
-    return redirect(url_for('student_registration'))
+    return redirect(url_for('index'))
 
 @app.route('/enquiry/<string:id>/action/prospectus')
 def prospectus(id):

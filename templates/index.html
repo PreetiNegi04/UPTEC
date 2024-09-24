@@ -98,10 +98,7 @@
                             </a>
                             <ul class="submenu ">
                                 <li class="submenu-item ">
-                                    <a href="{{ url_for('student_registration') }}">Registartion</a>
-                                </li>
-                                <li class="submenu-item ">
-                                    <a href="form-editor-ckeditor.html">Edit Details</a>
+                                    <a href="{{ url_for('student_registration') }}">Registeration</a>
                                 </li>
                                 
                             </ul>
@@ -161,15 +158,6 @@
                                 <span>Enquiries</span>
                             </a>
                         </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="" class='sidebar-link'>
-                                <i class="bi bi-chat-dots-fill"></i>
-                                <span>Notifications</span>
-                            </a>
-                        </li>
-
-
                         <li class="sidebar-item  ">
                             <a href="{{ url_for('login') }}" class='sidebar-link'>
                                 <i class="bi bi-person-badge-fill"></i>
@@ -382,7 +370,7 @@
                                         <div class="action-buttons">
                                         <a href="/enquiry/{{document['_id']}}/action/registered" class="edit-btn">Registered</a>
                                         <a href="/enquiry/{{document['_id']}}/action/prospectus" class="prospectus-btn">Prospectus</a>
-                                        <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Delete</a>
+                                        <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
                                         </div>
                                     </div>
                                 </div>
