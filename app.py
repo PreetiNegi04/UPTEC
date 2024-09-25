@@ -232,11 +232,25 @@ def contact():
             # Extract data from the form
             contact_data = {
                 'date_of_enquiry': request.form.get('dateoe'),
+                'type_of_enquiry': request.form.get('type_of_enquiry'),
                 'name': request.form.get('uname'),
                 'contact_number': request.form.get('contact'),
-                'type_of_enquiry': request.form.get('type_of_enquiry'),
-                'course_to_enquire': request.form.get('course'),
-                'follow_up_status': {
+                "whatsapp": request.form.get('whatsapp'),
+                "address": request.form.get('address'),
+                "area": request.form.get('area'),
+                "qualification": request.form.get('qualification'),
+                "college-name":request.form.get('collegename'),
+                 "objectives": request.form.getlist('objectives'),
+            "source": request.form.getlist('source'),
+             "specific_source": request.form.get('newspaperRadioText'),
+            "course_name": request.form.get('coursename'),
+            "new_tech_course_name": request.form.get('newTechCourseName'),
+            "short_term_course_name": request.form.get('shortTermCourseName'),
+            "p": request.form.get('p'),
+            "t": request.form.get('t'),
+            "r": request.form.get('r'),
+            "fees": request.form.get('fees'),
+             'follow_up_status': {
                     'date': request.form.get('date'),
                     'reason': request.form.get('reason')
                 },
@@ -249,10 +263,7 @@ def contact():
                 flash("All fields are required!", "error")
                 return redirect(url_for('contact'))
 
-            # Insert the data into MongoDB collection
-            mongo.db.contacts.insert_one(contact_data)
-
-            # Redirect to the success page
+            mongo.db.contact_data.insert_one(contact_data)
             return redirect(url_for('success'))
         
         except Exception as e:

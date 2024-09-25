@@ -4,7 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enquiry Form</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link  rel ="stylesheet" href="static\contactcss.css" >
+    <style>
+        #fees{
+            display:none;
+        }
+    </style>
+
+    
 </head>
 <body>
     <header>
@@ -13,45 +21,332 @@
         
     </header>
     <form method='post' class="form_section">
-        <label for="date">Date of Enquiry:</label>
-        <input type="date" id="dateoe" name="dateoe" required>
 
+        <div class="form-row mb-4">
+            <div class="col">
+                <label for="today-date">Date of Enquiry :</label>
+        <input type="date" class="form-control" name="today-date" id="today-date" value="" readonly>
+            </div>
+            <div class="col">
+                <label for="type_of_enquiry">Type of Enquiry:</label>
+                <select id="type_of_enquiry" name="type_of_enquiry" required>
+                    <option value="In Person Enquiry">In Person Enquiry</option>
+                    <option value="Telephonic Enquiry">Telephonic Enquiry</option>
+                </select>
+            </div>
+           
+        </div>
+
+
+        
+
+        
+
+        <div class="form-row mb-4">
+        <div class="col">
         <label for="name">Name:</label>
-        <input type="text" id="uname" name="uname" required>
+        <input type="text" id="uname" name="uname" required></div></div>
 
-        <label for="contact">Contact Number:</label>
+        
+      
+
+        <div class="form-row mb-4">
+            <div class="col">
+                <label for="contact">Contact Number:</label>
         <input type="tel" id="contact" name="contact" required>
+            </div>
+            <div class="col">
+                <label for="whatsapp">WhatsApp No:</label>
+                <input type="text" class="form-control" name="whatsapp" id="whatsapp" required>
+            </div>
+           
+        </div>
 
-        <label for="type_of_enquiry">Type of Enquiry:</label>
-        <select id="type_of_enquiry" name="type_of_enquiry" required>
-            <option value="In Person Enquiry">In Person Enquiry</option>
-            <option value="Telephonic Enquiry">Telephonic Enquiry</option>
-        </select>
+       
 
-        <label for="course">Course to Enquire:</label>
-        <input type="text" id="course" name="course" required>
+        <div class="form-row mb-4">
+            <div class="col">
+                <label for="address">Address:</label>
+                <input type="text" class="form-control" name="address" id="address" required>
+            </div>
+            <div class="col">
+                <label for="area">Area:</label>
+                <input type="text" class="form-control" name="area" id="area" required>
+            </div>
+           
+        </div>
+        <div class="form-row mb-4">
+        <div class="col">
+            <label for="qualification">Qualification:</label>
+            <select class="form-control" name="qualification" id="qualification">
+                <option value="High School">High School</option>  
+                <option value="Undergraduate">Undergraduate</option>
+                <option value="Graduate">Graduate</option>
+                <option value="Postgraduate">Postgraduate</option>
+            </select>
+        </div>
+        </div>
 
-        <label for="status">Follow Up Status:</label>
-        <input type="date" id="date" name="date" required>
-        <textarea id="reason" name="reason" placeholder="Enter the follow-up status" required></textarea>
+<div class="form-row mb-4">
+        <div class="col">
+            <label for="current-college">College / School Name</label>
+            <input type="text" placeholder="Enter your College Name" class="form-control" name="collegename" id="collegename">
+        </div>
+        </div>
 
-        <label for="estatus">Enquiry Status:</label>
-        <input type="text" id="estatus" name="estatus" required>
+        <h4 class="form-headers">Other Details</h4><br>
+                    <div class="form-row mb-4">
+                        <div class="col">
+                            <label>Objective for doing this programme:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="objectives" value="Computer Literacy" id="checkbox1">
+                                <label class="form-check-label" for="checkbox1">Computer Literacy</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="objectives" value="Added Qualification" id="checkbox2">
+                                <label class="form-check-label" for="checkbox2">Added Qualification</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="objectives" value="Career in Computers" id="checkbox3">
+                                <label class="form-check-label" for="checkbox3">Career in Computers</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="objectives" value="Others" id="checkbox4">
+                                <label class="form-check-label" for="checkbox4">Others</label>
+                            </div>
+                            <div class="form-group mt-2" id="otherTextInput" style="display: none;">
+                                <label for="otherText">Please specify:</label>
+                                <input type="text" class="form-control" id="otherText" placeholder="Enter details">
+                            </div>
+                        </div>
+                    </div>
 
+
+                    <div class="form-row mb-4">
+                        <div class="col">
+                            <label>How did you come to know about UPTEC?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="source" value="newspaper" id="checkboxNewspaper">
+                                <label class="form-check-label" for="checkboxNewspaper">Newspaper</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="source" value="radio" id="checkboxRadio">
+                                <label class="form-check-label" for="checkboxRadio">Radio</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="source" value="facebook" id="checkboxFacebook">
+                                <label class="form-check-label" for="checkboxFacebook">Facebook</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="source" value="whatsapp" id="checkboxWhatsapp">
+                                <label class="form-check-label" for="checkboxWhatsapp">WhatsApp</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="source" value="website" id="checkboxWebsite">
+                                <label class="form-check-label" for="checkboxWebsite">Website</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="source" value="friends" id="checkboxFriends">
+                                <label class="form-check-label" for="checkboxFriends">Friends</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="source" value="hoarding" id="checkboxHoarding">
+                                <label class="form-check-label" for="checkboxHoarding">Hoarding</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="source" value="others" id="checkboxOthers">
+                                <label class="form-check-label" for="checkboxOthers">Others</label>
+                            </div>
+                            <div class="form-group mt-2" id="newspaperRadioTextInput" style="display: none;">
+                                <label for="newspaperRadioText">Please specify name:</label>
+                                <input type="text" class="form-control" id="newspaperRadioText" placeholder="Enter details">
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <h4 class="form-headers">Course To Enquire</h4><br>
+
+             
+                    <div class="form-row mb-4">
+                        <div class="col">
+                            <label for="coursename">Course Name:</label>
+                            <select class="form-control" name="coursename" id="coursename" onchange="handleCourseTypeChange()">
+                                <option value="O Level">O Level</option>
+                                <option value=" Financial Accounting and Tally Prime">Tally</option>
+                                <option value="NIELIT CCC">DCAC</option>
+                                <option value="Tally For GST">Excel</option>
+                                <option value="New Tech">New Tech</option>
+                                <option value="Short Term">Short Term</option>
+                                <option value="Internship">Internship</option>
+                                <option value="CCNA">CCNA certification</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                    </div>
+               
+                    <div class="form-row mb-4" id="newTechCourses" style="display: none;">
+                        <div class="col">
+                            <label for="newTechCourseName">Select New Tech Course:</label>
+                            <select class="form-control" name="newTechCourseName" id="newTechCourseName">
+                                <option value="Advance Excel">Advance Excel</option>
+                                <option value="Advance Excel With VBA">Advance Excel With VBA</option>
+                                <option value="Digital Marketing">Digital Marketing</option>
+                                <option value="Advance Python With Django">Advance Python With Django</option>
+                                <option value="Full Stack Web Development">Full Stack Web Development</option>
+                                <option value="Node Js">Node JS</option>
+                                <option value="Internet Of Things">Internet Of Things</option>
+                                <option value="Artificial Intelligence ">Artificial Intelligence</option>
+                                <option value="Data Analytics Using Python">Data Analytics Using Python</option>
+                                <option value="Data Analytics Using R Lang "> Data Analytics Using R Lang</option>
+                                <option value="Data Science">Data Science</option>
+                                <option value="AI and ML">Artificial Intelligence and Machine Learning</option>
+                                <option value="AI and ML With Python ">Artificial Intelligence and Machine Learning With Python</option>
+
+
+                            </select>
+                        </div>
+                    </div>
+            
+                    <div class="form-row mb-4" id="shortTermCourses" style="display: none;">
+                        <div class="col">
+                            <label for="shortTermCourseName">Select Short Term Course:</label>
+                            <select class="form-control" name="shortTermCourseName" id="shortTermCourseName">
+                                <option value="CCC">CCC</option>
+                                <option value="MS Office And Internet">MS Office And Internet</option>
+                                <option value="MS Office with Tally Prime">MS Office with Tally Prime</option>
+                                <option value="Tally Prime">Tally Prime</option>
+                                <option value="ProE">ProE</option>
+                                <option value="MATLAB">MATLAB</option>
+                                <option value="Corel Draw">Corel Draw</option>
+                                <option value="PageMaker">Pagemaker</option>
+                                <option value="Adobe Photoshop">Adobe Photoshop</option>
+                                <option value="Web Page Designing">Web Page Designing</option>
+                                <option value="ASP.NET with MVC , LinQ AND JSON">ASP.NET with MVC , LinQ AND JSON</option>
+                                <option value="PHP and My SQL">PHP and My SQL</option>
+                                <option value="Javascript">Java Script</option>
+                                <option value="C">C Language</option>
+                                <option value="C++">C++ Language</option>
+                                <option value="App Development">Advance App Development</option>
+                                <option value="Python">Python</option>
+                                <option value="Core JAVA">CORE JAVA</option>
+                                <option value="Advanced JAVA ">Advanced JAVA(J2EE)</option>
+                                <option value="Cloud Computing">Cloud Computing</option>
+
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row mb-4" id="OtherCourses" style="display: none;">
+                        <div class="col">
+                            <label for="">Course Name :</label>
+                                <input type="text" class="form-control" id="OtherCourseName" placeholder="Enter Course Name">
+                            </div>
+                        
+                    </div>
+
+
+<div class="form-row mb-4">
+                        <div class="col">
+                            <label for="p">P:</label>
+                            <input type="text" class="form-control" name="p" id="p">
+                        </div>
+                        <div class="col">
+                            <label for="t">T:</label>
+                            <input type="text" class="form-control" name="t" id="t">
+                        </div>
+                        <div class="col">
+                            <label for="r">R:</label>
+                            <input type="text" class="form-control" name="r" id="r">
+                        </div>
+
+                        <div class="col">
+                            <label for="fees">Fees:</label>
+                            <input type="text" id="fees" name="fees"></div>
+                    </div>
+
+                    <div class="form-row mb-4">
+                        <div class="col">
+                            <label for="status">Follow Up Status:</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                        <div class="col">
+                            <textarea id="reason" name="reason" placeholder="Enter the follow-up status" required></textarea>
+                        </div></div>
+
+                        <div class="col">
+                            <label for="estatus">Enquiry Status:</label>
+                            <input type="text" id="estatus" name="estatus required></div>
+                    
+                            <div class="form-row mb-4">
+                            <div class="col">
         <label for="remark">Remark:</label>
         <div class="radio-group">
             <div>
                 <input type="radio" id="Closed" value="Closed" name="status" required>
-                <label for="closed">Closed</label>
+                <label for="closed">Closed</label>&nbsp;&nbsp;
                 <input type="radio" id="registered" value="Registered" name="status" required>
                 <label for="reg">Registered</label>
             </div>
            
         </div>
+        </div></div>
 
         <button type="submit">Submit</button>
     </form>
-    <script> document.getElementById('date').value = new Date().toISOString().split('T')[0];</script>
+    <script>
+
+const rInput = document.getElementById('r');
+        const feesInput = document.getElementById('fees');
+
+        // Add an input event listener to the R input field to check the value in real-time
+        rInput.addEventListener('input', function () {
+            const rValue = rInput.value;
+
+            // Check if the R value is '1' and show or hide the fees field accordingly
+            if (rValue === '1') {
+                feesInput.style.display = 'block';  // Show the Fees field
+            } else {
+                feesInput.style.display = 'none';  // Hide the Fees field
+            }
+        });
+        document.getElementById('today-date').value = new Date().toISOString().split('T')[0];
+
+        document.getElementById('checkbox4').addEventListener('change', function () {
+            var otherTextInput = document.getElementById('otherTextInput');
+            otherTextInput.style.display = this.checked ? 'block' : 'none';
+        });
+
+        document.getElementById('checkboxNewspaper').addEventListener('change', toggleTextInput);
+        document.getElementById('checkboxRadio').addEventListener('change', toggleTextInput);
+
+        function toggleTextInput() {
+            var newspaperRadioTextInput = document.getElementById('newspaperRadioTextInput');
+            var isNewspaperChecked = document.getElementById('checkboxNewspaper').checked;
+            var isRadioChecked = document.getElementById('checkboxRadio').checked;
+            newspaperRadioTextInput.style.display = (isNewspaperChecked || isRadioChecked) ? 'block' : 'none';
+        }
+
+        function handleCourseTypeChange() {
+            var selectedCourse = document.getElementById('coursename').value;
+        var newTechCourses = document.getElementById('newTechCourses');
+        var shortTermCourses = document.getElementById('shortTermCourses');
+        var otherCourses = document.getElementById('OtherCourses');
+
+        // Reset all sections
+        newTechCourses.style.display = 'none';
+        shortTermCourses.style.display = 'none';
+        otherCourses.style.display = 'none';
+
+        if (selectedCourse === 'New Tech') {
+            newTechCourses.style.display = 'block';
+        } else if (selectedCourse === 'Short Term') {
+            shortTermCourses.style.display = 'block';
+        } else if (selectedCourse === 'Others') {
+            otherCourses.style.display = 'block';
+        }
+        }
+    </script>
     
 </body>
 </html>

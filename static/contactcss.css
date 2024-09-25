@@ -10,9 +10,13 @@ body {
     align-items: center;
     height: 100vh;
     width: 100%;
+    overflow: hidden;
+
 }
 .form-section{
-    width:80%;
+    width:800px;
+    height:800px;
+    
 }
 /* Container to hold image and form */
 .container {
@@ -23,6 +27,7 @@ body {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
     background-color: #ffffff; /* White */
     border-radius: 10px;
+    display:flex;
 }
 
 /* Image Section */
@@ -44,14 +49,18 @@ body {
 
 /* Form Section */
 .form-section {
-    width: 100%; /* Increase width of form section */
+    width: 60%; /* Adjust width as necessary */
     padding: 20px;
     background-color: #F5F5F5; /* Light Grey */
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
     display: flex;
     flex-direction: column;
+    overflow: scroll; /* Enable vertical scrolling */
+    height:600px; 
+    /* Fill the container height */
 }
+
 
 /* Header styles */
 /*For Enquiry Form Heading*/
@@ -72,7 +81,11 @@ header h1 {
 form {
     display:flex;
     flex-direction: column;
-    width: 30%;
+    width: 40%;
+    height:90%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+
 }
 
 label {
@@ -87,9 +100,10 @@ input[type="tel"],
 input[type="date"],
 select,
 textarea {
-    width: 100%;
+    width:calc(100% - 20px);
     padding: 10px;
     margin-bottom: 20px;
+   
     border: 1px solid #ccc;
     border-radius: 6px;
     background-color: #ffffff; /* White */
@@ -106,7 +120,7 @@ textarea:focus {
     outline: none;
 }
 select{
-    width:104%
+    width:100%
 }
 
 textarea {
@@ -119,7 +133,7 @@ input[type="radio"] {
 }
 
 button[type="submit"] {
-    width: 105%;
+    width: 90%;
     background-color: #1E90FF; /* Blue */
     color: white;
     padding: 10px;
@@ -128,6 +142,8 @@ button[type="submit"] {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease-in-out;
+    align-self: center; /* Center button */
+    margin-top: 20px; /* Space above the button */
 }
 
 button[type="submit"]:hover {
