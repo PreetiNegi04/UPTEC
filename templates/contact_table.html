@@ -13,6 +13,7 @@
             padding: 20px;
             background-color: #f0f2f5;
             color: #333;
+            width:100%;
         }
 
         h1 {
@@ -25,7 +26,7 @@
             width: 100%;
             overflow-x: auto;
             margin: 0 auto;
-            max-width: 1400px;
+            max-width: 1800px;
         }
 
         #dataTable {
@@ -134,32 +135,57 @@
     <table id="dataTable">
         <thead>
             <tr>
-                <th>ID</th>
+                
                 <th>Date of enquiry</th>
+                <th>Type of enquiry</th>
                 <th>Name</th>
                 <th>Contact Number</th>
-                <th>Type of enquiry</th>
-                <th>Course to enquire</th>
+                <th>Whatsapp Number</th>
+                <th>Address</th>
+                <th>Area</th>
+                <th>Qualification</th>
+                <th>Institution Name</th>
+                <th>Objectives</th>
+                <th>Source</th>
+                <th>Specific Source</th>
+                <th>Course Name</th>
+                <th>New Tech Course Name</th>
+                <th>Short Term Course Name</th>
+                <th>P</th>
+                <th>T</th>
+                <th>R</th>
+                <th>Fees</th>
                 <th>Follow up date</th>
                 <th>Follow up Reason</th>
-                <th>Enquiry Status</th>
-                <th>Remarks</th>
+                
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for doc in all_documents %}
             <tr data-id="{{ doc._id }}">
-                <td>{{ doc._id }}</td>
+                
                 <td><input type="date" class="programme" value="{{ doc.date_of_enquiry }}"></td>
+                <td><input type="text" class="type_of_enquiry" value="{{ doc.type_of_enquiry }}"></td>
                 <td><input type="text" class="name" value="{{ doc.name }}"></td>
                 <td><input type="text" class="contact_number" value="{{ doc.contact_number }}"></td>
-                <td><input type="text" class="type_of_enquiry" value="{{ doc.type_of_enquiry }}"></td>
-                <td><input type="text" class="course_to_enquire" value="{{ doc.course_to_enquire}}"></td>
-                <td><input type="date" class="date" value="{{ doc.follow_up_status.date }}"></td>
-                <td><input type="text" class="reason" value="{{ doc.follow_up_status.reason }}"></td>
-                <td><input type="text" class="enquiry_status" value="{{ doc.enquiry_status }}"></td>
-                <td><input type="text" class="remark" value="{{ doc.remark }}"></td>
+                <td><input type="text" class="whatsapp" value="{{ doc.whatsapp }}"></td>
+                <td><input type="text" class="address" value="{{ doc.address }}"></td>
+                <td><input type="text" class="area" value="{{ doc.area }}"></td>
+                <td><input type="text" class="qualification" value="{{ doc.qualification }}"></td>
+                <td><input type="text" class="college_name" value="{{ doc.college_name}}"></td>
+                <td><input type="text" class="objectives" value="{{ doc.objectives|join(', ') }}"></td>
+                <td><input type="text" class="source" value="{{ doc.source |join(', ')}}"></td>
+                <td><input type="text" class="specific_source" value="{{specific_source}}"></td>
+                <td><input type="text" class="course_name" value="{{ doc.course_name}}"></td>
+                <td><input type="text" class="new_tech_course_name" value="{{ doc.new_tech_course_name}}"></td>
+                <td><input type="text" class="short_term_course_name" value="{{ doc.short_term_course_name}}"></td>
+                <td><input type="text" class="p" value="{{ doc.p}}"></td>
+                <td><input type="text" class="t" value="{{ doc.t}}"></td>
+                <td><input type="text" class="r" value="{{ doc.r}}"></td>
+                <td><input type="text" class="fees" value="{{ doc.fees}}"></td>
+                <td><input type="date" class="follow_up_status" value="{{ doc.follow_up_status.date}}"></td>
+                <td><input type="text" class="follow_up_status" value="{{ doc.follow_up_status.reason}}"></td>
                 <td class="action-buttons">
                     <button class="editButton" onclick="editRow(this)">Edit</button>
                     <button class="saveButton" style="display:none;" onclick="saveRow(this)">Save</button>

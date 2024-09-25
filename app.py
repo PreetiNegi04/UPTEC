@@ -272,7 +272,7 @@ def contact():
                 "address": request.form.get('address'),
                 "area": request.form.get('area'),
                 "qualification": request.form.get('qualification'),
-                "college-name":request.form.get('collegename'),
+                "college_name":request.form.get('college_name'),
                 "objectives": request.form.getlist('objectives'),
                 "source": request.form.getlist('source'),
                 "specific_source": request.form.get('newspaperRadioText'),
