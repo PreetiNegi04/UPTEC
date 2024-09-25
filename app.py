@@ -229,6 +229,14 @@ def student_registration():
 def contact():
     if request.method == 'POST':
         try:
+            if request.form.get('r') == '1':
+                registered_date = datetime.today().strftime("%Y-%m-%d")
+            else:
+                registered_date = None
+            if request.form.get('p') == '1':
+                prospectus_date = datetime.today().strftime("%Y-%m-%d")
+            else:
+                prospectus_date = None
             # Extract data from the form
             contact_data = {
                 'date_of_enquiry': request.form.get('today-date'),
@@ -253,7 +261,9 @@ def contact():
                 'follow_up_status': {
                         'date': request.form.get('date'),
                         'reason': request.form.get('reason')
-                    }
+                    },
+                'register_date': registered_date,
+                'prospectus_date': prospectus_date
                 }
             
             '''# Check if all fields are provided (additional checks can be added as needed)
@@ -305,7 +315,7 @@ def registered(id):
 @app.route('/enquiry/<string:id>/action/prospectus')
 def prospectus(id):
     id = ObjectId(id)
-    mongo.db.contacts.update_one({"_id": id}, {"$set": {"enquiry_status": "prospectus"}})
+    mongo.db.contacts.update_one({"_id": id}, {"$set": {'p': '1', 'prospectus_date': datetime.today().strftime("%Y-%m-%d")}})
     return redirect(url_for('index'))
 
 @app.route('/save', methods=['POST'])
