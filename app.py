@@ -240,30 +240,30 @@ def contact():
                 "area": request.form.get('area'),
                 "qualification": request.form.get('qualification'),
                 "college-name":request.form.get('collegename'),
-                 "objectives": request.form.getlist('objectives'),
-            "source": request.form.getlist('source'),
-             "specific_source": request.form.get('newspaperRadioText'),
-            "course_name": request.form.get('coursename'),
-            "new_tech_course_name": request.form.get('newTechCourseName'),
-            "short_term_course_name": request.form.get('shortTermCourseName'),
-            "p": request.form.get('p'),
-            "t": request.form.get('t'),
-            "r": request.form.get('r'),
-            "fees": request.form.get('fees'),
-             'follow_up_status': {
-                    'date': request.form.get('date'),
-                    'reason': request.form.get('reason')
-                },
+                "objectives": request.form.getlist('objectives'),
+                "source": request.form.getlist('source'),
+                "specific_source": request.form.get('newspaperRadioText'),
+                "course_name": request.form.get('coursename'),
+                "new_tech_course_name": request.form.get('newTechCourseName'),
+                "short_term_course_name": request.form.get('shortTermCourseName'),
+                "p": request.form.get('p'),
+                "t": request.form.get('t'),
+                "r": request.form.get('r'),
+                "fees": request.form.get('fees'),
+                'follow_up_status': {
+                        'date': request.form.get('date'),
+                        'reason': request.form.get('reason')
+                    },
                 'enquiry_status': request.form.get('estatus'),
                 'remark': request.form.get('status')
-            }
+                }
             
             # Check if all fields are provided (additional checks can be added as needed)
             if not all(contact_data.values()) or not contact_data['follow_up_status']['date'] or not contact_data['follow_up_status']['reason']:
                 flash("All fields are required!", "error")
                 return redirect(url_for('contact'))
 
-            mongo.db.contact_data.insert_one(contact_data)
+            mongo.db.contacts.insert_one(contact_data)
             return redirect(url_for('success'))
         
         except Exception as e:
