@@ -125,23 +125,23 @@ def index():
     username = session.get('username', None)
     coll = mongo.db["contacts"]
     # Get the total number of documents in the collection
-    query = {"enquiry_status" : "registered"}
+    query = {"r" : "1"}
     total_documents = coll.count_documents(query)
     total_enquiries = coll.count_documents({})
-    query = {"enquiry_status" : "pending"}
+    query = {"t": "1", "p": "0", "r": "0"}
     pending = coll.count_documents(query)
 
     pending_documents = find_pending()
 
     today_documents = find_today()
-    
+  
     area = find_area()
     courses = find_courses()
     # Get the current date and calculate the start and end of today
     today = datetime.today().strftime("%Y-%m-%d")
     # Query to count documents with 'today_date' of today
-    query = {"today_date": today}
-    total_today = collection.count_documents(query)
+    query = {"date_of_enquiry": today, "r" : "1"}
+    total_today = coll.count_documents(query)
     return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses)
 
 @app.route('/forget-password', methods=['POST', 'GET'])
@@ -408,7 +408,11 @@ def check_password(hashed_password, user_password):
 
 def find_pending():
     collection = mongo.db["contacts"]
-    query = {"enquiry_status" : "pending"}
+    query = {
+    "t": "1",
+    "p": "0",
+    "r": "0"
+    }
     # Get the documents that match the query
     pending_documents = collection.find(query).sort("follow_up_status.date", 1)
     return list(pending_documents)
@@ -419,33 +423,30 @@ def find_today():
     # Get the current date and calculate the start and end of today
     today = datetime.today().strftime("%Y-%m-%d")
 
-    query = {"follow_up_status.date": today, "enquiry_status": "pending"}
+    query = {"follow_up_status.date": today,"t": "1","p": "0","r": "0"}
     # Get the documents that match the query
     today_documents = collection.find(query).sort("follow_up_status.date", 1)
     return list(today_documents)
 
 def find_area():
-    collection = mongo.db['form_data']
-
-    # MongoDB aggregation query to count students in each distinct area
+    collection = mongo.db['contacts']
     pipeline = [
         {
             "$group": {
-                "_id": "$area",  # Group by the 'address' or 'area' field
-                "total_students": { "$sum": 1 }  # Count the number of students in each area
+                "_id": "$area",  # Group by area (replace 'area' with the actual field name)
+                "total_students": { "$sum": 1 }
             }
         },
-        {
-            "$sort": { "total_students": -1 }  # Sort by total students in descending order
-        }
+        { "$sort": { "total_students": -1 } } 
     ]
+
 
     # Execute the aggregation pipeline
     result = collection.aggregate(pipeline)
     return result
 
 def find_courses():
-    collection = mongo.db['form_data']
+    collection = mongo.db['contacts']
 
     # MongoDB aggregation query to count students in each distinct area
     pipeline = [
