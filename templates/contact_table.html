@@ -174,8 +174,8 @@
                 <td><input type="text" class="area" value="{{ doc.area }}"></td>
                 <td><input type="text" class="qualification" value="{{ doc.qualification }}"></td>
                 <td><input type="text" class="college_name" value="{{ doc.college_name}}"></td>
-                <td><input type="date" class="objectives" value="{{ doc.objectives }}"></td>
-                <td><input type="text" class="source" value="{{ doc.source }}"></td>
+                <td><input type="text" class="objectives" value="{{ doc.objectives|join(', ') }}"></td>
+                <td><input type="text" class="source" value="{{ doc.source |join(', ')}}"></td>
                 <td><input type="text" class="specific_source" value="{{specific_source}}"></td>
                 <td><input type="text" class="course_name" value="{{ doc.course_name}}"></td>
                 <td><input type="text" class="new_tech_course_name" value="{{ doc.new_tech_course_name}}"></td>
@@ -184,7 +184,7 @@
                 <td><input type="text" class="t" value="{{ doc.t}}"></td>
                 <td><input type="text" class="r" value="{{ doc.r}}"></td>
                 <td><input type="text" class="fees" value="{{ doc.fees}}"></td>
-                <td><input type="text" class="follow_up_status" value="{{ doc.follow_up_status.date}}"></td>
+                <td><input type="date" class="follow_up_status" value="{{ doc.follow_up_status.date}}"></td>
                 <td><input type="text" class="follow_up_status" value="{{ doc.follow_up_status.reason}}"></td>
                 <td class="action-buttons">
                     <button class="editButton" onclick="editRow(this)">Edit</button>
