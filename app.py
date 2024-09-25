@@ -231,7 +231,7 @@ def contact():
         try:
             # Extract data from the form
             contact_data = {
-                'date_of_enquiry': request.form.get('dateoe'),
+                'date_of_enquiry': request.form.get('today-date'),
                 'type_of_enquiry': request.form.get('type_of_enquiry'),
                 'name': request.form.get('uname'),
                 'contact_number': request.form.get('contact'),
@@ -258,10 +258,11 @@ def contact():
                 'remark': request.form.get('status')
                 }
             
-            # Check if all fields are provided (additional checks can be added as needed)
-            if not all(contact_data.values()) or not contact_data['follow_up_status']['date'] or not contact_data['follow_up_status']['reason']:
+            '''# Check if all fields are provided (additional checks can be added as needed)
+            if not contact_data['follow_up_status']['date'] or not contact_data['follow_up_status']['reason']:
                 flash("All fields are required!", "error")
-                return redirect(url_for('contact'))
+                print("All fields are required!")
+                return redirect(url_for('contact'))'''
 
             mongo.db.contacts.insert_one(contact_data)
             return redirect(url_for('success'))
