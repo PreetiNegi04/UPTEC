@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 app.secret_key = 'your_secret_key'
 
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient('mongodb://localhost:27017')
 db = client['mydatabase']
 collection = db['form_data'] 
 app.config['MONGO_URI'] = "mongodb://localhost:27017/mydatabase"
