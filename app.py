@@ -253,9 +253,7 @@ def contact():
                 'follow_up_status': {
                         'date': request.form.get('date'),
                         'reason': request.form.get('reason')
-                    },
-                'enquiry_status': request.form.get('estatus'),
-                'remark': request.form.get('status')
+                    }
                 }
             
             '''# Check if all fields are provided (additional checks can be added as needed)
