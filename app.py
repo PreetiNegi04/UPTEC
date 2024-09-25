@@ -116,7 +116,32 @@ def contact_table():
 
 @app.route('/dailyreport', methods=['POST', 'GET'])
 def dailyreport():
-    return render_template('dailyreport.html')
+    Olevel_e = mongo.db.contacts.count_documents({"course_name": "O Level", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
+    DCAC_e= mongo.db.contacts.count_documents({"course_name": "DCAC", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
+    BCA_e = mongo.db.contacts.count_documents({"course_name": "BCA", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
+    CCNA_e = mongo.db.contacts.count_documents({"course_name": "CCNA", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
+    NewTech_e = mongo.db.contacts.count_documents({"course_name": "New Tech", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
+    ShortTerm_e = mongo.db.contacts.count_documents({"course_name": "Short Term", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
+
+    Olevel_r = mongo.db.contacts.count_documents({"course_name": "O Level", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
+    DCAC_r= mongo.db.contacts.count_documents({"course_name": "DCAC", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
+    BCA_r = mongo.db.contacts.count_documents({"course_name": "BCA", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
+    CCNA_r = mongo.db.contacts.count_documents({"course_name": "CCNA", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
+    NewTech_r = mongo.db.contacts.count_documents({"course_name": "New Tech", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
+    ShortTerm_r = mongo.db.contacts.count_documents({"course_name": "Short Term", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
+
+    Olevel_p = mongo.db.contacts.count_documents({"course_name": "O Level", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
+    DCAC_p= mongo.db.contacts.count_documents({"course_name": "DCAC", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
+    BCA_p = mongo.db.contacts.count_documents({"course_name": "BCA", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
+    CCNA_p = mongo.db.contacts.count_documents({"course_name": "CCNA", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
+    NewTech_p = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
+    ShortTerm_p = mongo.db.contacts.count_documents({"course_name": "Short Term", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
+
+    enquiry = {"Olevel_e": Olevel_e, "DCAC_e": DCAC_e, "BCA_e": BCA_e, "CCNA_e": CCNA_e, "NewTech_e": NewTech_e, "ShortTerm_e": ShortTerm_e}
+    registration = {"Olevel_r": Olevel_r, "DCAC_r": DCAC_r, "BCA_r": BCA_r, "CCNA_r": CCNA_r, "NewTech_r": NewTech_r, "ShortTerm_r": ShortTerm_r}
+    prospectus = {"Olevel_p": Olevel_p, "DCAC_p": DCAC_p, "BCA_p": BCA_p, "CCNA_p": CCNA_p, "NewTech_p": NewTech_p, "ShortTerm_p": ShortTerm_p}
+
+    return render_template('dailyreport.html', enquiry = enquiry, registration = registration, prospectus = prospectus)
 
 
 @app.route('/index')
@@ -128,7 +153,7 @@ def index():
     query = {"r" : "1"}
     total_documents = coll.count_documents(query)
     total_enquiries = coll.count_documents({})
-    query = {"t": "1", "p": "0", "r": "0"}
+    query = {"e": "1", "p": "0", "r": "0"}
     pending = coll.count_documents(query)
 
     pending_documents = find_pending()
@@ -140,7 +165,7 @@ def index():
     # Get the current date and calculate the start and end of today
     today = datetime.today().strftime("%Y-%m-%d")
     # Query to count documents with 'today_date' of today
-    query = {"date_of_enquiry": today, "r" : "1"}
+    query = {"register_date": today, "r" : "1"}
     total_today = coll.count_documents(query)
     return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses)
 
@@ -206,7 +231,7 @@ def student_registration():
             "secfees": request.form.get('secfees'),
             "course_advised": request.form.get('courseadv'),
             "p": request.form.get('p'),
-            "t": request.form.get('t'),
+            "e": request.form.get('e'),
             "r": request.form.get('r'),
             "approved": request.form.get('approved'),
             "fremark": request.form.get('fremark'),
@@ -255,7 +280,7 @@ def contact():
                 "new_tech_course_name": request.form.get('newTechCourseName'),
                 "short_term_course_name": request.form.get('shortTermCourseName'),
                 "p": request.form.get('p'),
-                "t": request.form.get('t'),
+                "e": request.form.get('e'),
                 "r": request.form.get('r'),
                 "fees": request.form.get('fees'),
                 'follow_up_status': {
@@ -419,7 +444,7 @@ def check_password(hashed_password, user_password):
 def find_pending():
     collection = mongo.db["contacts"]
     query = {
-    "t": "1",
+    "e": "1",
     "p": "0",
     "r": "0"
     }
@@ -433,7 +458,7 @@ def find_today():
     # Get the current date and calculate the start and end of today
     today = datetime.today().strftime("%Y-%m-%d")
 
-    query = {"follow_up_status.date": today,"t": "1","p": "0","r": "0"}
+    query = {"follow_up_status.date": today,"e": "1","p": "0","r": "0"}
     # Get the documents that match the query
     today_documents = collection.find(query).sort("follow_up_status.date", 1)
     return list(today_documents)
