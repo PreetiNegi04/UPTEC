@@ -3,8 +3,9 @@
 <head>
     <title>Data Table</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    
 
     <style>
         body {
@@ -133,6 +134,7 @@
 <h1>Student Enquiry Data</h1>  
 <div class="table-container">
     <table id="dataTable">
+        <input type="text" id="searchBar" placeholder="Search by Name">
         <thead>
             <tr>
                 
@@ -152,7 +154,7 @@
                 <th>New Tech Course Name</th>
                 <th>Short Term Course Name</th>
                 <th>P</th>
-                <th>T</th>
+                <th>E</th>
                 <th>R</th>
                 <th>Fees</th>
                 <th>Follow up date</th>
@@ -181,7 +183,7 @@
                 <td><input type="text" class="new_tech_course_name" value="{{ doc.new_tech_course_name}}"></td>
                 <td><input type="text" class="short_term_course_name" value="{{ doc.short_term_course_name}}"></td>
                 <td><input type="text" class="p" value="{{ doc.p}}"></td>
-                <td><input type="text" class="t" value="{{ doc.t}}"></td>
+                <td><input type="text" class="e" value="{{ doc.e}}"></td>
                 <td><input type="text" class="r" value="{{ doc.r}}"></td>
                 <td><input type="text" class="fees" value="{{ doc.fees}}"></td>
                 <td><input type="date" class="follow_up_status" value="{{ doc.follow_up_status.date}}"></td>
@@ -202,35 +204,34 @@
 
 $(document).ready(function() {
 
-    $('#dataTable').DataTable({
-        "pageLength": 10, // Number of rows per page
-        "lengthMenu": [5, 10, 25, 50], // Options for how many rows to show
-        "searching": true, // Enable search bar
-        "paging": true, // Enable pagination
-        "ordering": true, // Allow column ordering
-        "info": true, // Show table information
-        "autoWidth": false // Disable auto width to prevent table stretching
+    var table = $('#dataTable').DataTable({
+        "pageLength": 10,
+        "lengthMenu": [5, 10, 25, 50],
+        "searching": true,
+        "paging": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false
+    });
+
+    // Disable inputs and buttons in each row
+    
+    // Custom search function for the third column (index 2)
+    $('#searchBar').on('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        console.log("Search Term: ", searchTerm); // Debugging: Check search term
+
+        $('#dataTable tbody tr').each(function() {
+            var nameCell = $(this).find('td:eq(2) input').val().toLowerCase();
+            if (nameCell.includes(searchTerm)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
     });
 
 
-    $('tr').each(function() {
-        $(this).find('input').prop('disabled', true);
-        $(this).find('.saveButton').prop('disabled', true);
-    });
-
-    function searchTable() {
-    var searchTerm = document.getElementById('searchBar').value.toLowerCase();
-    var rows = document.querySelectorAll('#dataTable tbody tr');
-
-    rows.forEach(function(row) {
-        var nameCell = row.cells[1].textContent.toLowerCase();
-        if (nameCell.includes(searchTerm)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
 
     $('.editButton').click(function() {
         var row = $(this).closest('tr');
