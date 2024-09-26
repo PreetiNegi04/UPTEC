@@ -267,7 +267,9 @@ def index():
     # Query to count documents with 'today_date' of today
     query = {"register_date": today, "r" : "1"}
     total_today = coll.count_documents(query)
-    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses)
+
+    prospectus = find_prospectus()
+    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses, prospectus = prospectus) 
 
 @app.route('/forget-password', methods=['POST', 'GET'])
 def forget_password():
@@ -409,6 +411,34 @@ def contact():
     # If GET request, render the contact form
     return render_template('contact.html')
 
+@app.route('/update_contact/<string:id>', methods=['GET', 'POST'])
+def update_contact(id):
+    collection = mongo.db["contacts"]
+    
+    # Convert id to ObjectId
+    id = ObjectId(id)
+    
+    if request.method == 'POST':
+        # Get the form data
+        fees = request.form.get('fees')
+        
+        # Update the document with the given ID
+        collection.update_one({"_id": id}, {"$set": {'r': "1", 'register_date': datetime.today().strftime("%Y-%m-%d"), 'fees': fees}})
+    
+        target_collection = mongo.db['form_data']
+        
+        document = collection.find_one({"_id": ObjectId(id)})
+
+        if document:
+            # Insert the document into the target collection
+            target_collection.insert_one(document)
+            
+        return redirect(url_for('success'))
+    
+    # Retrieve the document to display on the update_contact page
+    document = collection.find_one({"_id": id})
+    
+    return render_template('update_contact.html', document=document)
 
 @app.route('/success', methods=['POST', 'GET'])
 def success():
@@ -428,14 +458,13 @@ def delete_enquiry(id):
     # Convert the string id to an ObjectId
     id = ObjectId(id)
     # Delete the document with the given ID
-    mongo.db.contacts.update_one({"_id": id}, {"$set": {"enquiry_status": "not registered"}})
+    mongo.db.contacts.update_one({"_id": id}, {"$set": {'r': "2"}})
     return redirect(url_for('index'))
 
 @app.route('/enquiry/<string:id>/action/registered')
 def registered(id):
-    id = ObjectId(id)
-    mongo.db.contacts.update_one({"_id": id}, {"$set": {"enquiry_status": "registered"}})
-    return redirect(url_for('index'))
+    # Redirect to update_contact route, passing the id
+    return redirect(url_for('update_contact', id=id))
 
 @app.route('/enquiry/<string:id>/action/prospectus')
 def prospectus(id):
@@ -599,6 +628,12 @@ def find_courses():
     # Execute the aggregation pipeline
     result = collection.aggregate(pipeline)
     return result
+
+def find_prospectus():
+    collection = mongo.db["contacts"]
+    query = {"p": "1", "r" : "0"}
+    total_prospectus = collection.find(query).sort("follow_up_status.date", 1)
+    return list(total_prospectus)
 
 if __name__ == '__main__':
     app.run(debug=True)
