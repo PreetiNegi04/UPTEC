@@ -137,11 +137,111 @@ def dailyreport():
     NewTech_p = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
     ShortTerm_p = mongo.db.contacts.count_documents({"course_name": "Short Term", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
 
+    total_e = Olevel_e + DCAC_e + BCA_e + CCNA_e + NewTech_e + ShortTerm_e
+    total_r = Olevel_r + DCAC_r + BCA_r + CCNA_r + NewTech_r + ShortTerm_r
+    total_p = Olevel_p + DCAC_p + BCA_p + CCNA_p + NewTech_p + ShortTerm_p
+
+    total = {
+        "total_e": total_e,
+        "total_r": total_r,
+        "total_p": total_p
+    }
     enquiry = {"Olevel_e": Olevel_e, "DCAC_e": DCAC_e, "BCA_e": BCA_e, "CCNA_e": CCNA_e, "NewTech_e": NewTech_e, "ShortTerm_e": ShortTerm_e}
     registration = {"Olevel_r": Olevel_r, "DCAC_r": DCAC_r, "BCA_r": BCA_r, "CCNA_r": CCNA_r, "NewTech_r": NewTech_r, "ShortTerm_r": ShortTerm_r}
     prospectus = {"Olevel_p": Olevel_p, "DCAC_p": DCAC_p, "BCA_p": BCA_p, "CCNA_p": CCNA_p, "NewTech_p": NewTech_p, "ShortTerm_p": ShortTerm_p}
+    today = datetime.today().strftime("%Y-%m-%d")
 
-    return render_template('dailyreport.html', enquiry = enquiry, registration = registration, prospectus = prospectus)
+    # Aggregation query
+    pipeline = [
+        {
+            "$match": {
+                "e": "1",  # Assuming 'e' is stored as a string
+                "date_of_enquiry": today
+            }
+        },
+        {
+        "$unwind": "$source"  # Unwind the source array to separate its values
+        },
+        {
+            "$group": {
+                "_id": {
+                    "$cond": {
+                    "if": { "$in": [ { "$trim": { "input": "$source" } }, ["friends", "hoarding", "websites"] ] },  # Check if source is in the list after trimming whitespace
+                    "then": "$source",  # Keep the source as is
+                    "else": "Others"  # Group under 'Others'
+                }
+                },
+                "count": {"$sum": 1}  # Count the number of records
+            }
+        },
+        {
+        "$addFields": {
+            "sortOrder": {
+                "$switch": {
+                    "branches": [
+                        { "case": { "$eq": ["$_id", "friends"] }, "then": 1 },
+                        { "case": { "$eq": ["$_id", "hoarding"] }, "then": 2 },
+                        { "case": { "$eq": ["$_id", "websites"] }, "then": 3 }
+                    ],
+                    "default": 4  # Others come last
+                    }
+                }
+            }
+        },
+        {
+        "$sort": { "sortOrder": 1 }  # Sort by the custom sort order
+        },
+        {
+            # Ensure all predefined categories have a count (including those with 0)
+            "$facet": {
+                "counts": [
+                    { "$match": { "_id": { "$in": ["friends", "hoarding", "websites", "Others"] } } },
+                    { "$sort": { "sortOrder": 1 } }
+                ],
+                "defaults": [
+                    {
+                        "$set": {
+                            "sources": [
+                                { "_id": "friends", "count": 0, "sortOrder": 1 },
+                                { "_id": "hoarding", "count": 0, "sortOrder": 2 },
+                                { "_id": "websites", "count": 0, "sortOrder": 3 },
+                                { "_id": "Others", "count": 0, "sortOrder": 4 }
+                            ]
+                        }
+                    },
+                    { "$unwind": "$sources" }
+                ]
+            }
+        },
+        {
+            # Combine the actual counts with defaults and handle missing ones
+            "$project": {
+                "final": {
+                    "$concatArrays": [
+                        "$defaults.sources",  # Default sources with 0 count
+                        "$counts"  # Actual counted sources
+                    ]
+                }
+            }
+        },
+        {
+            "$unwind": "$final"  # Unwind the final array for a flat result
+        },
+        {
+            "$group": {
+                "_id": "$final._id",
+                "count": { "$max": "$final.count" },  # Take the maximum between 0 and actual count
+                "sortOrder": { "$first": "$final.sortOrder" }
+            }
+        },
+        {
+            "$sort": { "sortOrder": 1 }  # Sort by the custom sort order
+        }
+    ]
+
+    # Execute the aggregation query and convert to a list
+    result = list(mongo.db.contacts.aggregate(pipeline))
+    return render_template('dailyreport.html', enquiry = enquiry, registration = registration, prospectus = prospectus, total = total, sources = result)
 
 
 @app.route('/index')
@@ -499,5 +599,6 @@ def find_courses():
     # Execute the aggregation pipeline
     result = collection.aggregate(pipeline)
     return result
+
 if __name__ == '__main__':
     app.run(debug=True)
