@@ -253,6 +253,7 @@
                                                         <th>Name</th>
                                                         <th>Enquiry</th>
                                                         <th>Contact Details</th>
+                                                        <th>Course</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -261,6 +262,7 @@
                                                                 <td class="mb-1">{{ document['name'] }}</td>
                                                                 <td class="text-muted mb-0">{{ document['follow_up_status']['reason'] }}</td>
                                                                 <td class="text-muted mb-0">{{ document['contact_number'] }}</td>
+                                                                <td class="text-muted mb-0">{{ document['course_name'] }}</td>
                                                         </div>
                                                         {% endfor %}
                                                 </tbody>
@@ -274,54 +276,51 @@
                             <div class="col-12 col-xl-6">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h4>Student Enquired on Different Courses</h4>
+                                        <h4>Pending Enquiries</h4>
                                     </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            {% for course in courses %}
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <svg class="bi text-primary" width="32" height="32" fill="blue"
-                                                        style="width:10px">
-                                                        <use
-                                                            xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
-                                                    </svg>
-                                                    <h5 class="mb-0 ms-3">{{course['_id']}}</h5>
-                                                </div>
+                                    <div class="card-content pb-4">
+                                        {% for document in pending_documents %}
+                                        <div class="recent-message d-flex px-4 py-3">
+                                            <h5 class="mb-1">{{ document['name'] }}</h5>
+                                            <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
+                                            <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
+                                            <h6 class="text-muted mb-0">Course : {{ document['course_name'] }}</h6>
+                                            <div class="action-buttons">
+                                            <a href="/enquiry/{{document['_id']}}/action/registered" class="edit-btn">Registered</a>
+                                            <a href="/enquiry/{{document['_id']}}/action/prospectus" class="prospectus-btn">Prospectus</a>
+                                            <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
                                             </div>
-                                            <div class="col-6">
-                                                <h5 class="mb-0">{{course['total_students']}}</h5>
-                                            </div>
-                                            {% endfor %}
                                         </div>
+                                        {% endfor %}
+        
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12 col-xl-6">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h4>Student Enquired from Different Area</h4>
+                                        <h4>Student's taken Prospectus</h4>
                                     </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            {% for data in area %}
-                                            <div class="col-6">
-                                                <div class="d-flex align-items-center">
-                                                    <svg class="bi text-primary" width="32" height="32" fill="blue"
-                                                        style="width:10px">
-                                                        <use
-                                                            xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
-                                                    </svg>
-                                                    <h5 class="mb-0 ms-3">{{data['_id']}}</h5>
+                                    <div class="card-content pb-4">
+                                        {% for document in prospectus %}
+                                        <div class="recent-message d-flex px-4 py-3">
+                                            
+                                            <div class="name ms-4">
+        
+                                                <h5 class="mb-1">{{ document['name'] }}</h5>
+                                                <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
+                                                <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
+                                                <h6 class="text-muted mb-0">Course : {{ document['course_name'] }}</h6>
+                                                <div class="action-buttons">
+                                                <a href="/enquiry/{{document['_id']}}/action/registered" class="edit-btn">Registered</a>
+                                                <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
                                                 </div>
                                             </div>
-                                            <div class="col-6">
-                                                <h5 class="mb-0">{{data['total_students']}}</h5>
-                                            </div>
-                                            {% endfor %}
                                         </div>
+                                        {% endfor %}
                                     </div>
                                 </div>
+
                             </div>
 
                         </div>
@@ -343,26 +342,50 @@
                         </div>
                         <div class="card">
                             <div class="card-header">
-                                <h4>Pending Enquiries</h4>
+                                <h4>Student Enquired on Different Courses</h4>
                             </div>
-                            <div class="card-content pb-4">
-                                {% for document in pending_documents %}
-                                <div class="recent-message d-flex px-4 py-3">
-                                    
-                                    <div class="name ms-4">
-
-                                        <h5 class="mb-1">{{ document['name'] }}</h5>
-                                        <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
-                                        <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
-                                        <div class="action-buttons">
-                                        <a href="/enquiry/{{document['_id']}}/action/registered" class="edit-btn">Registered</a>
-                                        <a href="/enquiry/{{document['_id']}}/action/prospectus" class="prospectus-btn">Prospectus</a>
-                                        <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
+                            <div class="card-body">
+                                <div class="row">
+                                    {% for course in courses %}
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center">
+                                            <svg class="bi text-primary" width="32" height="32" fill="blue"
+                                                style="width:10px">
+                                                <use
+                                                    xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
+                                            </svg>
+                                            <h5 class="mb-0 ms-3">{{course['_id']}}</h5>
                                         </div>
                                     </div>
+                                    <div class="col-6">
+                                        <h5 class="mb-0">{{course['total_students']}}</h5>
+                                    </div>
+                                    {% endfor %}
                                 </div>
-                                {% endfor %}
-
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Student Enquired from Different Area</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    {% for data in area %}
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center">
+                                            <svg class="bi text-primary" width="32" height="32" fill="blue"
+                                                style="width:10px">
+                                                <use
+                                                    xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
+                                            </svg>
+                                            <h5 class="mb-0 ms-3">{{data['_id']}}</h5>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <h5 class="mb-0">{{data['total_students']}}</h5>
+                                    </div>
+                                    {% endfor %}
+                                </div>
                             </div>
                         </div>
                     </div>
