@@ -86,9 +86,86 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-@app.route('/Weeklyreport')
-def Weeklyreport():
-    return render_template('Weeklyreport.html')
+@app.route('/monthlyreport')
+def monthlyreport():
+    collection = mongo.db["contacts"]
+    # Define the start and end dates for the current month
+    start_of_month = datetime(datetime.today().year, datetime.today().month, 1)
+    end_of_month = datetime(datetime.today().year, datetime.today().month + 1, 1)
+
+    pipeline = [
+        {
+            "$match": {
+                "date_of_enquiry": {"$gte": start_of_month, "$lt": end_of_month}
+            }
+        },
+        {
+            "$project": {
+                "date_of_enquiry": {
+                    "$dateToString": {"format": "%Y-%m-%d", "date": "$date_of_enquiry"}
+                },
+                "course_name": {
+                    "$cond": [
+                        {"$in": ["$course_name", ["O level", "DCAC", "DCA", "ADCA", "New Tech", "Short Term", "Internship"]]},
+                        "$course_name",
+                        "Others"
+                    ]
+                },
+                "e": {"$toInt": "$e"},
+                "p": {"$toInt": "$p"},
+                "r": {"$toInt": "$r"}
+            }
+        },
+        {
+            "$group": {
+                "_id": {
+                    "date_of_enquiry": "$date_of_enquiry",
+                    "course_name": "$course_name"
+                },
+                "e_count": {
+                    "$sum": {
+                        "$cond": [{"$eq": ["$e", 1]}, 1, 0]
+                    }
+                },
+                "p_count": {
+                    "$sum": {
+                        "$cond": [{"$eq": ["$p", 1]}, 1, 0]
+                    }
+                },
+                "r_count": {
+                    "$sum": {
+                        "$cond": [{"$eq": ["$r", 1]}, 1, 0]
+                    }
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": "$_id.date_of_enquiry",
+                "courses": {
+                    "$push": {
+                        "course_name": "$_id.course_name",
+                        "e_count": "$e_count",
+                        "p_count": "$p_count",
+                        "r_count": "$r_count"
+                    }
+                }
+            }
+        },
+        {
+            "$sort": {
+                "_id": 1  # Sort by date_of_enquiry
+            }
+        }
+    ]
+
+    # Run the aggregation query
+    monthly_report = collection.aggregate(pipeline)
+
+    # Print the results (optional)
+    for day_report in monthly_report:
+        print(day_report)
+    return render_template('monthlyreport.html')
 
 @app.route('/yearlyreport')
 def yearlyreport():
