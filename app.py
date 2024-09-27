@@ -118,37 +118,40 @@ def contact_table():
 def dailyreport():
     Olevel_e = mongo.db.contacts.count_documents({"course_name": "O Level", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
     DCAC_e= mongo.db.contacts.count_documents({"course_name": "DCAC", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
-    BCA_e = mongo.db.contacts.count_documents({"course_name": "BCA", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
-    CCNA_e = mongo.db.contacts.count_documents({"course_name": "CCNA", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
+    DCA_e= mongo.db.contacts.count_documents({"course_name": "DCA", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
+    ADCA_e = mongo.db.contacts.count_documents({"course_name": "ADCA", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
+    Internship_e = mongo.db.contacts.count_documents({"course_name": "Internship", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
     NewTech_e = mongo.db.contacts.count_documents({"course_name": "New Tech", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
     ShortTerm_e = mongo.db.contacts.count_documents({"course_name": "Short Term", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
 
     Olevel_r = mongo.db.contacts.count_documents({"course_name": "O Level", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
     DCAC_r= mongo.db.contacts.count_documents({"course_name": "DCAC", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
-    BCA_r = mongo.db.contacts.count_documents({"course_name": "BCA", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
-    CCNA_r = mongo.db.contacts.count_documents({"course_name": "CCNA", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
+    DCA_r= mongo.db.contacts.count_documents({"course_name": "DCA", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
+    ADCA_r = mongo.db.contacts.count_documents({"course_name": "ADCA", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
+    Internship_r = mongo.db.contacts.count_documents({"course_name": "Internship", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
     NewTech_r = mongo.db.contacts.count_documents({"course_name": "New Tech", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
     ShortTerm_r = mongo.db.contacts.count_documents({"course_name": "Short Term", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
 
     Olevel_p = mongo.db.contacts.count_documents({"course_name": "O Level", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
     DCAC_p= mongo.db.contacts.count_documents({"course_name": "DCAC", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
-    BCA_p = mongo.db.contacts.count_documents({"course_name": "BCA", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
-    CCNA_p = mongo.db.contacts.count_documents({"course_name": "CCNA", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
+    DCA_p= mongo.db.contacts.count_documents({"course_name": "DCA", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
+    ADCA_p = mongo.db.contacts.count_documents({"course_name": "BCA", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
+    Internship_p = mongo.db.contacts.count_documents({"course_name": "Internship", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
     NewTech_p = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
     ShortTerm_p = mongo.db.contacts.count_documents({"course_name": "Short Term", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
 
-    total_e = Olevel_e + DCAC_e + BCA_e + CCNA_e + NewTech_e + ShortTerm_e
-    total_r = Olevel_r + DCAC_r + BCA_r + CCNA_r + NewTech_r + ShortTerm_r
-    total_p = Olevel_p + DCAC_p + BCA_p + CCNA_p + NewTech_p + ShortTerm_p
+    total_e = Olevel_e + DCAC_e +DCA_e+ADCA_e+Internship_e + NewTech_e + ShortTerm_e
+    total_r = Olevel_r + DCAC_r +DCA_r +ADCA_r+Internship_r+ NewTech_r + ShortTerm_r
+    total_p = Olevel_p + DCAC_p +DCA_p+ ADCA_p +Internship_p+ NewTech_p + ShortTerm_p
 
     total = {
         "total_e": total_e,
         "total_r": total_r,
         "total_p": total_p
     }
-    enquiry = {"Olevel_e": Olevel_e, "DCAC_e": DCAC_e, "BCA_e": BCA_e, "CCNA_e": CCNA_e, "NewTech_e": NewTech_e, "ShortTerm_e": ShortTerm_e}
-    registration = {"Olevel_r": Olevel_r, "DCAC_r": DCAC_r, "BCA_r": BCA_r, "CCNA_r": CCNA_r, "NewTech_r": NewTech_r, "ShortTerm_r": ShortTerm_r}
-    prospectus = {"Olevel_p": Olevel_p, "DCAC_p": DCAC_p, "BCA_p": BCA_p, "CCNA_p": CCNA_p, "NewTech_p": NewTech_p, "ShortTerm_p": ShortTerm_p}
+    enquiry = {"Olevel_e": Olevel_e, "DCAC_e": DCAC_e,"DCA_e": DCA_e, "ADCA_e":ADCA_e, "Internship_e":Internship_e, "NewTech_e": NewTech_e, "ShortTerm_e": ShortTerm_e}
+    registration = {"Olevel_r": Olevel_r, "DCAC_r": DCAC_r,"DCA_r": DCA_r,  "ADCA_r": ADCA_r,"Internship_r":Internship_r, "NewTech_r": NewTech_r, "ShortTerm_r": ShortTerm_r}
+    prospectus = {"Olevel_p": Olevel_p, "DCAC_p": DCAC_p,"DCA_p": DCA_p,  "ADCA_p": ADCA_p, ", Internship_p":Internship_p,"NewTech_p": NewTech_p, "ShortTerm_p": ShortTerm_p}
     today = datetime.today().strftime("%Y-%m-%d")
 
     # Aggregation query
