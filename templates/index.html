@@ -281,20 +281,23 @@
                                     <div class="card-content pb-4">
                                         {% for document in pending_documents %}
                                         <div class="recent-message d-flex px-4 py-3">
-                                            <h5 class="mb-1">{{ document['name'] }}</h5>
-                                            <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
-                                            <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
-                                            <h6 class="text-muted mb-0">Course : {{ document['course_name'] }}</h6>
-                                            <div class="action-buttons">
-                                            <a href="/enquiry/{{document['_id']}}/action/registered" class="edit-btn">Registered</a>
-                                            <a href="/enquiry/{{document['_id']}}/action/prospectus" class="prospectus-btn">Prospectus</a>
-                                            <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
+                                            
+                                            <div class="name ms-4">
+                                                <h5 class="mb-1">{{ document['name'] }}</h5>
+                                                <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
+                                                <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
+                                                <h6 class="text-muted mb-0">Course : {{ document['course_name'] }}</h6>
+                                                <div class="action-buttons">
+                                                <a href="/enquiry/{{document['_id']}}/action/registered" class="edit-btn">Registered</a>
+                                                <a href="/enquiry/{{document['_id']}}/action/prospectus" class="prospectus-btn">Prospectus</a>
+                                                <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
+                                                </div>
                                             </div>
                                         </div>
                                         {% endfor %}
-        
                                     </div>
                                 </div>
+
                             </div>
                             <div class="col-12 col-xl-6">
                                 <div class="card">
@@ -306,7 +309,6 @@
                                         <div class="recent-message d-flex px-4 py-3">
                                             
                                             <div class="name ms-4">
-        
                                                 <h5 class="mb-1">{{ document['name'] }}</h5>
                                                 <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
                                                 <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
