@@ -104,7 +104,7 @@ def monthlyreport():
 
         # List of courses and sources for which you want the report
         course_list = ["O level", "DCAC", "DCA", "ADCA", "New Tech", "Short Term", "Internship"]
-        source_list = ["friends", "hoardings", "website"]
+        source_list = ["friends", "hoarding", "website"]
 
         # Aggregation pipeline for courses (count of e, p, r)
         course_pipeline = [
@@ -149,7 +149,6 @@ def monthlyreport():
             }
         ]
 
-        # Aggregation pipeline for sources (count of e)
         source_pipeline = [
             {
                 "$match": {
@@ -176,11 +175,23 @@ def monthlyreport():
                 }
             },
             {
+                "$group": {
+                    "_id": "$_id.date_of_enquiry",
+                    "sources": {
+                        "$push": {
+                            "source": "$_id.source",
+                            "e_count": "$e_count"
+                        }
+                    }
+                }
+            },
+            {
                 "$sort": {
                     "_id": 1  # Sort by date_of_enquiry
                 }
             }
         ]
+
 
         # Run the aggregation queries
         monthly_course_report = list(collection.aggregate(course_pipeline))
@@ -409,9 +420,9 @@ def dailyreport():
     NewTech_p = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
     ShortTerm_p = mongo.db.contacts.count_documents({"course_name": "Short Term", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
 
-    total_e = Olevel_e + DCAC_e +DCA_e+ADCA_e+Internship_e + NewTech_e + ShortTerm_e
-    total_r = Olevel_r + DCAC_r +DCA_r +ADCA_r+Internship_r+ NewTech_r + ShortTerm_r
-    total_p = Olevel_p + DCAC_p +DCA_p+ ADCA_p +Internship_p+ NewTech_p + ShortTerm_p
+    total_e = Olevel_e + DCAC_e +DCA_e+ ADCA_e+ Internship_e + NewTech_e + ShortTerm_e
+    total_r = Olevel_r + DCAC_r +DCA_r +ADCA_r+ Internship_r+ NewTech_r + ShortTerm_r
+    total_p = Olevel_p + DCAC_p +DCA_p+ ADCA_p + Internship_p+ NewTech_p + ShortTerm_p
 
     total = {
         "total_e": total_e,
@@ -420,9 +431,10 @@ def dailyreport():
     }
     enquiry = {"Olevel_e": Olevel_e, "DCAC_e": DCAC_e,"DCA_e": DCA_e, "ADCA_e":ADCA_e, "Internship_e":Internship_e, "NewTech_e": NewTech_e, "ShortTerm_e": ShortTerm_e}
     registration = {"Olevel_r": Olevel_r, "DCAC_r": DCAC_r,"DCA_r": DCA_r,  "ADCA_r": ADCA_r,"Internship_r":Internship_r, "NewTech_r": NewTech_r, "ShortTerm_r": ShortTerm_r}
-    prospectus = {"Olevel_p": Olevel_p, "DCAC_p": DCAC_p,"DCA_p": DCA_p,  "ADCA_p": ADCA_p, ", Internship_p":Internship_p,"NewTech_p": NewTech_p, "ShortTerm_p": ShortTerm_p}
+    prospectus = {"Olevel_p": Olevel_p, "DCAC_p": DCAC_p,"DCA_p": DCA_p,  "ADCA_p": ADCA_p, "Internship_p":Internship_p,"NewTech_p": NewTech_p, "ShortTerm_p": ShortTerm_p}
     today = datetime.today().strftime("%Y-%m-%d")
 
+    print(prospectus)
     # Aggregation query
     pipeline = [
         {
