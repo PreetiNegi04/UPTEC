@@ -9,29 +9,41 @@
     <style>
         body {
             display: flex; /* Use flexbox layout */
-            justify-content: center; /* Center content horizontally */
-            align-items: center; /* Center content vertically */
+            flex-direction: column; /* Arrange children vertically */
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
             height: 100vh; /* Full viewport height */
             margin: 0; /* Remove default margin */
         }
-        .success-heading{
+        .success-heading {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             font-weight: 500;
-            color:rgb(48, 77, 238);
-            font-style:italic;
-            align-items: center; 
+            color: rgb(48, 77, 238);
+            font-style: italic;
+            margin: 20px 0; /* Space above and below the heading */
+        }
+        button[type="submit"] {
+            background-color: #c9dbec; /* Blue */
+            color: black; /* Change text color to black for visibility */
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease-in-out;
+            width: 200px; /* Set a fixed width for the button */
+        }
 
+        button[type="submit"]:hover {
+            background-color: #c4d9eb;
         }
     </style>
 </head>
 <body>
-   <img src="https://i.pinimg.com/originals/32/b6/f2/32b6f2aeeb2d21c5a29382721cdc67f7.gif" alt="Data Saved Successfully">
-   <h1 class="success-heading"> Data Saved Successfully</h1>
-    <br>
-    <br>
-    <div>
-        <button class = "back_button"> <a href="{{ url_for('index') }}">Go to home</a></button>
-    </div>
-   
+   <img src="https://i.pinimg.com/originals/32/b6/f2/32b6f2aeeb2d21c5a29382721cdc67f7.gif" alt="Data Saved Successfully" style="max-width: 100%; height: auto;"> <!-- Make the image responsive -->
+   <h1 class="success-heading">Data Saved Successfully</h1>
+   <div>
+        <button type="submit"><a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">Back to home</a></button>
+   </div>
 </body>
 </html>

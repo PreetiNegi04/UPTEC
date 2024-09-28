@@ -127,6 +127,26 @@
     margin: 0; /* Remove default margin */
     padding: 5px 10px; /* Adjust padding */
 }
+
+.search-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center; 
+    margin-top: 10px; 
+}
+
+
+#searchLabel {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+
+#searchBar {
+    width: 200px; 
+    padding: 8px;
+    box-sizing: border-box; 
+}
     </style>
 </head>
 <body>
@@ -134,7 +154,10 @@
 <h1>Student Enquiry Data</h1>  
 <div class="table-container">
     <table id="dataTable">
-        <input type="text" id="searchBar" placeholder="Search by Name">
+        <div class="search-container">
+            <label id="searchLabel">Search:</label>
+            <input type="text" id="searchBar" placeholder="Search by Name">
+        </div>
         <thead>
             <tr>
                 
@@ -186,8 +209,9 @@
                 <td><input type="text" class="p" value="{{ doc.p}}" readonly></td>
                 <td><input type="text" class="r" value="{{ doc.r}}" readonly></td>
                 <td><input type="text" class="fees" value="{{ doc.fees}}"></td>
-                <td><input type="date" class="follow_up_status" value="{{ doc.follow_up_status.date}}"></td>
-                <td><input type="text" class="follow_up_status" value="{{ doc.follow_up_status.reason}}"></td>
+                <td><input type="date" class="follow_up_status" value="{{ doc.follow_up_status.date if doc.follow_up_status else '' }}"></td>
+                <td><input type="text" class="follow_up_status" value="{{ doc.follow_up_status.reason if doc.follow_up_status else '' }}"></td>
+
                 <td class="action-buttons">
                     <button class="editButton" onclick="editRow(this)">Edit</button>
                     <button class="saveButton" style="display:none;" onclick="saveRow(this)">Save</button>
@@ -207,7 +231,7 @@ $(document).ready(function() {
     var table = $('#dataTable').DataTable({
         "pageLength": 10,
         "lengthMenu": [5, 10, 25, 50],
-        "searching": true,
+        "searching": false,
         "paging": true,
         "ordering": true,
         "info": true,
