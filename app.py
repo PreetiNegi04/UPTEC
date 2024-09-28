@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from bson import ObjectId
 from flask import jsonify
 from datetime import datetime
+import calendar
 
 app = Flask(__name__)
 
@@ -248,25 +249,38 @@ def monthlyreport():
 @app.route('/yearlyreport')
 def yearlyreport():
     collection = mongo.db["contacts"]
-    
+
+    # Define the start and end of the year
     start_of_year = datetime(datetime.today().year, 1, 1)
     end_of_year = datetime(datetime.today().year + 1, 1, 1)
-    
- 
+    current_year = datetime.today().year
+     # List of months (1 to 12)
+    months_list = list(range(1, 13))
+    # List of courses and sources for which you want the report
+    course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term", "Others"]
+    source_list = ["friends", "hoardings", "website"]
+
+    # Aggregation pipeline
     pipeline = [
         {
             "$match": {
-                "date_of_enquiry": {"$gte": start_of_year, "$lt": end_of_year}
+                "date_of_enquiry": {"$gte": start_of_year.strftime("%Y-%m-%d"), "$lt": end_of_year.strftime("%Y-%m-%d")}
             }
         },
         {
             "$project": {
+                # Extract the month from date_of_enquiry
                 "month": {
-                    "$dateToString": {"format": "%Y-%m", "date": "$date_of_enquiry"}
+                    "$month": {
+                        "$dateFromString": {
+                            "dateString": "$date_of_enquiry",
+                            "format": "%Y-%m-%d"
+                        }
+                    }
                 },
                 "course_name": {
                     "$cond": [
-                        {"$in": ["$course_name", ["O Level", "DCAC", "DCA", "ADCA", "New Tech", "Short Term", "Internship"]]},
+                        {"$in": ["$course_name", course_list[:-1]]},
                         "$course_name",
                         "Others"
                     ]
@@ -282,21 +296,9 @@ def yearlyreport():
                     "month": "$month",
                     "course_name": "$course_name"
                 },
-                "e_count": {
-                    "$sum": {
-                        "$cond": [{"$eq": ["$e", 1]}, 1, 0]
-                    }
-                },
-                "p_count": {
-                    "$sum": {
-                        "$cond": [{"$eq": ["$p", 1]}, 1, 0]
-                    }
-                },
-                "r_count": {
-                    "$sum": {
-                        "$cond": [{"$eq": ["$r", 1]}, 1, 0]
-                    }
-                }
+                "e_count": {"$sum": {"$cond": [{"$eq": ["$e", 1]}, 1, 0]}},
+                "p_count": {"$sum": {"$cond": [{"$eq": ["$p", 1]}, 1, 0]}},
+                "r_count": {"$sum": {"$cond": [{"$eq": ["$r", 1]}, 1, 0]}}
             }
         },
         {
@@ -309,32 +311,54 @@ def yearlyreport():
                         "p_count": "$p_count",
                         "r_count": "$r_count"
                     }
-                }
+                },
+                "total_e": {"$sum": "$e_count"},
+                "total_p": {"$sum": "$p_count"},
+                "total_r": {"$sum": "$r_count"}
             }
         },
         {
-            "$sort": {
-                "_id": 1  # Sort by month
-            }
+            "$sort": {"_id": 1}  # Sort by month
         }
     ]
 
-    
-    
     # Run the aggregation query
-    yearly_report = collection.aggregate(pipeline)
+    yearly_report_from_db = list(collection.aggregate(pipeline))
 
-    # Convert the aggregation result to a list
-    yearly_results = list(yearly_report)
+    # Create a default structure for all months with zero counts for all courses
+    yearly_report = []
+    for month in months_list:
+        courses_with_zero_counts = [
+            {"course_name": course, "e_count": 0, "p_count": 0, "r_count": 0} for course in course_list
+        ]
+        yearly_report.append({
+            "month": month,
+            "courses": courses_with_zero_counts,
+            "total_e": 0,
+            "total_p": 0,
+            "total_r": 0
+        })
 
-    # Debugging: Print the results to verify the output
-    print("Yearly Report Results:")
-    for month_report in yearly_results:
-        print(month_report)
+    # Merge database results into the default yearly report structure
+    for db_report in yearly_report_from_db:
+        month_index = db_report["_id"] - 1  # Months in the database are 1-based, list is 0-based
+        # Update counts for the courses in the corresponding month
+        for db_course in db_report["courses"]:
+            for report_course in yearly_report[month_index]["courses"]:
+                if report_course["course_name"] == db_course["course_name"]:
+                    report_course["e_count"] = db_course["e_count"]
+                    report_course["p_count"] = db_course["p_count"]
+                    report_course["r_count"] = db_course["r_count"]
 
-    # Pass the results to the template and render it
-    return render_template('yearlyreport.html', reports=yearly_results)
+        yearly_report[month_index]["total_e"] = db_report["total_e"]
+        yearly_report[month_index]["total_p"] = db_report["total_p"]
+        yearly_report[month_index]["total_r"] = db_report["total_r"]
 
+    total_summary = calculate_total_values(yearly_report)
+
+    print(total_summary)
+    # Return the report
+    return render_template('yearlyreport.html', report=yearly_report, year=current_year, total = total_summary)
 
 
 
@@ -923,6 +947,37 @@ def calculate_column_totals(monthly_report):
             source_totals[source] += count
 
     return course_totals, source_totals
+
+def calculate_total_values(data):
+    # Initialize total sums
+    totals = {
+        'ADCA': {'e': 0, 'p': 0, 'r': 0},
+        'DCAC': {'e': 0, 'p': 0, 'r': 0},
+        'DCA': {'e': 0, 'p': 0, 'r': 0},
+        'O level': {'e': 0, 'p': 0, 'r': 0},
+        'New Tech': {'e': 0, 'p': 0, 'r': 0},
+        'Short Term': {'e': 0, 'p': 0, 'r': 0},
+        'Internship': {'e': 0, 'p': 0, 'r': 0},
+        'Others': {'e': 0, 'p': 0, 'r': 0},
+        'total_e': 0,
+        'total_p': 0,
+        'total_r': 0
+    }
+
+    # Iterate through each month
+    for month_data in data:
+        for course in month_data['courses']:
+            course_name = course['course_name']
+            totals[course_name]['e'] += course['e_count']
+            totals[course_name]['p'] += course['p_count']
+            totals[course_name]['r'] += course['r_count']
+            
+        # Sum the total counts for the month
+        totals['total_e'] += month_data['total_e']
+        totals['total_p'] += month_data['total_p']
+        totals['total_r'] += month_data['total_r']
+    
+    return totals
 
 
 if __name__ == '__main__':
