@@ -237,8 +237,6 @@ def monthlyreport():
             })
 
         course_totals, source_totals = calculate_column_totals(report_with_zero_counts)
-        print("Course Totals:", course_totals)
-        print("Source Totals:", source_totals)
         return render_template('monthlyreport.html', report=report_with_zero_counts, course_totals=course_totals, source_totals=source_totals)
 
     except Exception as e:
