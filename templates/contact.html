@@ -49,11 +49,11 @@
         <div class="form-row mb-4">
             <div class="col">
                 <label for="contact">Contact Number:</label>
-        <input type="tel" id="contact" name="contact" required>
+        <input type="tel" maxlength="10" id="contact" name="contact" required>
             </div>
             <div class="col">
                 <label for="whatsapp">WhatsApp No:</label>
-                <input type="text" class="form-control" name="whatsapp" id="whatsapp" required>
+                <input type="tel" maxlength="10" class="form-control" name="whatsapp" id="whatsapp" required>
             </div>
            
         </div>
@@ -246,20 +246,20 @@
                     <div class="form-row mb-4">
                         <div class="col">
                             <label for="t">E:</label>
-                            <input type="text" class="form-control" name="e" id="e">
+                            <input type="text" class="form-control" name="e" id="e" maxlength="1">
                         </div>
                         <div class="col">
                             <label for="p">P:</label>
-                            <input type="text" class="form-control" name="p" id="p">
+                            <input type="text" class="form-control" name="p" id="p" maxlength="1" >
                         </div>
                         <div class="col">
                             <label for="r">R:</label>
-                            <input type="text" class="form-control" name="r" id="r">
+                            <input type="text" class="form-control" name="r" id="r" maxlength="1">
                         </div>
 
                         <div class="col">
                             <label for="fees">Fees:</label>
-                            <input type="text" id="fees" name="fees"></div>
+                            <input type="text" id="fees" name="fees" maxlength="6"></div>
                     </div>
 
                     <div class="form-row mb-4">
@@ -268,7 +268,7 @@
                             <input type="date" id="date" name="date" required>
                         </div>
                         <div class="col">
-                            <textarea id="reason" name="reason" placeholder="Enter the follow-up status" required></textarea>
+                            <textarea id="reason" name="reason" placeholder="Enter the follow-up status"  maxlength="20" required></textarea>
                         </div></div>
 
                       
