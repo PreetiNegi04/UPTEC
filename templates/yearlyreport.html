@@ -149,70 +149,72 @@
                 </tr>
             </thead>
             <tbody id="report-body">
+                {% set months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"] %}
                 {% for r in report %}
                 <tr>
-                    <td>{{r['month']}}</td>
-                    <td>{{year}} (T)</td>
+                    <td>{{ months[r['month'] - 1] }}</td> <!-- Replace month number with month name -->
+                    <td>{{ year }} (T)</td>
                     {% for courses in r['courses'] %}
-                    <td>{{courses['e_count']}}</td><td>{{courses['p_count']}}</td><td>{{courses['r_count']}}</td><td></td>
+                    <td>{{ courses['e_count'] }}</td><td>{{ courses['p_count'] }}</td><td>{{ courses['r_count'] }}</td><td></td>
                     {% endfor %}
-                    <td class="total-col">{{r['total_e']}}</td>
-                    <td class="total-col">{{r['total_p']}}</td>
-                    <td class="total-col">{{r['total_r']}}</td>
+                    <td class="total-col">{{ r['total_e'] }}</td>
+                    <td class="total-col">{{ r['total_p'] }}</td>
+                    <td class="total-col">{{ r['total_r'] }}</td>
                     <td class="total-col"></td>
                     <td class="total-col"></td>
                 </tr>
                 {% endfor %}
                 <tr>
                     <td class="total-col">Total</td>
-                    <td class="total-col">{{year}} (T)</td>
-                    <td class="total-col">{{total['ADCA']['e']}}</td>
-                    <td class="total-col">{{total['ADCA']['p']}}</td>
-                    <td class="total-col">{{total['ADCA']['r']}}</td>
+                    <td class="total-col">{{ year }} (T)</td>
+                    <td class="total-col">{{ total['ADCA']['e'] }}</td>
+                    <td class="total-col">{{ total['ADCA']['p'] }}</td>
+                    <td class="total-col">{{ total['ADCA']['r'] }}</td>
                     <td class="total-col"></td>
-
-                    <td class="total-col">{{total['DCA']['e']}}</td>
-                    <td class="total-col">{{total['DCA']['p']}}</td>
-                    <td class="total-col">{{total['DCA']['r']}}</td>
+            
+                    <td class="total-col">{{ total['DCA']['e'] }}</td>
+                    <td class="total-col">{{ total['DCA']['p'] }}</td>
+                    <td class="total-col">{{ total['DCA']['r'] }}</td>
                     <td class="total-col"></td>
-
-                    <td class="total-col">{{total['O level']['e']}}</td>
-                    <td class="total-col">{{total['O level']['p']}}</td>
-                    <td class="total-col">{{total['O level']['r']}}</td>
+            
+                    <td class="total-col">{{ total['O level']['e'] }}</td>
+                    <td class="total-col">{{ total['O level']['p'] }}</td>
+                    <td class="total-col">{{ total['O level']['r'] }}</td>
                     <td class="total-col"></td>
-
-                    <td class="total-col">{{total['DCAC']['e']}}</td>
-                    <td class="total-col">{{total['DCAC']['p']}}</td>
-                    <td class="total-col">{{total['DCAC']['r']}}</td>
+            
+                    <td class="total-col">{{ total['DCAC']['e'] }}</td>
+                    <td class="total-col">{{ total['DCAC']['p'] }}</td>
+                    <td class="total-col">{{ total['DCAC']['r'] }}</td>
                     <td class="total-col"></td>
-
-                    <td class="total-col">{{total['Internship']['e']}}</td>
-                    <td class="total-col">{{total['Internship']['p']}}</td>
-                    <td class="total-col">{{total['Internship']['r']}}</td>
+            
+                    <td class="total-col">{{ total['Internship']['e'] }}</td>
+                    <td class="total-col">{{ total['Internship']['p'] }}</td>
+                    <td class="total-col">{{ total['Internship']['r'] }}</td>
                     <td class="total-col"></td>
-
-                    <td class="total-col">{{total['New Tech']['e']}}</td>
-                    <td class="total-col">{{total['New Tech']['p']}}</td>
-                    <td class="total-col">{{total['New Tech']['r']}}</td>
+            
+                    <td class="total-col">{{ total['New Tech']['e'] }}</td>
+                    <td class="total-col">{{ total['New Tech']['p'] }}</td>
+                    <td class="total-col">{{ total['New Tech']['r'] }}</td>
                     <td class="total-col"></td>
-
-                    <td class="total-col">{{total['Short Term']['e']}}</td>
-                    <td class="total-col">{{total['Short Term']['p']}}</td>
-                    <td class="total-col">{{total['Short Term']['r']}}</td>
+            
+                    <td class="total-col">{{ total['Short Term']['e'] }}</td>
+                    <td class="total-col">{{ total['Short Term']['p'] }}</td>
+                    <td class="total-col">{{ total['Short Term']['r'] }}</td>
                     <td class="total-col"></td>
-
-                    <td class="total-col">{{total['Others']['e']}}</td>
-                    <td class="total-col">{{total['Others']['p']}}</td>
-                    <td class="total-col">{{total['Others']['r']}}</td>
+            
+                    <td class="total-col">{{ total['Others']['e'] }}</td>
+                    <td class="total-col">{{ total['Others']['p'] }}</td>
+                    <td class="total-col">{{ total['Others']['r'] }}</td>
                     <td class="total-col"></td>
-
-                    <td class="total-col">{{total['total_e']}}</td>
-                    <td class="total-col">{{total['total_p']}}</td>
-                    <td class="total-col">{{total['total_r']}}</td>
+            
+                    <td class="total-col">{{ total['total_e'] }}</td>
+                    <td class="total-col">{{ total['total_p'] }}</td>
+                    <td class="total-col">{{ total['total_r'] }}</td>
                     <td class="total-col"></td>
                     <td class="total-col"></td>
                 </tr>
             </tbody>
+            
         </table>
     </div>
     <div class="download-toolbar">
@@ -253,14 +255,14 @@
 
             // Create rows for each month from April to next year's March
             for (let i = startMonth; i <= 11; i++) {
-                createTableRow(reportBody, months[i], `${startYear} (T)`);
+                createTableRow(reportBody, months[i], `${startYear}`);
             }
             for (let i = 0; i <= endMonth; i++) {
-                createTableRow(reportBody, months[i], `${endYear} (T)`);
+                createTableRow(reportBody, months[i], `${endYear}`);
             }
 
             // Create total row
-            createTotalRow(reportBody, `${startYear}-${endYear} (T)`);
+            createTotalRow(reportBody, `${startYear}-${endYear}`);
         }
 
         function createTableRow(reportBody, month, year) {
@@ -268,27 +270,7 @@
             row.innerHTML = `
                 <td>${month}</td>
                 <td>${year}</td>
-                <td>0</td><td>0</td><td>0</td><td>0</td>
-
-                <td>0</td><td>0</td><td>0</td><td>0</td>
-
-                <td>0</td><td>0</td><td>0</td><td>0</td>
-
-                <td>0</td><td>0</td><td>0</td><td>0</td>
-
-                <td>0</td><td>0</td><td>0</td><td>0</td>
                 
-                <td>0</td><td>0</td><td>0</td><td>0</td>
-                
-                <td>0</td><td>0</td><td>0</td><td>0</td>
-
-                <td>0</td><td>0</td><td>0</td><td>0</td>
-               
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
             `;
             reportBody.appendChild(row);
         }
@@ -299,43 +281,7 @@
             row.innerHTML = `
                 <td class="total-col">Total</td>
                 <td class="total-col">${yearRange}</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td >
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
-                <td class="total-col">0</td>
+                
             `;
             reportBody.appendChild(row);
         }
@@ -396,28 +342,51 @@
 }
 
 function generateCSV() {
-    toggleButtonsVisibility(true);
-
-    let csvContent = "data:text/csv;charset=utf-8,";
-    const rows = document.querySelectorAll('#report-table tr');
+    toggleButtonsVisibility(true); // Hide buttons while generating CSV
     
+    const table = document.querySelector('table'); // Select the first table in the document (since there's only one table)
+    
+    if (!table) {
+        console.error("Table not found.");
+        alert("Error: Report table not found.");
+        toggleButtonsVisibility(false);
+        return; // Exit if the table is not found
+    }
+
+    const rows = table.querySelectorAll('tr'); // Get all rows from the table
+
+    if (rows.length === 0) {
+        alert("No data available to download.");
+        toggleButtonsVisibility(false);
+        return; // Stop execution if no rows are found
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,"; // Initialize CSV content string
+
     rows.forEach(row => {
-        const cells = row.querySelectorAll('th, td');
-        const rowArray = Array.from(cells).map(cell => {
-            const text = cell.innerText.replace(/,/g, ''); // Remove commas to avoid breaking CSV format
-            return `"${text}"`; // Enclose in quotes to handle commas in text
+        const cells = row.querySelectorAll('th, td'); // Get header and data cells
+        const rowData = Array.from(cells).map(cell => {
+            let text = cell.innerText || cell.textContent; // Get the text content of the cell
+            text = text.replace(/"/g, '""'); // Escape double quotes for CSV compliance
+            return `"${text}"`; // Enclose cell content in quotes
         });
-        csvContent += rowArray.join(',') + "\n";
+        csvContent += rowData.join(',') + "\n"; // Add row to CSV content, joining cells with commas
     });
 
+    // Create a download link and trigger download
     const downloadLink = document.createElement('a');
-    downloadLink.setAttribute('href', encodeURI(csvContent));
-    downloadLink.setAttribute('download', 'report.csv');
-    downloadLink.click();
+    downloadLink.setAttribute('href', encodeURI(csvContent)); // Encode CSV content
+    downloadLink.setAttribute('download', 'report.csv'); // Set download filename
+    document.body.appendChild(downloadLink); // Append link to body
+    downloadLink.click(); // Trigger the download
+    document.body.removeChild(downloadLink); // Remove the link after download
 
-    toggleButtonsVisibility(false);
+    toggleButtonsVisibility(false); // Show buttons again after download
 }
 
+
+
+    
 
    
     function generateImage() {
