@@ -119,14 +119,35 @@
         }
         .action-buttons {
     display: flex;
-    justify-content: space-between; /* Spacing between buttons */
-    gap: 10px; /* Add space between buttons */
+    justify-content: space-between;
+    gap: 10px; 
 }
 
 .action-buttons button {
-    margin: 0; /* Remove default margin */
-    padding: 5px 10px; /* Adjust padding */
+    margin: 0; 
+    padding: 5px 10px;
 }
+
+.search-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center; 
+    margin-top: 10px; 
+}
+
+
+#searchLabel {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+
+#searchBar {
+    width: 200px; 
+    padding: 8px;
+    box-sizing: border-box; 
+}
+
     </style>
 </head>
 <body>
@@ -134,7 +155,12 @@
 <h1>Student Enquiry Data</h1>  
 <div class="table-container">
     <table id="dataTable">
-        <input type="text" id="searchBar" placeholder="Search by Name">
+        <div class="search-container">
+            <label id="searchLabel">Search:</label>
+            <input type="text" id="searchBar" placeholder="Search by Name">
+        </div>
+        
+        
         <thead>
             <tr>
                 
@@ -207,7 +233,7 @@ $(document).ready(function() {
     var table = $('#dataTable').DataTable({
         "pageLength": 10,
         "lengthMenu": [5, 10, 25, 50],
-        "searching": true,
+        "searching": false,
         "paging": true,
         "ordering": true,
         "info": true,
