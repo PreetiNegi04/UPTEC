@@ -5,6 +5,8 @@ import re
 import bcrypt
 from datetime import datetime, timedelta
 from bson import ObjectId
+from flask import jsonify
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -167,9 +169,100 @@ def monthlyreport():
         print(day_report)
     return render_template('monthlyreport.html')
 
+
 @app.route('/yearlyreport')
 def yearlyreport():
-    return render_template('yearlyreport.html')
+    collection = mongo.db["contacts"]
+    
+    start_of_year = datetime(datetime.today().year, 1, 1)
+    end_of_year = datetime(datetime.today().year + 1, 1, 1)
+    
+ 
+    pipeline = [
+        {
+            "$match": {
+                "date_of_enquiry": {"$gte": start_of_year, "$lt": end_of_year}
+            }
+        },
+        {
+            "$project": {
+                "month": {
+                    "$dateToString": {"format": "%Y-%m", "date": "$date_of_enquiry"}
+                },
+                "course_name": {
+                    "$cond": [
+                        {"$in": ["$course_name", ["O Level", "DCAC", "DCA", "ADCA", "New Tech", "Short Term", "Internship"]]},
+                        "$course_name",
+                        "Others"
+                    ]
+                },
+                "e": {"$toInt": "$e"},
+                "p": {"$toInt": "$p"},
+                "r": {"$toInt": "$r"}
+            }
+        },
+        {
+            "$group": {
+                "_id": {
+                    "month": "$month",
+                    "course_name": "$course_name"
+                },
+                "e_count": {
+                    "$sum": {
+                        "$cond": [{"$eq": ["$e", 1]}, 1, 0]
+                    }
+                },
+                "p_count": {
+                    "$sum": {
+                        "$cond": [{"$eq": ["$p", 1]}, 1, 0]
+                    }
+                },
+                "r_count": {
+                    "$sum": {
+                        "$cond": [{"$eq": ["$r", 1]}, 1, 0]
+                    }
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": "$_id.month",
+                "courses": {
+                    "$push": {
+                        "course_name": "$_id.course_name",
+                        "e_count": "$e_count",
+                        "p_count": "$p_count",
+                        "r_count": "$r_count"
+                    }
+                }
+            }
+        },
+        {
+            "$sort": {
+                "_id": 1  # Sort by month
+            }
+        }
+    ]
+
+    
+    
+    # Run the aggregation query
+    yearly_report = collection.aggregate(pipeline)
+
+    # Convert the aggregation result to a list
+    yearly_results = list(yearly_report)
+
+    # Debugging: Print the results to verify the output
+    print("Yearly Report Results:")
+    for month_report in yearly_results:
+        print(month_report)
+
+    # Pass the results to the template and render it
+    return render_template('yearlyreport.html', reports=yearly_results)
+
+
+
+
 
 @app.route('/table')
 def table():
