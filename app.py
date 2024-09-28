@@ -149,6 +149,7 @@ def monthlyreport():
             }
         ]
 
+        # Aggregation pipeline for sources (count of e)
         source_pipeline = [
             {
                 "$match": {
@@ -156,15 +157,18 @@ def monthlyreport():
                 }
             },
             {
+            "$unwind": "$source"  # Unwind the source array to separate its values
+            },
+            {
                 "$group": {
                     "_id": {
                         "date_of_enquiry": "$date_of_enquiry",  # Keep date as string
                         "source": {
-                            "$cond": [
-                                {"$in": ["$source", source_list]},
-                                "$source",
-                                "Others"
-                            ]
+                            "$cond": {
+                                "if": { "$in": [ { "$trim": { "input": "$source" } }, ["friends", "hoarding", "website"] ] },  # Check if source is in the list after trimming whitespace
+                                "then": "$source",  # Keep the source as is
+                                "else": "Others"  # Group under 'Others'
+                            }
                         }
                     },
                     "e_count": {
@@ -175,22 +179,12 @@ def monthlyreport():
                 }
             },
             {
-                "$group": {
-                    "_id": "$_id.date_of_enquiry",
-                    "sources": {
-                        "$push": {
-                            "source": "$_id.source",
-                            "e_count": "$e_count"
-                        }
-                    }
-                }
-            },
-            {
                 "$sort": {
                     "_id": 1  # Sort by date_of_enquiry
                 }
             }
         ]
+
 
 
         # Run the aggregation queries
@@ -936,7 +930,7 @@ def calculate_column_totals(monthly_report):
     # Initialize totals for sources
     source_totals = {
         "friends": 0,
-        "hoardings": 0,
+        "hoarding": 0,
         "website": 0,
         "Others": 0
     }
