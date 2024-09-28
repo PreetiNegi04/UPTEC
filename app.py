@@ -90,84 +90,161 @@ def logout():
 
 @app.route('/monthlyreport')
 def monthlyreport():
-    collection = mongo.db["contacts"]
-    # Define the start and end dates for the current month
-    start_of_month = datetime(datetime.today().year, datetime.today().month, 1)
-    end_of_month = datetime(datetime.today().year, datetime.today().month + 1, 1)
+    try:
+        collection = mongo.db["contacts"]
+        # Get the current year and month
+        current_date = datetime.today()
+        year = current_date.year
+        month = current_date.month
 
-    pipeline = [
-        {
-            "$match": {
-                "date_of_enquiry": {"$gte": start_of_month, "$lt": end_of_month}
-            }
-        },
-        {
-            "$project": {
-                "date_of_enquiry": {
-                    "$dateToString": {"format": "%Y-%m-%d", "date": "$date_of_enquiry"}
-                },
-                "course_name": {
-                    "$cond": [
-                        {"$in": ["$course_name", ["O level", "DCAC", "DCA", "ADCA", "New Tech", "Short Term", "Internship"]]},
-                        "$course_name",
-                        "Others"
-                    ]
-                },
-                "e": {"$toInt": "$e"},
-                "p": {"$toInt": "$p"},
-                "r": {"$toInt": "$r"}
-            }
-        },
-        {
-            "$group": {
-                "_id": {
-                    "date_of_enquiry": "$date_of_enquiry",
-                    "course_name": "$course_name"
-                },
-                "e_count": {
-                    "$sum": {
-                        "$cond": [{"$eq": ["$e", 1]}, 1, 0]
-                    }
-                },
-                "p_count": {
-                    "$sum": {
-                        "$cond": [{"$eq": ["$p", 1]}, 1, 0]
-                    }
-                },
-                "r_count": {
-                    "$sum": {
-                        "$cond": [{"$eq": ["$r", 1]}, 1, 0]
+        # Define the start and end of the current month
+        start_of_month = f"{year}-{month:02d}-01"  # Starting from the 1st of the month
+        end_of_month = f"{year}-{month:02d}-{calendar.monthrange(year, month)[1]}"  # Ending on the last day of the month
+
+        # List of courses and sources for which you want the report
+        course_list = ["O level", "DCAC", "DCA", "ADCA", "New Tech", "Short Term", "Internship"]
+        source_list = ["friends", "hoardings", "website"]
+
+        # Aggregation pipeline for courses (count of e, p, r)
+        course_pipeline = [
+            {
+                "$match": {
+                    "date_of_enquiry": {"$gte": start_of_month, "$lte": end_of_month}
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "date_of_enquiry": "$date_of_enquiry",  # Keep date as string
+                        "course_name": {
+                            "$cond": [
+                                {"$in": ["$course_name", course_list]},
+                                "$course_name",
+                                "Others"
+                            ]
+                        }
+                    },
+                    "e_count": {
+                        "$sum": {
+                            "$cond": [{"$eq": ["$e", "1"]}, 1, 0]  # Check e as string
+                        }
+                    },
+                    "p_count": {
+                        "$sum": {
+                            "$cond": [{"$eq": ["$p", "1"]}, 1, 0]  # Check p as string
+                        }
+                    },
+                    "r_count": {
+                        "$sum": {
+                            "$cond": [{"$eq": ["$r", "1"]}, 1, 0]  # Check r as string
+                        }
                     }
                 }
-            }
-        },
-        {
-            "$group": {
-                "_id": "$_id.date_of_enquiry",
-                "courses": {
-                    "$push": {
-                        "course_name": "$_id.course_name",
-                        "e_count": "$e_count",
-                        "p_count": "$p_count",
-                        "r_count": "$r_count"
-                    }
+            },
+            {
+                "$sort": {
+                    "_id": 1  # Sort by date_of_enquiry
                 }
             }
-        },
-        {
-            "$sort": {
-                "_id": 1  # Sort by date_of_enquiry
+        ]
+
+        # Aggregation pipeline for sources (count of e)
+        source_pipeline = [
+            {
+                "$match": {
+                    "date_of_enquiry": {"$gte": start_of_month, "$lte": end_of_month}
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "date_of_enquiry": "$date_of_enquiry",  # Keep date as string
+                        "source": {
+                            "$cond": [
+                                {"$in": ["$source", source_list]},
+                                "$source",
+                                "Others"
+                            ]
+                        }
+                    },
+                    "e_count": {
+                        "$sum": {
+                            "$cond": [{"$eq": ["$e", "1"]}, 1, 0]  # Check e as string
+                        }
+                    }
+                }
+            },
+            {
+                "$sort": {
+                    "_id": 1  # Sort by date_of_enquiry
+                }
             }
-        }
-    ]
+        ]
 
-    # Run the aggregation query
-    monthly_report = collection.aggregate(pipeline)
+        # Run the aggregation queries
+        monthly_course_report = list(collection.aggregate(course_pipeline))
+        monthly_source_report = list(collection.aggregate(source_pipeline))
 
-    # Print the results (optional)
-    for day_report in monthly_report:
-        print(day_report)
-    return render_template('monthlyreport.html')
+        # Create a list of all dates in the current month
+        all_dates = [
+            (datetime(year, month, day).strftime("%Y-%m-%d"))  # date
+            for day in range(1, calendar.monthrange(year, month)[1] + 1)
+        ]
+
+        # Initialize the final report structure
+        report_with_zero_counts = []
+
+        for date_str in all_dates:
+            # Initialize counts
+            total_e = 0
+            total_p = 0
+            total_r = 0
+            
+            # Initialize course counts with zeros
+            course_counts = {course: {"e_count": 0, "p_count": 0, "r_count": 0} for course in course_list}
+            course_counts["Others"] = {"e_count": 0, "p_count": 0, "r_count": 0}  # Add "Others" for courses
+
+            # Initialize source counts with zeros
+            source_counts = {source: 0 for source in source_list}
+            source_counts["Others"] = 0  # Initialize the 'Others' source count
+
+            # Get course counts for the date
+            day_course_report = [item for item in monthly_course_report if item["_id"]["date_of_enquiry"] == date_str]
+            
+            for report in day_course_report:
+                course_name = report["_id"]["course_name"]
+                course_counts[course_name]["e_count"] = report["e_count"]
+                course_counts[course_name]["p_count"] = report["p_count"]
+                course_counts[course_name]["r_count"] = report["r_count"]
+                total_e += report["e_count"]
+                total_p += report["p_count"]
+                total_r += report["r_count"]
+
+            # Get source counts for the date
+            day_source_report = [item for item in monthly_source_report if item["_id"]["date_of_enquiry"] == date_str]
+            
+            for report in day_source_report:
+                source_name = report["_id"]["source"]
+                source_counts[source_name] = report["e_count"]
+
+            # Prepare the final structure for this date
+            report_with_zero_counts.append({
+                "date_of_enquiry": date_str,
+                "courses": course_counts,
+                "total_e": total_e,
+                "total_p": total_p,
+                "total_r": total_r,
+                "sources": source_counts
+            })
+
+        course_totals, source_totals = calculate_column_totals(report_with_zero_counts)
+        print("Course Totals:", course_totals)
+        print("Source Totals:", source_totals)
+        return render_template('monthlyreport.html', report=report_with_zero_counts, course_totals=course_totals, source_totals=source_totals)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return "An error occurred"
 
 
 @app.route('/yearlyreport')
@@ -703,9 +780,9 @@ def deleteEnquiry():
         data = request.json
         record_id = data.get('id')
         collection = mongo.db["contacts"]
-        result = collection.delete_one({'_id': ObjectId(record_id)})
+        result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': {'r': "2"}})
 
-        if result.deleted_count > 0:
+        if result.modified_count > 0:
             return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
         else:
             print(f"Error no record")
@@ -807,6 +884,48 @@ def find_prospectus():
     query = {"p": "1", "r" : "0"}
     total_prospectus = collection.find(query).sort("follow_up_status.date", 1)
     return list(total_prospectus)
+
+def calculate_column_totals(monthly_report):
+    # Initialize totals dictionary for each course
+    course_totals = {
+        "O level": {"e_count": 0, "p_count": 0, "r_count": 0},
+        "DCAC": {"e_count": 0, "p_count": 0, "r_count": 0},
+        "ADCA": {"e_count": 0, "p_count": 0, "r_count": 0},
+        "DCA": {"e_count": 0, "p_count": 0, "r_count": 0},
+        "Internship": {"e_count": 0, "p_count": 0, "r_count": 0},
+        "New Tech": {"e_count": 0, "p_count": 0, "r_count": 0},
+        "Short Term": {"e_count": 0, "p_count": 0, "r_count": 0},
+        "Others": {"e_count": 0, "p_count": 0, "r_count": 0},
+        "Total": {"e_count": 0, "p_count": 0, "r_count": 0}
+    }
+
+    # Initialize totals for sources
+    source_totals = {
+        "friends": 0,
+        "hoardings": 0,
+        "website": 0,
+        "Others": 0
+    }
+
+    # Iterate over each day report in the monthly report
+    for day_report in monthly_report:
+        # Calculate course totals
+        for course, counts in day_report['courses'].items():
+            course_totals[course]["e_count"] += counts.get("e_count", 0)
+            course_totals[course]["p_count"] += counts.get("p_count", 0)
+            course_totals[course]["r_count"] += counts.get("r_count", 0)
+
+        # Add totals to the overall totals
+        course_totals["Total"]["e_count"] += day_report.get("total_e", 0)
+        course_totals["Total"]["p_count"] += day_report.get("total_p", 0)
+        course_totals["Total"]["r_count"] += day_report.get("total_r", 0)
+
+        # Add source counts from the report
+        for source, count in day_report['sources'].items():
+            source_totals[source] += count
+
+    return course_totals, source_totals
+
 
 if __name__ == '__main__':
     app.run(debug=True)

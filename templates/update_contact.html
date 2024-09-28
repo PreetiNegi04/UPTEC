@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Fees</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link  rel ="stylesheet" href="static\contactcss.css" >
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+   
 
     
 </head>
@@ -81,7 +82,7 @@
                     <div class="form-row mb-4">
                         <div class="col">
                             <h4>Objective for doing this programme:</h4>
-                            <input type = "text" id = "objective" name = "objective" value = "{{document['objectives']}}" readonly>
+                            <input type = "text" id = "objective" name = "objective" value = "{{document.objectives | join(', ')}}" readonly>
                         </div>
                     </div>
 
@@ -89,7 +90,7 @@
                     <div class="form-row mb-4">
                         <div class="col">
                             <h4>How did you come to know about UPTEC?</h4>
-                            <input type = "text" name = "source" id = "source" value="{{document['source']}}" readonly>
+                            <input type = "text" name = "source" id = "source" value="{{ document.source |join(', ')}}" readonly>
                         </div>
                     </div>
 

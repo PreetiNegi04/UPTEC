@@ -200,61 +200,117 @@
                 </tr>
             </thead>
             <tbody id="report-body">
-                <!-- Rows will be generated here by JavaScript -->
+                {% for day_report in report %}
+                <tr>
+                    <td>{{ day_report['date_of_enquiry'] }}</td>
+                    <td class="E">{{ day_report['courses']['ADCA']['e_count'] }}</td>
+                    <td class="P">{{ day_report['courses']['ADCA']['p_count'] }}</td>
+                    <td class="R">{{ day_report['courses']['ADCA']['r_count'] }}</td>
+                    <td class="U"></td>
+
+                    <td class="E">{{ day_report['courses']['DCA']['e_count'] }}</td>
+                    <td class="P">{{ day_report['courses']['DCA']['p_count'] }}</td>
+                    <td class="R">{{ day_report['courses']['DCA']['r_count'] }}</td>
+                    <td class="U"></td>
+
+                    <td class="E">{{ day_report['courses']['O level']['e_count'] }}</td>
+                    <td class="P">{{ day_report['courses']['O level']['p_count'] }}</td>
+                    <td class="R">{{ day_report['courses']['O level']['r_count'] }}</td>
+                    <td class="U"></td>
+
+                    <td class="E">{{ day_report['courses']['DCAC']['e_count'] }}</td>
+                    <td class="P">{{ day_report['courses']['DCAC']['p_count'] }}</td>
+                    <td class="R">{{ day_report['courses']['DCAC']['r_count'] }}</td>
+                    <td class="U"></td>
+
+                    <td class="E">{{ day_report['courses']['Internship']['e_count'] }}</td>
+                    <td class="P">{{ day_report['courses']['Internship']['p_count'] }}</td>
+                    <td class="R">{{ day_report['courses']['Internship']['r_count'] }}</td>
+                    <td class="U"></td>
+
+                    <td class="E">{{ day_report['courses']['New Tech']['e_count'] }}</td>
+                    <td class="P">{{ day_report['courses']['New Tech']['p_count'] }}</td>
+                    <td class="R">{{ day_report['courses']['New Tech']['r_count'] }}</td>
+                    <td class="U"></td>
+
+                    <td class="E">{{ day_report['courses']['Short Term']['e_count'] }}</td>
+                    <td class="P">{{ day_report['courses']['Short Term']['p_count'] }}</td>
+                    <td class="R">{{ day_report['courses']['Short Term']['r_count'] }}</td>
+                    <td class="U"></td>
+
+                    <td class="E">{{ day_report['courses']['Others']['e_count'] }}</td>
+                    <td class="P">{{ day_report['courses']['Others']['p_count'] }}</td>
+                    <td class="R">{{ day_report['courses']['Others']['r_count'] }}</td>
+                    <td class="U"></td>
+
+                    <td class="E">{{ day_report['total_e']}}</td>
+                    <td class="P">{{ day_report['total_p'] }}</td>
+                    <td class="U"></td>
+                    <td class="R">{{ day_report['total_r'] }}</td>
+                    <td class="TR">{{ day_report['total_tr'] }}</td>
+
+                    <td>{{ day_report['sources']['friends'] }}</td>
+                    <td>{{ day_report['sources']['hoardings'] }}</td>
+                    <td>{{ day_report['sources']['website'] }}</td>
+                    <td>{{ day_report['sources']['Others'] }}</td>
+
+
+                </tr>
+                {% endfor %}
             </tbody>
             <tfoot>
                 <tr class="total-column">
                     <td>Total</td>
-                    <td id="total-adca-e">0</td>
-                    <td id="total-adca-p">0</td>
-                    <td id="total-adca-r">0</td>
-                    <td id="total-adca-u">0</td>
+                    <td id="total-adca-e">{{course_totals['ADCA']['e_count']}}</td>
+                    <td id="total-adca-p">{{course_totals['ADCA']['p_count']}}</td>
+                    <td id="total-adca-r">{{course_totals['ADCA']['r_count']}}</td>
+                    <td id="total-adca-u"></td>
 
-                    <td id="total-o-level-e">0</td>
-                    <td id="total-o-level-p">0</td>
-                    <td id="total-o-level-r">0</td>
-                    <td id="total-o-level-u">0</td>
+                    <td id="total-adca-e">{{course_totals['DCA']['e_count']}}</td>
+                    <td id="total-adca-p">{{course_totals['DCA']['p_count']}}</td>
+                    <td id="total-adca-r">{{course_totals['DCA']['r_count']}}</td>
+                    <td id="total-adca-u"></td>
 
-                    <td id="total-dcac-e">0</td>
-                    <td id="total-dcac-p">0</td>
-                    <td id="total-dcac-r">0</td>
-                    <td id="total-dcac-u">0</td>
+                    <td id="total-adca-e">{{course_totals['O level']['e_count']}}</td>
+                    <td id="total-adca-p">{{course_totals['O level']['p_count']}}</td>
+                    <td id="total-adca-r">{{course_totals['O level']['r_count']}}</td>
+                    <td id="total-adca-u"></td>
 
-                    <td id="total-bca-e">0</td>
-                    <td id="total-bca-p">0</td>
-                    <td id="total-bca-r">0</td>
-                    <td id="total-bca-u">0</td>
+                    <td id="total-adca-e">{{course_totals['DCAC']['e_count']}}</td>
+                    <td id="total-adca-p">{{course_totals['DCAC']['p_count']}}</td>
+                    <td id="total-adca-r">{{course_totals['DCAC']['r_count']}}</td>
+                    <td id="total-adca-u"></td>
 
-                    <td id="total-ic-e">0</td>
-                    <td id="total-ic-p">0</td>
-                    <td id="total-ic-r">0</td>
-                    <td id="total-ic-u">0</td>
+                    <td id="total-adca-e">{{course_totals['Internship']['e_count']}}</td>
+                    <td id="total-adca-p">{{course_totals['Internship']['p_count']}}</td>
+                    <td id="total-adca-r">{{course_totals['Internship']['r_count']}}</td>
+                    <td id="total-adca-u"></td>
 
-                    <td id="total-internship-e">0</td>
-                    <td id="total-internship-p">0</td>
-                    <td id="total-internship-r">0</td>
-                    <td id="total-internship-u">0</td>
+                    <td id="total-adca-e">{{course_totals['New Tech']['e_count']}}</td>
+                    <td id="total-adca-p">{{course_totals['New Tech']['p_count']}}</td>
+                    <td id="total-adca-r">{{course_totals['New Tech']['r_count']}}</td>
+                    <td id="total-adca-u"></td>
 
-                    <td id="total-new-tech-e">0</td>
-                    <td id="total-new-tech-p">0</td>
-                    <td id="total-new-tech-r">0</td>
-                    <td id="total-new-tech-u">0</td>
+                    <td id="total-adca-e">{{course_totals['Short Term']['e_count']}}</td>
+                    <td id="total-adca-p">{{course_totals['Short Term']['p_count']}}</td>
+                    <td id="total-adca-r">{{course_totals['Short Term']['r_count']}}</td>
+                    <td id="total-adca-u"></td>
 
-                    <td id="total-st-e">0</td>
-                    <td id="total-st-p">0</td>
-                    <td id="total-st-r">0</td>
-                    <td id="total-st-u">0</td>
+                    <td id="total-adca-e">{{course_totals['Others']['e_count']}}</td>
+                    <td id="total-adca-p">{{course_totals['Others']['p_count']}}</td>
+                    <td id="total-adca-r">{{course_totals['Others']['r_count']}}</td>
+                    <td id="total-adca-u"></td>
 
-                    <td id="total-total-e">0</td>
-                    <td id="total-total-p">0</td>
-                    <td id="total-total-u">0</td>
-                    <td id="total-total-r">0</td>
-                    <td id="total-total-tr">0</td>
+                    <td id="total-adca-e">{{course_totals['Total']['e_count']}}</td>
+                    <td id="total-adca-p">{{course_totals['Total']['p_count']}}</td>
+                    <td id="total-adca-u"></td>
+                    <td id="total-adca-r">{{course_totals['Total']['r_count']}}</td>
+                    <td id="total-adca-u"></td>
 
-                    <td id="media-friends">0</td>
-                    <td id="media-hoarding">0</td>
-                    <td id="media-website">0</td>
-                    <td id="media-others">0</td>
+                    <td id="media-friends">{{source_totals['friends']}}</td>
+                    <td id="media-hoarding">{{source_totals['hoardings']}}</td>
+                    <td id="media-website">{{source_totals['website']}}</td>
+                    <td id="media-others">{{source_totals['Others']}}</td>
                 </tr>
             </tfoot>
         </table>
@@ -275,85 +331,6 @@
     </div>
 
     <script>
-        function generateTableForMonth() {
-            const tableBody = document.getElementById('report-body');
-            const now = new Date();
-            const month = now.getMonth();
-            const year = now.getFullYear();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            let rows = '';
-
-            document.getElementById('month-year').textContent = now.toLocaleString('default', { month: 'long', year: 'numeric' });
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, month, day);
-                const dayOfWeek = date.getDay();
-                const isSunday = dayOfWeek === 0; // 0 is Sunday
-
-                const rowClass = isSunday ? 'sunday-row' : ''; // Apply the Sunday row class if it's Sunday
-
-                rows += `
-                    <tr class="${rowClass}">
-                        <td>${day}</td>
-                       
-                        <td class="E">0</td>
-                        <td class="P">0</td>
-                        <td class="R">0</td>
-                        <td class="U">0</td>
-
-                        <td class="E">0</td>
-                        <td class="P">0</td>
-                        <td class="R">0</td>
-                        <td class="U">0</td>
-
-                        <td class="E">0</td>
-                        <td class="P">0</td>
-                        <td class="R">0</td>
-                        <td class="U">0</td>
-
-                        <td class="E">0</td>
-                        <td class="P">0</td>
-                        <td class="R">0</td>
-                        <td class="U">0</td>
-
-                        <td class="E">0</td>
-                        <td class="P">0</td>
-                        <td class="R">0</td>
-                        <td class="U">0</td>
-
-                        <td class="E">0</td>
-                        <td class="P">0</td>
-                        <td class="R">0</td>
-                        <td class="U">0</td>
-
-                        <td class="E">0</td>
-                        <td class="P">0</td>
-                        <td class="R">0</td>
-                        <td class="U">0</td>
-
-                        <td class="E">0</td>
-                        <td class="P">0</td>
-                        <td class="R">0</td>
-                        <td class="U">0</td>
-
-                        <td class="T">0</td>
-                        <td class="T">0</td>
-                      
-                        <td class="T">0</td>
-                        <td class="T">0</td>
-                        <td class="T">0</td>
-                        
-                        <td class="O">0</td>
-                        <td class="O">0</td>
-                        <td class="O">0</td>
-                        <td class="O">0</td>
-                        
-                    </tr>
-                `;
-            }
-
-            tableBody.innerHTML = rows;
-        }
         document.querySelector('.download-menu-icon').addEventListener('click', function() {
         const menu = document.querySelector('.download-menu');
         menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
