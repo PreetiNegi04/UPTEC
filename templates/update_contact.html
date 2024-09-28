@@ -81,7 +81,7 @@
                     <div class="form-row mb-4">
                         <div class="col">
                             <h4>Objective for doing this programme:</h4>
-                            <input type = "text" id = "objective" name = "objective" value = "{{document['objectives']}}" readonly>
+                            <input type = "text" id = "objective" name = "objective" value = "{{document.objectives | join(', ')}}" readonly>
                         </div>
                     </div>
 
@@ -89,7 +89,7 @@
                     <div class="form-row mb-4">
                         <div class="col">
                             <h4>How did you come to know about UPTEC?</h4>
-                            <input type = "text" name = "source" id = "source" value="{{document['source']}}" readonly>
+                            <input type = "text" name = "source" id = "source" value="{{ document.source |join(', ')}}" readonly>
                         </div>
                     </div>
 

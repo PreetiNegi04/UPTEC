@@ -688,9 +688,9 @@ def deleteEnquiry():
         data = request.json
         record_id = data.get('id')
         collection = mongo.db["contacts"]
-        result = collection.delete_one({'_id': ObjectId(record_id)})
+        result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': {'r': "2"}})
 
-        if result.deleted_count > 0:
+        if result.modified_count > 0:
             return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
         else:
             print(f"Error no record")
