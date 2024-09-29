@@ -255,99 +255,122 @@ def monthlyreport():
 def yearlyreport():
     collection = mongo.db["contacts"]
 
-    # Define the start and end of the year
-    start_of_year = datetime(datetime.today().year, 1, 1)
-    end_of_year = datetime(datetime.today().year + 1, 1, 1)
+    # Define the current year and next year for the fiscal period
     current_year = datetime.today().year
-     # List of months (1 to 12)
-    months_list = list(range(1, 13))
-    # List of courses and sources for which you want the report
+    next_year = current_year + 1
+
+    # List of months for the report
+    months_list = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3]
+
+    # List of courses for which you want the report
     course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term", "Others"]
-    source_list = ["friends", "hoardings", "website"]
 
-    # Aggregation pipeline
-    pipeline = [
-        {
-            "$match": {
-                "date_of_enquiry": {"$gte": start_of_year.strftime("%Y-%m-%d"), "$lt": end_of_year.strftime("%Y-%m-%d")}
-            }
-        },
-        {
-            "$project": {
-                # Extract the month from date_of_enquiry
-                "month": {
-                    "$month": {
-                        "$dateFromString": {
-                            "dateString": "$date_of_enquiry",
-                            "format": "%Y-%m-%d"
+    def generate_report_for_period(start_date, end_date):
+        pipeline = [
+            {
+                "$match": {
+                    "date_of_enquiry": {
+                        "$gte": start_date.strftime("%Y-%m-%d"),
+                        "$lt": end_date.strftime("%Y-%m-%d")
+                    }
+                }
+            },
+            {
+                "$project": {
+                    "actual_month": {
+                        "$month": {
+                            "$dateFromString": {
+                                "dateString": "$date_of_enquiry",
+                                "format": "%Y-%m-%d",
+                                "onError": None,
+                                "onNull": None
+                            }
                         }
-                    }
-                },
-                "course_name": {
-                    "$cond": [
-                        {"$in": ["$course_name", course_list[:-1]]},
-                        "$course_name",
-                        "Others"
-                    ]
-                },
-                "e": {"$toInt": "$e"},
-                "p": {"$toInt": "$p"},
-                "r": {"$toInt": "$r"}
+                    },
+                    "course_name": {
+                        "$cond": [
+                            {"$in": ["$course_name", course_list[:-1]]},
+                            "$course_name",
+                            "Others"
+                        ]
+                    },
+                    "e": {"$toInt": "$e"},
+                    "p": {"$toInt": "$p"},
+                    "r": {"$toInt": "$r"}
+                }
+            },
+            {
+                "$match": {
+                    "actual_month": {"$ne": None}
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "month": "$actual_month",
+                        "course_name": "$course_name"
+                    },
+                    "e_count": {"$sum": {"$cond": [{"$eq": ["$e", 1]}, 1, 0]}},
+                    "p_count": {"$sum": {"$cond": [{"$eq": ["$p", 1]}, 1, 0]}},
+                    "r_count": {"$sum": {"$sum": {"$cond": [{"$eq": ["$r", 1]}, 1, 0]}}}
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$_id.month",
+                    "courses": {
+                        "$push": {
+                            "course_name": "$_id.course_name",
+                            "e_count": "$e_count",
+                            "p_count": "$p_count",
+                            "r_count": "$r_count"
+                        }
+                    },
+                    "total_e": {"$sum": "$e_count"},
+                    "total_p": {"$sum": "$p_count"},
+                    "total_r": {"$sum": "$r_count"}
+                }
+            },
+            {
+                "$sort": {"_id": 1}
             }
-        },
-        {
-            "$group": {
-                "_id": {
-                    "month": "$month",
-                    "course_name": "$course_name"
-                },
-                "e_count": {"$sum": {"$cond": [{"$eq": ["$e", 1]}, 1, 0]}},
-                "p_count": {"$sum": {"$cond": [{"$eq": ["$p", 1]}, 1, 0]}},
-                "r_count": {"$sum": {"$cond": [{"$eq": ["$r", 1]}, 1, 0]}}
-            }
-        },
-        {
-            "$group": {
-                "_id": "$_id.month",
-                "courses": {
-                    "$push": {
-                        "course_name": "$_id.course_name",
-                        "e_count": "$e_count",
-                        "p_count": "$p_count",
-                        "r_count": "$r_count"
-                    }
-                },
-                "total_e": {"$sum": "$e_count"},
-                "total_p": {"$sum": "$p_count"},
-                "total_r": {"$sum": "$r_count"}
-            }
-        },
-        {
-            "$sort": {"_id": 1}  # Sort by month
-        }
-    ]
+        ]
 
-    # Run the aggregation query
-    yearly_report_from_db = list(collection.aggregate(pipeline))
+        return list(collection.aggregate(pipeline))
 
-    # Create a default structure for all months with zero counts for all courses
+    # Generate report for April to December (current year)
+    start_april = datetime(current_year, 4, 1)
+    end_december = datetime(current_year, 12, 31)
+    april_to_dec_report = generate_report_for_period(start_april, end_december)
+
+    # Generate report for January to March (next year)
+    start_january = datetime(next_year, 1, 1)
+    end_march = datetime(next_year, 3, 31)
+    jan_to_mar_report = generate_report_for_period(start_january, end_march)
+
+    # Create a default structure for all months (April to March) with zero counts for all courses
     yearly_report = []
     for month in months_list:
         courses_with_zero_counts = [
             {"course_name": course, "e_count": 0, "p_count": 0, "r_count": 0} for course in course_list
         ]
+        # Add year to each month's report
+        report_year = current_year if month >= 4 else next_year
         yearly_report.append({
             "month": month,
+            "year": report_year,  # Add year field
             "courses": courses_with_zero_counts,
             "total_e": 0,
             "total_p": 0,
             "total_r": 0
         })
 
-    # Merge database results into the default yearly report structure
-    for db_report in yearly_report_from_db:
-        month_index = db_report["_id"] - 1  # Months in the database are 1-based, list is 0-based
-        # Update counts for the courses in the corresponding month
+    # Merge April to December report into the default structure
+    for db_report in april_to_dec_report:
+        db_month = db_report["_id"]
+        fiscal_month = db_month - 4 + 1  # Map April-Dec to 1-9
+        month_index = fiscal_month - 1  # Convert to 0-based index
+        
         for db_course in db_report["courses"]:
             for report_course in yearly_report[month_index]["courses"]:
                 if report_course["course_name"] == db_course["course_name"]:
@@ -359,12 +382,27 @@ def yearlyreport():
         yearly_report[month_index]["total_p"] = db_report["total_p"]
         yearly_report[month_index]["total_r"] = db_report["total_r"]
 
+    # Merge January to March report into the default structure
+    for db_report in jan_to_mar_report:
+        db_month = db_report["_id"]
+        fiscal_month = db_month + 9  # Map Jan-Mar to 10-12
+        month_index = fiscal_month - 1  # Convert to 0-based index
+        
+        for db_course in db_report["courses"]:
+            for report_course in yearly_report[month_index]["courses"]:
+                if report_course["course_name"] == db_course["course_name"]:
+                    report_course["e_count"] = db_course["e_count"]
+                    report_course["p_count"] = db_course["p_count"]
+                    report_course["r_count"] = db_course["r_count"]
+
+        yearly_report[month_index]["total_e"] = db_report["total_e"]
+        yearly_report[month_index]["total_p"] = db_report["total_p"]
+        yearly_report[month_index]["total_r"] = db_report["total_r"]
+
+    # Calculate total summary (assumed function to calculate total)
     total_summary = calculate_total_values(yearly_report)
-
-    print(total_summary)
     # Return the report
-    return render_template('yearlyreport.html', report=yearly_report, year=current_year, total = total_summary)
-
+    return render_template('yearlyreport.html', report=yearly_report, year=current_year, total=total_summary)
 
 
 

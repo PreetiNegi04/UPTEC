@@ -149,11 +149,11 @@
                 </tr>
             </thead>
             <tbody id="report-body">
-                {% set months = ["April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February", "March"] %}
+                {% set months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
                 {% for r in report %}
                 <tr>
                     <td>{{ months[r['month'] - 1] }}</td> <!-- Replace month number with month name -->
-                    <td>{{ year }} (T)</td>
+                    <td>{{ r['year'] }} (T)</td>
                     {% for courses in r['courses'] %}
                     <td>{{ courses['e_count'] }}</td><td>{{ courses['p_count'] }}</td><td>{{ courses['r_count'] }}</td><td></td>
                     {% endfor %}
@@ -166,7 +166,7 @@
                 {% endfor %}
                 <tr>
                     <td class="total-col">Total</td>
-                    <td class="total-col">{{ year }} (T)</td>
+                    <td class="total-col">{{ year }} (T) - {{year + 1}} (T)</td>
                     <td class="total-col">{{ total['ADCA']['e'] }}</td>
                     <td class="total-col">{{ total['ADCA']['p'] }}</td>
                     <td class="total-col">{{ total['ADCA']['r'] }}</td>
@@ -233,59 +233,6 @@
 
 
     <script>
-        function generateReport() {
-            const reportBody = document.getElementById('report-body');
-            const reportTitle = document.getElementById('report-title');
-            
-            // Get current year and next year
-            const currentYear = new Date().getFullYear();
-            const startMonth = 3; // April (0 = January, so 3 = April)
-            const endMonth = 2; // March
-            let startYear = currentYear;
-            let endYear = currentYear + 1;
-
-            // Generate report title
-            reportTitle.textContent = `UCC Center EPR Report for ${startYear}-${endYear}`;
-
-            // Month names
-            const months = [
-                "January", "February", "March", "April", "May", "June", "July", "August", 
-                "September", "October", "November", "December"
-            ];
-
-            // Create rows for each month from April to next year's March
-            for (let i = startMonth; i <= 11; i++) {
-                createTableRow(reportBody, months[i], `${startYear}`);
-            }
-            for (let i = 0; i <= endMonth; i++) {
-                createTableRow(reportBody, months[i], `${endYear}`);
-            }
-
-            // Create total row
-            createTotalRow(reportBody, `${startYear}-${endYear}`);
-        }
-
-        function createTableRow(reportBody, month, year) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${month}</td>
-                <td>${year}</td>
-                
-            `;
-            reportBody.appendChild(row);
-        }
-
-        function createTotalRow(reportBody, yearRange) {
-            const row = document.createElement('tr');
-            row.classList.add('total-row');
-            row.innerHTML = `
-                <td class="total-col">Total</td>
-                <td class="total-col">${yearRange}</td>
-                
-            `;
-            reportBody.appendChild(row);
-        }
-
         document.querySelector('.download-menu-icon').addEventListener('click', function() {
         const menu = document.querySelector('.download-menu');
         menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
