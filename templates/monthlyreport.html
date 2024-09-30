@@ -303,9 +303,9 @@
 
                     <td id="total-adca-e">{{course_totals['Total']['e_count']}}</td>
                     <td id="total-adca-p">{{course_totals['Total']['p_count']}}</td>
-                    <td id="total-adca-u"></td>
+                    <td id="total-adca-u">{{course_totals['Total']['u_count']}}</td>
                     <td id="total-adca-r">{{course_totals['Total']['r_count']}}</td>
-                    <td id="total-adca-u"></td>
+                    <td id="total-adca-tr">{{course_totals['Total']['tr_count']}}</td>
 
                     <td id="media-friends">{{source_totals['friends']}}</td>
                     <td id="media-hoarding">{{source_totals['hoarding']}}</td>
@@ -434,7 +434,26 @@ function generateCSV() {
         });
     }
 
-        generateTableForMonth();
+    generateTableForMonth();
+
+    
+    function calculateTotalTR() {
+   
+    const totalU = parseInt(document.querySelector('#total-adca-u').innerText || 0);
+    const totalR = parseInt(document.querySelector('#total-adca-r').innerText || 0);
+    
+   
+    const totalTR = totalU + totalR;
+
+    
+    document.querySelector('#total-adca-tr').innerText = totalTR;
+}
+
+// Ensure the function runs to update the TR column
+calculateTotalTR();
+
+
+
     </script>
 </body>
 </html>

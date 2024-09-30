@@ -303,7 +303,6 @@ $(document).ready(function() {
             }
         });
     });
-
     $('.deleteButton').click(function() {
         if (confirm('Are you sure you want to delete this record?')) {
             var row = $(this).closest('tr');
@@ -311,7 +310,7 @@ $(document).ready(function() {
 
             $.ajax({
                 type: 'POST',
-                url: '/enquiry/delete',
+                url: '/delete',
                 contentType: 'application/json',
                 data: JSON.stringify({ id: id }),
                 success: function(response) {
@@ -324,6 +323,7 @@ $(document).ready(function() {
                 }
             });
         }
+  
     });
 });
 // Function to handle edit button click
@@ -366,7 +366,6 @@ function deleteRow(deleteButton) {
         row.remove(); // Or add your delete logic here
     }
 }
-
 </script>
 
 </body>
