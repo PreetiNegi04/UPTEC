@@ -112,6 +112,20 @@
             background-color: #0056b3;
         }
 
+        .upgradeButton {
+            background-color:darkblue;
+            color: white;
+            border: none;
+            
+            cursor: pointer;
+            
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .upgradeButton:hover {
+            background-color: #9299f3;
+        }
+
         input:disabled {
             background-color: #f0f0f0;
             border: 1px solid #ddd;
@@ -215,6 +229,7 @@
                 <td class="action-buttons">
                     <button class="editButton" onclick="editRow(this)">Edit</button>
                     <button class="saveButton" style="display:none;" onclick="saveRow(this)">Save</button>
+                    <button class="upgradeButton" onclick="upgradeRow(this)">Upgrade</button>
                     <button class="deleteButton" onclick="deleteRow(this)">Delete</button>
                 </td>
             </tr>
@@ -238,7 +253,26 @@ $(document).ready(function() {
         "autoWidth": false
     });
 
-    // Disable inputs and buttons in each row
+    $('#dataTable input').prop('disabled', true);
+
+// Function to handle upgrade button click
+function upgradeRow(upgradeButton) {
+        var row = $(upgradeButton).closest('tr');
+
+        // Enable only the course-related fields and the fees field
+        row.find('.course_name, .new_tech_course_name, .short_term_course_name, .fees').prop('disabled', false);
+
+        // Disable all buttons except the Save button in the current row
+        row.find('.editButton, .deleteButton, .upgradeButton').prop('disabled', true);
+
+        // Show and enable the Save button
+        row.find('.saveButton').show().prop('disabled', false);
+    }
+
+// Attach upgradeRow function to the upgrade buttons
+
+
+
     
     // Custom search function for the third column (index 2)
     $('#searchBar').on('keyup', function() {
@@ -274,13 +308,14 @@ $(document).ready(function() {
                 name: row.find('.name').val(),
                 contact_number: row.find('.contact_number').val(),
                 type_of_enquiry: row.find('.type_of_enquiry').val(),
-                course_to_enquire: row.find('.course_to_enquire').val(),
+                course_name: row.find('.course_name').val(),
+                new_tech_course_name: row.find('.new_tech_course_name').val(),
+                short_term_course_name: row.find('.short_term_course_name').val(),
+                fees: row.find('.fees').val(),
                 follow_up_status: {
-                    date: row.find('.date').val(),
-                    reason: row.find('.reason').val()
-                },
-                enquiry_status: row.find('.enquiry_status').val(),
-                remark: row.find('.remark').val()
+                    date: row.find('.follow_up_date').val(),
+                    reason: row.find('.follow_up_reason').val()
+                }
             }
         };
 
@@ -294,12 +329,19 @@ $(document).ready(function() {
                 row.find('input').prop('disabled', true);
                 row.find('.saveButton').prop('disabled', true);
                 row.find('.editButton').prop('disabled', false);
+                row.find('.upgradeButton').prop('disabled', false);
+
             },
             error: function(error) {
                 console.error('Error updating record:', error);
                 alert('Failed to update record. Please try again.');
             }
         });
+    });
+
+    $(document).on('click', '.upgradeButton', function() {
+        upgradeRow(this);
+        
     });
 
     $('.deleteButton').click(function() {
