@@ -230,6 +230,8 @@
 
 $(document).ready(function() {
 
+    $('#dataTable tbody input').prop('disabled', true);
+
     var table = $('#dataTable').DataTable({
         "pageLength": 10,
         "lengthMenu": [5, 10, 25, 50],
@@ -261,7 +263,7 @@ $(document).ready(function() {
 
     $('.editButton').click(function() {
         var row = $(this).closest('tr');
-        row.find('input').prop('disabled', false);
+        row.find('.contact_number,.whatsapp,.address,.area,.follow_up_status.date,.follow_up_status.reason').prop('disabled', false);
         row.find('.saveButton').prop('disabled', false);
         $(this).prop('disabled', true);  // Disable the Edit button
     });

@@ -622,7 +622,8 @@ def contact():
                     },
                 'register_date': registered_date,
                 'prospectus_date': prospectus_date,
-                'u' : "0"
+                'u' : "0",
+                'upgrade_date':upgrade_date,
                 }
 
             mongo.db.contacts.insert_one(contact_data)
@@ -731,6 +732,96 @@ def save_record():
         print(f"Error updating record: {str(e)}")  # Print the full error message
         return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
 
+"""@app.route('/save_upgrade', methods=['POST'])
+def save_upgrade():
+    try:
+        data = request.json
+        print(f"Upgrade data received: {data}")  # Log the incoming data
+
+        record_id = data.get('id')
+        updated_data = data.get('data')
+
+        # Validate the ObjectId
+        if not ObjectId.is_valid(record_id):
+            print(f"Invalid ObjectId: {record_id}")
+            return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
+
+        # Attempt to update only the course-related fields in the primary collection
+        result = collection.update_one(
+            {'_id': ObjectId(record_id)},
+            {'$set': {
+                'course_name': updated_data.get('course_name'),
+                'new_tech_course_name': updated_data.get('new_tech_course_name'),
+                'short_term_course_name': updated_data.get('short_term_course_name'),
+                'fees': updated_data.get('fees')
+            }}
+        )
+        print(f"Primary upgrade result: {result.raw_result}")  # Log result of primary update
+
+        # Update the secondary collection (if required, same as in save)
+        r = mongo.db.contacts.update_one({"_id": ObjectId(record_id)}, {"$set": {'u': "1"}})
+        print(f"Secondary update result: {r.raw_result}")  # Log result of secondary update
+
+        # Check if any modifications were made
+        if result.modified_count > 0 and r.modified_count > 0:
+            return jsonify({'status': 'success', 'message': 'Course-related data upgraded successfully!'})
+        else:
+            return jsonify({'status': 'success', 'message': 'No changes detected, record already up-to-date.'}), 200
+
+    except Exception as e:
+        print(f"Error upgrading record: {str(e)}")  # Log the error message
+        return jsonify({'status': 'error', 'message': 'Failed to upgrade record: ' + str(e)}), 500"""
+
+
+@app.route('/save_upgrade', methods=['POST'])
+def save_upgrade():
+    try:
+        # Get the JSON data from the request
+        data = request.json
+        contact_id = data['id']
+        updated_fields = data['data']
+
+        # Step 1: Prepare the update data
+        update_data = {
+            'course_name': updated_fields.get('course_name'),
+            'new_tech_course_name': updated_fields.get('new_tech_course_name'),
+            'short_term_course_name': updated_fields.get('short_term_course_name'),
+            'fees': updated_fields.get('fees'),
+            'u': 1,  # Set 'u' to 1
+            'upgrade_date': datetime.today().strftime("%Y-%m-%d")  # Set the current date
+        }
+
+        # Step 2: Update the contacts collection
+        result_contacts = mongo.db.contacts.update_one(
+            {'_id': ObjectId(contact_id)},
+            {'$set': update_data}
+        )
+
+        # Step 3: Update the form_data collection
+        result_form_data = mongo.db.form_data.update_one(
+            {'_id': ObjectId(contact_id)},
+            {'$set': {
+                'course_name': updated_fields.get('course_name'),
+                'new_tech_course_name': updated_fields.get('new_tech_course_name'),
+                'short_term_course_name': updated_fields.get('short_term_course_name'),
+                'fees': updated_fields.get('fees'),
+            }}
+        )
+
+        # Check if the update was acknowledged for contacts collection
+        if result_contacts.modified_count == 0:
+            return jsonify({'status': 'error', 'message': 'No records updated in contacts collection.'}), 400
+
+        # Check if the update was acknowledged for form_data collection
+        if result_form_data.modified_count == 0:
+            return jsonify({'status': 'error', 'message': 'No records updated in form_data collection.'}), 400
+
+        return jsonify({'status': 'success'}), 200
+
+    except Exception as e:
+        app.logger.error(f"Error during upgrade: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 
 @app.route('/delete', methods=['POST'])
@@ -782,53 +873,7 @@ def save_enquiry():
 
 
 
-    try:
-        data = request.json
-        print(f"Data received: {data}")  # Log the incoming data
-
-        record_id = data.get('id')
-        updated_data = data.get('data')
-
-        # Validate the ObjectId
-        if not ObjectId.is_valid(record_id):
-            print(f"Invalid ObjectId: {record_id}")
-            return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
-
-        # Log the existing record before updating
-        existing_record = collection.find_one({'_id': ObjectId(record_id)})
-        if not existing_record:
-            print(f"No record found with ID: {record_id}")
-            return jsonify({'status': 'error', 'message': 'Record not found'}), 404
-
-        print(f"Existing record before update: {existing_record}")
-
-        # Prepare the update query, ensuring nested fields are updated properly
-        update_query = {'$set': {
-            'name': updated_data['name'],
-            'contact_number': updated_data['contact_number'],
-            'type_of_enquiry': updated_data['type_of_enquiry'],
-            'course_name': updated_data['course_name'],
-            'address': updated_data['address'],
-            'area': updated_data['area'],
-            'qualification': updated_data['qualification'],
-            'college_name': updated_data['college_name'],
-            'follow_up_status.date': updated_data['follow_up_status']['date'],
-            'follow_up_status.reason': updated_data['follow_up_status']['reason']
-        }}
-
-        # Attempt to update the primary collection
-        result = mongo.db.contacts.update_one({'_id': ObjectId(record_id)}, update_query)
-        print(f"Primary update result: {result.raw_result}")  # Log result of primary update
-
-        if result.modified_count > 0:
-            return jsonify({'status': 'success', 'message': 'Record updated successfully!'}), 200
-        else:
-            return jsonify({'status': 'success', 'message': 'Record was already up-to-date.'}), 200
-
-    except Exception as e:
-        print(f"Error updating record: {str(e)}")  # Print the full error message
-        return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
-
+    
 
 @app.route('/enquiry/delete', methods=['POST'])
 def deleteEnquiry():
