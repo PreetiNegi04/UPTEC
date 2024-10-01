@@ -173,10 +173,12 @@
     </table>
     <div class="source-section">
         <h3>Source</h3>
-        {% for source in sources %}
+        {% for key, value in sources.items() %}
         <div class="source-row">
-            <div>{{source['_id']}}</div>
-            <div>{{source['count']}}</div>
+            
+            <div>{{key}}</div>
+            <div>{{value}}</div>
+            
         </div>
         {% endfor %}
     </div>
