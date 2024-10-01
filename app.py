@@ -118,7 +118,7 @@ def monthlyreport():
             monthly_report.append(mydict)
 
         course_total , source_total = calculate_column_totals(monthly_report)
-        
+
         print(course_total)
         print(source_total)
 
@@ -705,7 +705,6 @@ def save_record():
         print(f"Data received: {data}")  # Log the incoming data
 
         record_id = data.get('id')
-        u = data.get('u')
         updated_data = data.get('data')
 
         # Validate the ObjectId
@@ -718,11 +717,11 @@ def save_record():
         print(f"Primary update result: {result.raw_result}")  # Log result of primary update
 
         # Attempt to update the secondary collection
-        r = mongo.db.contacts.update_one({"_id": ObjectId(record_id)}, {"$set": {'u': u}})
+        r = mongo.db.contacts.update_one({"_id": ObjectId(record_id)}, {"$set": {'u': "1"}})
         print(f"Secondary update result: {r.raw_result}")  # Log result of secondary update
 
         # Check for modifications
-        if result.modified_count > 0 or r.modified_count > 0:
+        if result.modified_count > 0 and r.modified_count > 0:
             return jsonify({'status': 'success', 'message': 'Record updated successfully!'})
         else:
             # If no modifications were made, consider it successful
@@ -759,7 +758,6 @@ def save_enquiry():
         print(f"Data received: {data}")  # Log the incoming data
 
         record_id = data.get('id')
-        u = data.get('u')
         updated_data = data.get('data')
 
         # Validate the ObjectId
@@ -768,12 +766,7 @@ def save_enquiry():
             return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
 
         # Attempt to update the primary collection
-        result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': updated_data})
-        print(f"Primary update result: {result.raw_result}")  # Log result of primary update
-
-        # Attempt to update the secondary collection
-        r = mongo.db.contacts.update_one({"_id": ObjectId(record_id)}, {"$set": {'u': u}})
-        print(f"Secondary update result: {r.raw_result}")  # Log result of secondary update
+        result = mongo.db.contacts.update_one({'_id': ObjectId(record_id)}, {'$set': updated_data})
 
         # Check for modifications
         if result.modified_count > 0 or r.modified_count > 0:
@@ -824,7 +817,7 @@ def save_enquiry():
         }}
 
         # Attempt to update the primary collection
-        result = collection.update_one({'_id': ObjectId(record_id)}, update_query)
+        result = mongo.db.contacts.update_one({'_id': ObjectId(record_id)}, update_query)
         print(f"Primary update result: {result.raw_result}")  # Log result of primary update
 
         if result.modified_count > 0:
