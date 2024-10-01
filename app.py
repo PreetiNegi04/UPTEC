@@ -817,19 +817,36 @@ def prospectus(id):
 def save_record():
     try:
         data = request.json
+        print(f"Data received: {data}")  # Log the incoming data
+
         record_id = data.get('id')
         u = data.get('u')
         updated_data = data.get('data')
 
+        # Validate the ObjectId
+        if not ObjectId.is_valid(record_id):
+            print(f"Invalid ObjectId: {record_id}")
+            return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
+
+        # Attempt to update the primary collection
         result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': updated_data})
-        r  = mongo.db.contacts.update_one({"_id": ObjectId(record_id)}, {"$set": {'u': u}})
-        if result.modified_count and r.modified_count > 0:
+        print(f"Primary update result: {result.raw_result}")  # Log result of primary update
+
+        # Attempt to update the secondary collection
+        r = mongo.db.contacts.update_one({"_id": ObjectId(record_id)}, {"$set": {'u': u}})
+        print(f"Secondary update result: {r.raw_result}")  # Log result of secondary update
+
+        # Check for modifications
+        if result.modified_count > 0 or r.modified_count > 0:
             return jsonify({'status': 'success', 'message': 'Record updated successfully!'})
         else:
-            return jsonify({'status': 'error', 'message': 'No record was updated'}), 500
+            # If no modifications were made, consider it successful
+            return jsonify({'status': 'success', 'message': 'Record was already up-to-date.'}), 200
+
     except Exception as e:
-        print(f"Error updating record: {e}")
-        return jsonify({'status': 'error', 'message': 'Failed to update record'}), 500
+        print(f"Error updating record: {str(e)}")  # Print the full error message
+        return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
+
 
 
 @app.route('/delete', methods=['POST'])
@@ -849,22 +866,91 @@ def delete_record():
         print(f"Error deleting record: {e}")
         return jsonify({'status': 'error', 'message': 'Failed to delete record'}), 500
 
+
 @app.route('/enquiry/save', methods=['POST'])
 def save_enquiry():
     try:
         data = request.json
-        record_id = data.get('id')
-        updated_data = data.get('data')
-        collection = mongo.db["contacts"]
-        result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': updated_data})
+        print(f"Data received: {data}")  # Log the incoming data
 
-        if result.modified_count > 0:
+        record_id = data.get('id')
+        u = data.get('u')
+        updated_data = data.get('data')
+
+        # Validate the ObjectId
+        if not ObjectId.is_valid(record_id):
+            print(f"Invalid ObjectId: {record_id}")
+            return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
+
+        # Attempt to update the primary collection
+        result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': updated_data})
+        print(f"Primary update result: {result.raw_result}")  # Log result of primary update
+
+        # Attempt to update the secondary collection
+        r = mongo.db.contacts.update_one({"_id": ObjectId(record_id)}, {"$set": {'u': u}})
+        print(f"Secondary update result: {r.raw_result}")  # Log result of secondary update
+
+        # Check for modifications
+        if result.modified_count > 0 or r.modified_count > 0:
             return jsonify({'status': 'success', 'message': 'Record updated successfully!'})
         else:
-            return jsonify({'status': 'error', 'message': 'No record was updated'}), 500
+            # If no modifications were made, consider it successful
+            return jsonify({'status': 'success', 'message': 'Record was already up-to-date.'}), 200
+
     except Exception as e:
-        print(f"Error updating record: {e}")
-        return jsonify({'status': 'error', 'message': 'Failed to update record'}), 500
+        print(f"Error updating record: {str(e)}")  # Print the full error message
+        return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
+
+
+
+
+    try:
+        data = request.json
+        print(f"Data received: {data}")  # Log the incoming data
+
+        record_id = data.get('id')
+        updated_data = data.get('data')
+
+        # Validate the ObjectId
+        if not ObjectId.is_valid(record_id):
+            print(f"Invalid ObjectId: {record_id}")
+            return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
+
+        # Log the existing record before updating
+        existing_record = collection.find_one({'_id': ObjectId(record_id)})
+        if not existing_record:
+            print(f"No record found with ID: {record_id}")
+            return jsonify({'status': 'error', 'message': 'Record not found'}), 404
+
+        print(f"Existing record before update: {existing_record}")
+
+        # Prepare the update query, ensuring nested fields are updated properly
+        update_query = {'$set': {
+            'name': updated_data['name'],
+            'contact_number': updated_data['contact_number'],
+            'type_of_enquiry': updated_data['type_of_enquiry'],
+            'course_name': updated_data['course_name'],
+            'address': updated_data['address'],
+            'area': updated_data['area'],
+            'qualification': updated_data['qualification'],
+            'college_name': updated_data['college_name'],
+            'follow_up_status.date': updated_data['follow_up_status']['date'],
+            'follow_up_status.reason': updated_data['follow_up_status']['reason']
+        }}
+
+        # Attempt to update the primary collection
+        result = collection.update_one({'_id': ObjectId(record_id)}, update_query)
+        print(f"Primary update result: {result.raw_result}")  # Log result of primary update
+
+        if result.modified_count > 0:
+            return jsonify({'status': 'success', 'message': 'Record updated successfully!'}), 200
+        else:
+            return jsonify({'status': 'success', 'message': 'Record was already up-to-date.'}), 200
+
+    except Exception as e:
+        print(f"Error updating record: {str(e)}")  # Print the full error message
+        return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
+
 
 @app.route('/enquiry/delete', methods=['POST'])
 def deleteEnquiry():

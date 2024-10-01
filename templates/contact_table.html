@@ -212,8 +212,8 @@
                 <td><input type="text" class="e" value="{{ doc.e}}"></td>
                 <td><input type="text" class="r" value="{{ doc.r}}"></td>
                 <td><input type="text" class="fees" value="{{ doc.fees}}"></td>
-                <td><input type="date" class="follow_up_status" value="{{ doc.follow_up_status.date}}"></td>
-                <td><input type="text" class="follow_up_status" value="{{ doc.follow_up_status.reason}}"></td>
+                <td><input type="date" class="follow_up_status date" value="{{ doc.follow_up_status.date}}"></td>
+                <td><input type="text" class="follow_up_status reason" value="{{ doc.follow_up_status.reason }}"></td>
                 <td class="action-buttons">
                     <button class="editButton" onclick="editRow(this)">Edit</button>
                     <button class="saveButton" style="display:none;" onclick="saveRow(this)">Save</button>
@@ -276,13 +276,16 @@ $(document).ready(function() {
                 name: row.find('.name').val(),
                 contact_number: row.find('.contact_number').val(),
                 type_of_enquiry: row.find('.type_of_enquiry').val(),
-                course_to_enquire: row.find('.course_to_enquire').val(),
+                course_name: row.find('.course_name').val(),
+                address:row.find('.address').val(),
+                area:row.find('.area').val(),
+                qualification:row.find('.qualification').val(),
+                college_name:row.find('.college_name').val(),
                 follow_up_status: {
-                    date: row.find('.date').val(),
-                    reason: row.find('.reason').val()
+                    date: row.find('.follow_up_status.date').val(),
+                    reason: row.find('.follow_up_status.reason').val()
                 },
-                enquiry_status: row.find('.enquiry_status').val(),
-                remark: row.find('.remark').val()
+                
             }
         };
 

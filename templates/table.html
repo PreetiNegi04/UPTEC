@@ -112,20 +112,6 @@
             background-color: #0056b3;
         }
 
-        .upgradeButton {
-            background-color:darkblue;
-            color: white;
-            border: none;
-            
-            cursor: pointer;
-            
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        .upgradeButton:hover {
-            background-color: #9299f3;
-        }
-
         input:disabled {
             background-color: #f0f0f0;
             border: 1px solid #ddd;
@@ -193,7 +179,6 @@
                 <th>P</th>
                 <th>E</th>
                 <th>R</th>
-                <th>U</th>
                 <th>Fees</th>
                 <th>Follow up date</th>
                 <th>Follow up Reason</th>
@@ -205,7 +190,7 @@
             {% for doc in all_documents %}
             <tr data-id="{{ doc._id }}">
                 
-                <td><input type="date" class="programme" value="{{ doc.date_of_enquiry }}" readonly></td>
+                <td><input type="date" class="date_of_enquiry" value="{{ doc.date_of_enquiry }}" readonly></td>
                 <td><input type="text" class="type_of_enquiry" value="{{ doc.type_of_enquiry }}" readonly></td>
                 <td><input type="text" class="name" value="{{ doc.name }}"></td>
                 <td><input type="text" class="contact_number" value="{{ doc.contact_number }}"></td>
@@ -223,15 +208,13 @@
                 <td><input type="text" class="e" value="{{ doc.e}}" readonly></td>
                 <td><input type="text" class="p" value="{{ doc.p}}" readonly></td>
                 <td><input type="text" class="r" value="{{ doc.r}}" readonly></td>
-                <td><input type="text" class="r" value="0"></td>
                 <td><input type="text" class="fees" value="{{ doc.fees}}"></td>
-                <td><input type="date" class="follow_up_status" value="{{ doc.follow_up_status.date if doc.follow_up_status else '' }}"></td>
-                <td><input type="text" class="follow_up_status" value="{{ doc.follow_up_status.reason if doc.follow_up_status else '' }}"></td>
+                <td><input type="date" class="follow_up_status date" value="{{ doc.follow_up_status.date}}"></td>
+                <td><input type="text" class="follow_up_status reason" value="{{ doc.follow_up_status.reason }}"></td>
 
                 <td class="action-buttons">
                     <button class="editButton" onclick="editRow(this)">Edit</button>
                     <button class="saveButton" style="display:none;" onclick="saveRow(this)">Save</button>
-                    <button class="upgradeButton" onclick="upgradeRow(this)">Upgrade</button>
                     <button class="deleteButton" onclick="deleteRow(this)">Delete</button>
                 </td>
             </tr>
@@ -255,26 +238,7 @@ $(document).ready(function() {
         "autoWidth": false
     });
 
-    $('#dataTable input').prop('disabled', true);
-
-// Function to handle upgrade button click
-function upgradeRow(upgradeButton) {
-        var row = $(upgradeButton).closest('tr');
-
-        // Enable only the course-related fields and the fees field
-        row.find('.course_name, .new_tech_course_name, .short_term_course_name, .fees').prop('disabled', false);
-
-        // Disable all buttons except the Save button in the current row
-        row.find('.editButton, .deleteButton, .upgradeButton').prop('disabled', true);
-
-        // Show and enable the Save button
-        row.find('.saveButton').show().prop('disabled', false);
-    }
-
-// Attach upgradeRow function to the upgrade buttons
-
-
-
+    // Disable inputs and buttons in each row
     
     // Custom search function for the third column (index 2)
     $('#searchBar').on('keyup', function() {
@@ -299,54 +263,48 @@ function upgradeRow(upgradeButton) {
         row.find('.saveButton').prop('disabled', false);
         $(this).prop('disabled', true);  // Disable the Edit button
     });
-
     $('.saveButton').click(function() {
-        var row = $(this).closest('tr');
-        var id = row.data('id');
-        var data = {
-            id: id,
-            data: {
-                date_of_enquiry: row.find('.date_of_enquiry').val(),
-                name: row.find('.name').val(),
-                contact_number: row.find('.contact_number').val(),
-                type_of_enquiry: row.find('.type_of_enquiry').val(),
-                course_name: row.find('.course_name').val(),
-                new_tech_course_name: row.find('.new_tech_course_name').val(),
-                short_term_course_name: row.find('.short_term_course_name').val(),
-                fees: row.find('.fees').val(),
-                follow_up_status: {
-                    date: row.find('.date').val(),
-                    reason: row.find('.reason').val()
-                },
-                enquiry_status: row.find('.enquiry_status').val(),
-                remark: row.find('.remark').val()
+    var row = $(this).closest('tr');
+    var id = row.data('id');
+    var data = {
+        id: id,
+        data: {
+            date_of_enquiry: row.find('.programme').val(),  // Corrected class name
+            name: row.find('.name').val(),
+            contact_number: row.find('.contact_number').val(),
+            type_of_enquiry: row.find('.type_of_enquiry').val(),
+            course_name: row.find('.course_name').val(),
+            address: row.find('.address').val(),
+            area: row.find('.area').val(),
+            qualification: row.find('.qualification').val(),
+            college_name: row.find('.college_name').val(),
+            follow_up_status: {
+                date: row.find('.follow_up_status.date').val(),  // Ensure these classes are correct
+                reason: row.find('.follow_up_status.reason').val()
             }
-        };
+        }
+    };
 
-        $.ajax({
-            type: 'POST',
-            url: '/save',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: function(response) {
-                alert('Record updated successfully!');
-                row.find('input').prop('disabled', true);
-                row.find('.saveButton').prop('disabled', true);
-                row.find('.editButton').prop('disabled', false);
-                row.find('.upgradeButton').prop('disabled', false);
+    console.log("Data being sent:", data);  // Log the data being sent for debugging
 
-            },
-            error: function(error) {
-                console.error('Error updating record:', error);
-                alert('Failed to update record. Please try again.');
-            }
-        });
+    $.ajax({
+        type: 'POST',
+        url: '/enquiry/save',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            alert('Record updated successfully!');
+            row.find('input').prop('disabled', true);
+            row.find('.saveButton').prop('disabled', true);
+            row.find('.editButton').prop('disabled', false);
+        },
+        error: function(error) {
+            console.error('Error updating record:', error);
+            alert('Failed to update record. Please try again.');
+        }
     });
+});
 
-    $(document).on('click', '.upgradeButton', function() {
-        upgradeRow(this);
-        
-    });
 
     $('.deleteButton').click(function() {
         if (confirm('Are you sure you want to delete this record?')) {
