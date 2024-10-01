@@ -257,7 +257,7 @@ def monthlyreport():
 
     except Exception as e:
         print(f"Error: {e}")
-        return "An error occurred"
+        return "An error occurred" 
 
 
 @app.route('/yearlyreport')
@@ -1023,14 +1023,14 @@ def calculate_column_totals(monthly_report):
 def calculate_total_values(data):
     # Initialize total sums
     totals = {
-        'ADCA': {'e': 0, 'p': 0, 'r': 0},
-        'DCAC': {'e': 0, 'p': 0, 'r': 0},
-        'DCA': {'e': 0, 'p': 0, 'r': 0},
-        'O level': {'e': 0, 'p': 0, 'r': 0},
-        'New Tech': {'e': 0, 'p': 0, 'r': 0},
-        'Short Term': {'e': 0, 'p': 0, 'r': 0},
-        'Internship': {'e': 0, 'p': 0, 'r': 0},
-        'Others': {'e': 0, 'p': 0, 'r': 0},
+        'ADCA': {'e': 0, 'p': 0, 'r': 0, 'u':0},
+        'DCAC': {'e': 0, 'p': 0, 'r': 0, 'u':0},
+        'DCA': {'e': 0, 'p': 0, 'r': 0, 'u':0},
+        'O level': {'e': 0, 'p': 0, 'r': 0, 'u':0},
+        'New Tech': {'e': 0, 'p': 0, 'r': 0, 'u':0},
+        'Short Term': {'e': 0, 'p': 0, 'r': 0,'u':0 },
+        'Internship': {'e': 0, 'p': 0, 'r': 0, 'u':0},
+        'Others': {'e': 0, 'p': 0, 'r': 0,'u':0},
         'total_e': 0,
         'total_p': 0,
         'total_r': 0,
