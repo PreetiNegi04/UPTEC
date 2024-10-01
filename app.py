@@ -139,6 +139,11 @@ def monthlyreport():
                         "$sum": {
                             "$cond": [{"$eq": ["$r", "1"]}, 1, 0]  # Check r as string
                         }
+                    },
+                    "u_count": {
+                        "$sum": {
+                            "$cond": [{"$eq": ["$u", "1"]}, 1, 0]  # Check u as string
+                        }
                     }
                 }
             },
@@ -205,10 +210,11 @@ def monthlyreport():
             total_e = 0
             total_p = 0
             total_r = 0
+            total_u = 0
             
             # Initialize course counts with zeros
-            course_counts = {course: {"e_count": 0, "p_count": 0, "r_count": 0} for course in course_list}
-            course_counts["Others"] = {"e_count": 0, "p_count": 0, "r_count": 0}  # Add "Others" for courses
+            course_counts = {course: {"e_count": 0, "p_count": 0, "r_count": 0, "u_count":0} for course in course_list}
+            course_counts["Others"] = {"e_count": 0, "p_count": 0, "r_count": 0, "u_count":0}  # Add "Others" for courses
 
             # Initialize source counts with zeros
             source_counts = {source: 0 for source in source_list}
@@ -222,9 +228,11 @@ def monthlyreport():
                 course_counts[course_name]["e_count"] = report["e_count"]
                 course_counts[course_name]["p_count"] = report["p_count"]
                 course_counts[course_name]["r_count"] = report["r_count"]
+                course_counts[course_name]["u_count"] = report["u_count"]
                 total_e += report["e_count"]
                 total_p += report["p_count"]
                 total_r += report["r_count"]
+                total_u += report["u_count"]
 
             # Get source counts for the date
             day_source_report = [item for item in monthly_source_report if item["_id"]["date_of_enquiry"] == date_str]
@@ -240,6 +248,7 @@ def monthlyreport():
                 "total_e": total_e,
                 "total_p": total_p,
                 "total_r": total_r,
+                "total_u": total_u,
                 "sources": source_counts
             })
 
@@ -296,7 +305,8 @@ def yearlyreport():
                     },
                     "e": {"$toInt": "$e"},
                     "p": {"$toInt": "$p"},
-                    "r": {"$toInt": "$r"}
+                    "r": {"$toInt": "$r"},
+                    "u": {"$toInt": "$u"}
                 }
             },
             {
@@ -312,8 +322,10 @@ def yearlyreport():
                     },
                     "e_count": {"$sum": {"$cond": [{"$eq": ["$e", 1]}, 1, 0]}},
                     "p_count": {"$sum": {"$cond": [{"$eq": ["$p", 1]}, 1, 0]}},
-                    "r_count": {"$sum": {"$sum": {"$cond": [{"$eq": ["$r", 1]}, 1, 0]}}}
-                }
+                    "r_count": {"$sum": {"$cond": [{"$eq": ["$r", 1]}, 1, 0]}},
+                    "u_count": {"$sum": {"$cond": [{"$eq": ["$u", 1]}, 1, 0]}}
+                
+            }
             },
             {
                 "$group": {
@@ -323,12 +335,14 @@ def yearlyreport():
                             "course_name": "$_id.course_name",
                             "e_count": "$e_count",
                             "p_count": "$p_count",
-                            "r_count": "$r_count"
+                            "r_count": "$r_count",
+                            "u_count": "$u_count"
                         }
                     },
                     "total_e": {"$sum": "$e_count"},
                     "total_p": {"$sum": "$p_count"},
-                    "total_r": {"$sum": "$r_count"}
+                    "total_r": {"$sum": "$r_count"},
+                    "total_u": {"$sum": "$u_count"}
                 }
             },
             {
@@ -352,7 +366,7 @@ def yearlyreport():
     yearly_report = []
     for month in months_list:
         courses_with_zero_counts = [
-            {"course_name": course, "e_count": 0, "p_count": 0, "r_count": 0} for course in course_list
+            {"course_name": course, "e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0} for course in course_list
         ]
         # Add year to each month's report
         report_year = current_year if month >= 4 else next_year
@@ -362,7 +376,8 @@ def yearlyreport():
             "courses": courses_with_zero_counts,
             "total_e": 0,
             "total_p": 0,
-            "total_r": 0
+            "total_r": 0,
+            "total_u": 0
         })
 
     # Merge April to December report into the default structure
@@ -377,10 +392,12 @@ def yearlyreport():
                     report_course["e_count"] = db_course["e_count"]
                     report_course["p_count"] = db_course["p_count"]
                     report_course["r_count"] = db_course["r_count"]
+                    report_course["u_count"] = db_course["u_count"]
 
         yearly_report[month_index]["total_e"] = db_report["total_e"]
         yearly_report[month_index]["total_p"] = db_report["total_p"]
         yearly_report[month_index]["total_r"] = db_report["total_r"]
+        yearly_report[month_index]["total_u"] = db_report["total_u"]
 
     # Merge January to March report into the default structure
     for db_report in jan_to_mar_report:
@@ -394,10 +411,12 @@ def yearlyreport():
                     report_course["e_count"] = db_course["e_count"]
                     report_course["p_count"] = db_course["p_count"]
                     report_course["r_count"] = db_course["r_count"]
+                    report_course["u_count"] = db_course["u_count"]
 
         yearly_report[month_index]["total_e"] = db_report["total_e"]
         yearly_report[month_index]["total_p"] = db_report["total_p"]
         yearly_report[month_index]["total_r"] = db_report["total_r"]
+        yearly_report[month_index]["total_u"] = db_report["total_u"]
 
     # Calculate total summary (assumed function to calculate total)
     total_summary = calculate_total_values(yearly_report)
@@ -452,18 +471,29 @@ def dailyreport():
     NewTech_p = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
     ShortTerm_p = mongo.db.contacts.count_documents({"course_name": "Short Term", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
 
+    Olevel_u = mongo.db.contacts.count_documents({"course_name": "O Level", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
+    DCAC_u= mongo.db.contacts.count_documents({"course_name": "DCAC", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
+    DCA_u= mongo.db.contacts.count_documents({"course_name": "DCA", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
+    ADCA_u = mongo.db.contacts.count_documents({"course_name": "BCA", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
+    Internship_u = mongo.db.contacts.count_documents({"course_name": "Internship", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
+    NewTech_u = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"u", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
+    ShortTerm_u = mongo.db.contacts.count_documents({"course_name": "Short Term", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
+
     total_e = Olevel_e + DCAC_e +DCA_e+ ADCA_e+ Internship_e + NewTech_e + ShortTerm_e
     total_r = Olevel_r + DCAC_r +DCA_r +ADCA_r+ Internship_r+ NewTech_r + ShortTerm_r
     total_p = Olevel_p + DCAC_p +DCA_p+ ADCA_p + Internship_p+ NewTech_p + ShortTerm_p
+    total_u = Olevel_u + DCAC_u +DCA_u+ ADCA_u + Internship_u+ NewTech_u + ShortTerm_u
 
     total = {
         "total_e": total_e,
         "total_r": total_r,
-        "total_p": total_p
+        "total_p": total_p,
+        "total_u": total_u
     }
     enquiry = {"Olevel_e": Olevel_e, "DCAC_e": DCAC_e,"DCA_e": DCA_e, "ADCA_e":ADCA_e, "Internship_e":Internship_e, "NewTech_e": NewTech_e, "ShortTerm_e": ShortTerm_e}
     registration = {"Olevel_r": Olevel_r, "DCAC_r": DCAC_r,"DCA_r": DCA_r,  "ADCA_r": ADCA_r,"Internship_r":Internship_r, "NewTech_r": NewTech_r, "ShortTerm_r": ShortTerm_r}
     prospectus = {"Olevel_p": Olevel_p, "DCAC_p": DCAC_p,"DCA_p": DCA_p,  "ADCA_p": ADCA_p, "Internship_p":Internship_p,"NewTech_p": NewTech_p, "ShortTerm_p": ShortTerm_p}
+    upgrade = {"Olevel_u": Olevel_u, "DCAC_u": DCAC_u,"DCA_u": DCA_u,  "ADCA_u": ADCA_u, "Internship_u":Internship_u,"NewTech_u": NewTech_u, "ShortTerm_u": ShortTerm_u}
     today = datetime.today().strftime("%Y-%m-%d")
 
     print(prospectus)
@@ -557,7 +587,7 @@ def dailyreport():
 
     # Execute the aggregation query and convert to a list
     result = list(mongo.db.contacts.aggregate(pipeline))
-    return render_template('dailyreport.html', enquiry = enquiry, registration = registration, prospectus = prospectus, total = total, sources = result)
+    return render_template('dailyreport.html', enquiry = enquiry, registration = registration, prospectus = prospectus, upgrade = upgrade , total = total, sources = result)
 
 
 @app.route('/index')
@@ -706,14 +736,9 @@ def contact():
                         'reason': request.form.get('reason')
                     },
                 'register_date': registered_date,
-                'prospectus_date': prospectus_date
+                'prospectus_date': prospectus_date,
+                'u' : "0"
                 }
-            
-            '''# Check if all fields are provided (additional checks can be added as needed)
-            if not contact_data['follow_up_status']['date'] or not contact_data['follow_up_status']['reason']:
-                flash("All fields are required!", "error")
-                print("All fields are required!")
-                return redirect(url_for('contact'))'''
 
             mongo.db.contacts.insert_one(contact_data)
             return redirect(url_for('success'))
@@ -793,11 +818,12 @@ def save_record():
     try:
         data = request.json
         record_id = data.get('id')
+        u = data.get('u')
         updated_data = data.get('data')
 
         result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': updated_data})
-
-        if result.modified_count > 0:
+        r  = mongo.db.contacts.update_one({"_id": ObjectId(record_id)}, {"$set": {'u': u}})
+        if result.modified_count and r.modified_count > 0:
             return jsonify({'status': 'success', 'message': 'Record updated successfully!'})
         else:
             return jsonify({'status': 'error', 'message': 'No record was updated'}), 500
@@ -954,15 +980,15 @@ def find_prospectus():
 def calculate_column_totals(monthly_report):
     # Initialize totals dictionary for each course
     course_totals = {
-        "O level": {"e_count": 0, "p_count": 0, "r_count": 0},
-        "DCAC": {"e_count": 0, "p_count": 0, "r_count": 0},
-        "ADCA": {"e_count": 0, "p_count": 0, "r_count": 0},
-        "DCA": {"e_count": 0, "p_count": 0, "r_count": 0},
-        "Internship": {"e_count": 0, "p_count": 0, "r_count": 0},
-        "New Tech": {"e_count": 0, "p_count": 0, "r_count": 0},
-        "Short Term": {"e_count": 0, "p_count": 0, "r_count": 0},
-        "Others": {"e_count": 0, "p_count": 0, "r_count": 0},
-        "Total": {"e_count": 0, "p_count": 0, "r_count": 0}
+        "O level": {"e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0},
+        "DCAC": {"e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0},
+        "ADCA": {"e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0},
+        "DCA": {"e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0},
+        "Internship": {"e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0},
+        "New Tech": {"e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0},
+        "Short Term": {"e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0},
+        "Others": {"e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0},
+        "Total": {"e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0}
     }
 
     # Initialize totals for sources
@@ -980,11 +1006,13 @@ def calculate_column_totals(monthly_report):
             course_totals[course]["e_count"] += counts.get("e_count", 0)
             course_totals[course]["p_count"] += counts.get("p_count", 0)
             course_totals[course]["r_count"] += counts.get("r_count", 0)
+            course_totals[course]["u_count"] += counts.get("u_count", 0)
 
         # Add totals to the overall totals
         course_totals["Total"]["e_count"] += day_report.get("total_e", 0)
         course_totals["Total"]["p_count"] += day_report.get("total_p", 0)
         course_totals["Total"]["r_count"] += day_report.get("total_r", 0)
+        course_totals["Total"]["u_count"] += day_report.get("total_u", 0)
 
         # Add source counts from the report
         for source, count in day_report['sources'].items():
@@ -1005,7 +1033,8 @@ def calculate_total_values(data):
         'Others': {'e': 0, 'p': 0, 'r': 0},
         'total_e': 0,
         'total_p': 0,
-        'total_r': 0
+        'total_r': 0,
+        'total_u': 0
     }
 
     # Iterate through each month
@@ -1015,11 +1044,13 @@ def calculate_total_values(data):
             totals[course_name]['e'] += course['e_count']
             totals[course_name]['p'] += course['p_count']
             totals[course_name]['r'] += course['r_count']
+            totals[course_name]['u'] += course['u_count']
             
         # Sum the total counts for the month
         totals['total_e'] += month_data['total_e']
         totals['total_p'] += month_data['total_p']
         totals['total_r'] += month_data['total_r']
+        totals['total_u'] += month_data['total_u']
     
     return totals
 

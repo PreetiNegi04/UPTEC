@@ -208,6 +208,7 @@
                 <td><input type="text" class="e" value="{{ doc.e}}" readonly></td>
                 <td><input type="text" class="p" value="{{ doc.p}}" readonly></td>
                 <td><input type="text" class="r" value="{{ doc.r}}" readonly></td>
+                <td><input type="text" class="r" value="0"></td>
                 <td><input type="text" class="fees" value="{{ doc.fees}}"></td>
                 <td><input type="date" class="follow_up_status" value="{{ doc.follow_up_status.date if doc.follow_up_status else '' }}"></td>
                 <td><input type="text" class="follow_up_status" value="{{ doc.follow_up_status.reason if doc.follow_up_status else '' }}"></td>
@@ -280,7 +281,8 @@ $(document).ready(function() {
                     reason: row.find('.reason').val()
                 },
                 enquiry_status: row.find('.enquiry_status').val(),
-                remark: row.find('.remark').val()
+                remark: row.find('.remark').val(),
+                u : row.find('.u').val(),
             }
         };
 
