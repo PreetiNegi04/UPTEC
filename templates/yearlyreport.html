@@ -155,12 +155,12 @@
                     <td>{{ months[r['month'] - 1] }}</td> <!-- Replace month number with month name -->
                     <td>{{ r['year'] }} (T)</td>
                     {% for courses in r['courses'] %}
-                    <td>{{ courses['e_count'] }}</td><td>{{ courses['p_count'] }}</td><td>{{ courses['r_count'] }}</td><td></td>
+                    <td>{{ courses['e_count'] }}</td><td>{{ courses['p_count'] }}</td><td>{{ courses['r_count'] }}</td><td>{{courses['u_count']}}</td>
                     {% endfor %}
                     <td class="total-col">{{ r['total_e'] }}</td>
                     <td class="total-col">{{ r['total_p'] }}</td>
                     <td class="total-col">{{ r['total_r'] }}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{ r['total_u']}}</td>
                     <td class="total-col"></td>
                 </tr>
                 {% endfor %}
@@ -170,47 +170,47 @@
                     <td class="total-col">{{ total['ADCA']['e'] }}</td>
                     <td class="total-col">{{ total['ADCA']['p'] }}</td>
                     <td class="total-col">{{ total['ADCA']['r'] }}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{ total['ADCA']['u']}}</td>
             
                     <td class="total-col">{{ total['DCA']['e'] }}</td>
                     <td class="total-col">{{ total['DCA']['p'] }}</td>
                     <td class="total-col">{{ total['DCA']['r'] }}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{ total['DCA']['u']}}</td>
             
                     <td class="total-col">{{ total['O level']['e'] }}</td>
                     <td class="total-col">{{ total['O level']['p'] }}</td>
                     <td class="total-col">{{ total['O level']['r'] }}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{ total['O level']['u']}}</td>
             
                     <td class="total-col">{{ total['DCAC']['e'] }}</td>
                     <td class="total-col">{{ total['DCAC']['p'] }}</td>
                     <td class="total-col">{{ total['DCAC']['r'] }}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{ total['DCAC']['u'] }}</td>
             
                     <td class="total-col">{{ total['Internship']['e'] }}</td>
                     <td class="total-col">{{ total['Internship']['p'] }}</td>
                     <td class="total-col">{{ total['Internship']['r'] }}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{total['Internship']['u']}}</td>
             
                     <td class="total-col">{{ total['New Tech']['e'] }}</td>
                     <td class="total-col">{{ total['New Tech']['p'] }}</td>
                     <td class="total-col">{{ total['New Tech']['r'] }}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{total['New Tech']['u']}}</td>
             
                     <td class="total-col">{{ total['Short Term']['e'] }}</td>
                     <td class="total-col">{{ total['Short Term']['p'] }}</td>
                     <td class="total-col">{{ total['Short Term']['r'] }}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{total['Short Term']['u']}}</td>
             
                     <td class="total-col">{{ total['Others']['e'] }}</td>
                     <td class="total-col">{{ total['Others']['p'] }}</td>
                     <td class="total-col">{{ total['Others']['r'] }}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{total['Others']['u']}}</td>
             
                     <td class="total-col">{{ total['total_e'] }}</td>
                     <td class="total-col">{{ total['total_p'] }}</td>
                     <td class="total-col">{{ total['total_r'] }}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{ total['total_u']}}</td>
                     <td class="total-col"></td>
                 </tr>
             </tbody>
