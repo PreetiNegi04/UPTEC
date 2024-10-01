@@ -873,7 +873,53 @@ def save_enquiry():
 
 
 
-    
+    try:
+        data = request.json
+        print(f"Data received: {data}")  # Log the incoming data
+
+        record_id = data.get('id')
+        updated_data = data.get('data')
+
+        # Validate the ObjectId
+        if not ObjectId.is_valid(record_id):
+            print(f"Invalid ObjectId: {record_id}")
+            return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
+
+        # Log the existing record before updating
+        existing_record = collection.find_one({'_id': ObjectId(record_id)})
+        if not existing_record:
+            print(f"No record found with ID: {record_id}")
+            return jsonify({'status': 'error', 'message': 'Record not found'}), 404
+
+        print(f"Existing record before update: {existing_record}")
+
+        # Prepare the update query, ensuring nested fields are updated properly
+        update_query = {'$set': {
+            'name': updated_data['name'],
+            'contact_number': updated_data['contact_number'],
+            'type_of_enquiry': updated_data['type_of_enquiry'],
+            'course_name': updated_data['course_name'],
+            'address': updated_data['address'],
+            'area': updated_data['area'],
+            'qualification': updated_data['qualification'],
+            'college_name': updated_data['college_name'],
+            'follow_up_status.date': updated_data['follow_up_status']['date'],
+            'follow_up_status.reason': updated_data['follow_up_status']['reason']
+        }}
+
+        # Attempt to update the primary collection
+        result = mongo.db.contacts.update_one({'_id': ObjectId(record_id)}, update_query)
+        print(f"Primary update result: {result.raw_result}")  # Log result of primary update
+
+        if result.modified_count > 0:
+            return jsonify({'status': 'success', 'message': 'Record updated successfully!'}), 200
+        else:
+            return jsonify({'status': 'success', 'message': 'Record was already up-to-date.'}), 200
+
+    except Exception as e:
+        print(f"Error updating record: {str(e)}")  # Print the full error message
+        return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
+
 
 @app.route('/enquiry/delete', methods=['POST'])
 def deleteEnquiry():
