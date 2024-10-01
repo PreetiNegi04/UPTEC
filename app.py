@@ -779,9 +779,6 @@ def save_enquiry():
         print(f"Error updating record: {str(e)}")  # Print the full error message
         return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
 
-
-
-
     try:
         data = request.json
         print(f"Data received: {data}")  # Log the incoming data
