@@ -112,15 +112,23 @@ def monthlyreport():
         # Initialize the result structure
         monthly_report = []
 
+
         for date_str in all_dates:
             mydict = {}
             mydict[date_str] = report(date_str) 
             monthly_report.append(mydict)
 
         course_total , source_total = calculate_column_totals(monthly_report)
+        #extract month and year from the current date
+        month = current_date.strftime("%B")
+        year = current_date.year
+        yearly_report = {
+            "month": month,
+            "year": year,
+            "courses": course_total
+        }
 
-        print(course_total)
-        print(source_total)
+        insert_into_table(yearly_report)
 
         return render_template('monthlyreport.html', report=monthly_report, course_total=course_total, source_total=source_total)
 
@@ -130,7 +138,7 @@ def monthlyreport():
 
 @app.route('/yearlyreport')
 def yearlyreport():
-    collection = mongo.db["contacts"]
+    '''collection = mongo.db["contacts"]
 
     # Define the current year and next year for the fiscal period
     current_year = datetime.today().year
@@ -284,9 +292,75 @@ def yearlyreport():
         yearly_report[month_index]["total_u"] = db_report["total_u"]
 
     # Calculate total summary (assumed function to calculate total)
+    total_summary = calculate_total_values(yearly_report)'''
+
+
+    current_year = datetime.today().year
+    current_month = datetime.today().month
+
+    collection = mongo.db["yearly_report"]
+    # generate the list of months form April to December in String format
+    months = [calendar.month_name[i] for i in range(4, 13)]
+
+    # Fetch the report for the current year form April to December and store it in a list
+    yearly_report = []
+    for month in months:
+        report = collection.find_one({"month": month, "year": current_year})
+        if report:
+            yearly_report.append(report)
+        else:
+            yearly_report.append({
+                "month": month,
+                "year": current_year,
+                "courses": {
+                    "O level": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "DCAC": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "ADCA": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "DCA": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "Internship": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "New Tech": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "Short Term": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "Others": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "Total": {"e": 0, "p": 0, "r": 0, "u": 0, "tr": 0}
+                    },
+                "sources": {
+                    "friends": 0,
+                    "hoarding": 0,
+                    "website": 0,
+                    "Others": 0
+                    }
+            })
+
+        # generate month list for the next year from January to March
+    months = [calendar.month_name[i] for i in range(1, 4)]
+    for month in months:
+        report = collection.find_one({"month": month, "year": current_year + 1})
+        if report:
+            yearly_report.append(report)
+        else:
+            yearly_report.append({
+                "month": month,
+                "year": current_year + 1,
+                "courses": {
+                    "O level": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "DCAC": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "ADCA": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "DCA": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "Internship": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "New Tech": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "Short Term": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "Others": {"e": 0, "p": 0, "r": 0, "u": 0},
+                    "Total": {"e": 0, "p": 0, "r": 0, "u": 0, "tr": 0}
+                    },
+                "sources": {
+                    "friends": 0,
+                    "hoarding": 0,
+                    "website": 0,
+                    "Others": 0
+                    }
+            })
     total_summary = calculate_total_values(yearly_report)
-    # Return the report
-    return render_template('yearlyreport.html', report=yearly_report, year=current_year, total=total_summary)
+    return render_template('yearlyreport.html', report=yearly_report, year=current_year, total = total_summary)
 
 
 @app.route('/table')
@@ -359,96 +433,6 @@ def dailyreport():
     prospectus = {"Olevel_p": Olevel_p, "DCAC_p": DCAC_p,"DCA_p": DCA_p,  "ADCA_p": ADCA_p, "Internship_p":Internship_p,"NewTech_p": NewTech_p, "ShortTerm_p": ShortTerm_p}
     upgrade = {"Olevel_u": Olevel_u, "DCAC_u": DCAC_u,"DCA_u": DCA_u,  "ADCA_u": ADCA_u, "Internship_u":Internship_u,"NewTech_u": NewTech_u, "ShortTerm_u": ShortTerm_u}
 
-    '''# Aggregation query
-    pipeline = [
-        {
-            "$match": {
-                "e": "1",  # Assuming 'e' is stored as a string
-                "date_of_enquiry": today
-            }
-        },
-        {
-        "$unwind": "$source"  # Unwind the source array to separate its values
-        },
-        {
-            "$group": {
-                "_id": {
-                    "$cond": {
-                    "if": { "$in": [ { "$trim": { "input": "$source" } }, ["friends", "hoarding", "website"] ] },  # Check if source is in the list after trimming whitespace
-                    "then": "$source",  # Keep the source as is
-                    "else": "Others"  # Group under 'Others'
-                }
-                },
-                "count": {"$sum": 1}  # Count the number of records
-            }
-        },
-        {
-        "$addFields": {
-            "sortOrder": {
-                "$switch": {
-                    "branches": [
-                        { "case": { "$eq": ["$_id", "friends"] }, "then": 1 },
-                        { "case": { "$eq": ["$_id", "hoarding"] }, "then": 2 },
-                        { "case": { "$eq": ["$_id", "websites"] }, "then": 3 }
-                    ],
-                    "default": 4  # Others come last
-                    }
-                }
-            }
-        },
-        {
-        "$sort": { "sortOrder": 1 }  # Sort by the custom sort order
-        },
-        {
-            # Ensure all predefined categories have a count (including those with 0)
-            "$facet": {
-                "counts": [
-                    { "$match": { "_id": { "$in": ["friends", "hoarding", "websites", "Others"] } } },
-                    { "$sort": { "sortOrder": 1 } }
-                ],
-                "defaults": [
-                    {
-                        "$set": {
-                            "sources": [
-                                { "_id": "friends", "count": 0, "sortOrder": 1 },
-                                { "_id": "hoarding", "count": 0, "sortOrder": 2 },
-                                { "_id": "websites", "count": 0, "sortOrder": 3 },
-                                { "_id": "Others", "count": 0, "sortOrder": 4 }
-                            ]
-                        }
-                    },
-                    { "$unwind": "$sources" }
-                ]
-            }
-        },
-        {
-            # Combine the actual counts with defaults and handle missing ones
-            "$project": {
-                "final": {
-                    "$concatArrays": [
-                        "$defaults.sources",  # Default sources with 0 count
-                        "$counts"  # Actual counted sources
-                    ]
-                }
-            }
-        },
-        {
-            "$unwind": "$final"  # Unwind the final array for a flat result
-        },
-        {
-            "$group": {
-                "_id": "$final._id",
-                "count": { "$max": "$final.count" },  # Take the maximum between 0 and actual count
-                "sortOrder": { "$first": "$final.sortOrder" }
-            }
-        },
-        {
-            "$sort": { "sortOrder": 1 }  # Sort by the custom sort order
-        }
-    ]
-
-    # Execute the aggregation query and convert to a list
-    result = list(mongo.db.contacts.aggregate(pipeline))'''
 
     specific_date = datetime.today().strftime("%Y-%m-%d")
 
@@ -787,7 +771,7 @@ def save_upgrade():
             'new_tech_course_name': updated_fields.get('new_tech_course_name'),
             'short_term_course_name': updated_fields.get('short_term_course_name'),
             'fees': updated_fields.get('fees'),
-            'u': 1,  # Set 'u' to 1
+            'u': "1",  # Set 'u' to 1
             'upgrade_date': datetime.today().strftime("%Y-%m-%d")  # Set the current date
         }
 
@@ -1044,27 +1028,23 @@ def calculate_total_values(data):
         'Short Term': {'e': 0, 'p': 0, 'r': 0,'u':0 },
         'Internship': {'e': 0, 'p': 0, 'r': 0, 'u':0},
         'Others': {'e': 0, 'p': 0, 'r': 0,'u':0},
-        'total_e': 0,
-        'total_p': 0,
-        'total_r': 0,
-        'total_u': 0
+        'total' : {'e': 0, 'p': 0, 'r': 0, 'u': 0, 'tr': 0}
     }
+     #Iterate over each day report in the monthly report
+    for month in data:
+        for course, value in month['courses'].items():
+                if course != "Total":
+                    totals[course]["e"] += month["courses"][course]["e"]
+                    totals[course]["p"] += month["courses"][course]["p"]
+                    totals[course]["r"] += month["courses"][course]["r"]
+                    totals[course]["u"] += month["courses"][course]["u"]
+                else:
+                    totals["total"]["e"] += month["courses"]["Total"]["e"]
+                    totals["total"]["p"] += month["courses"]["Total"]["p"]
+                    totals["total"]["r"] += month["courses"]["Total"]["r"]
+                    totals["total"]["u"] += month["courses"]["Total"]["u"]
+                    totals["total"]["tr"] += month["courses"]["Total"]["tr"]
 
-    # Iterate through each month
-    for month_data in data:
-        for course in month_data['courses']:
-            course_name = course['course_name']
-            totals[course_name]['e'] += course['e_count']
-            totals[course_name]['p'] += course['p_count']
-            totals[course_name]['r'] += course['r_count']
-            totals[course_name]['u'] += course['u_count']
-            
-        # Sum the total counts for the month
-        totals['total_e'] += month_data['total_e']
-        totals['total_p'] += month_data['total_p']
-        totals['total_r'] += month_data['total_r']
-        totals['total_u'] += month_data['total_u']
-    
     return totals
 
 
@@ -1130,6 +1110,7 @@ def report(date):
     total_r = Olevel_r + DCAC_r + DCA_r + ADCA_r + Internship_r + NewTech_r + ShortTerm_r + others_r
     total_p = Olevel_p + DCAC_p + DCA_p + ADCA_p + Internship_p + NewTech_p + ShortTerm_p + others_p
     total_u = Olevel_u + DCAC_u + DCA_u + ADCA_u + Internship_u + NewTech_u + ShortTerm_u + others_u
+    total_tr = total_u + total_r
 
 
     courses = {
@@ -1141,7 +1122,7 @@ def report(date):
         "New Tech": {"e": NewTech_e, "r": NewTech_r, "p": NewTech_p, "u": NewTech_u},
         "Short Term": {"e": ShortTerm_e, "r": ShortTerm_r, "p": ShortTerm_p, "u": ShortTerm_u},
         "Others": {"e": others_e, "r": others_r, "p": others_p, "u": others_u},
-        "Total" : {"e": total_e, "r": total_r, "p": total_p, "u": total_u}
+        "Total" : {"e": total_e, "r": total_r, "p": total_p, "u": total_u, "tr": total_tr}
     }
 
     friend = mongo.db.contacts.count_documents({"source": "friends", "e": "1", "date_of_enquiry": specific_date})
@@ -1180,7 +1161,7 @@ def calculate_column_totals(monthly_report):
         "New Tech": {"e": 0, "p": 0, "r": 0, "u": 0},
         "Short Term": {"e": 0, "p": 0, "r": 0, "u": 0},
         "Others": {"e": 0, "p": 0, "r": 0, "u": 0},
-        "Total": {"e": 0, "p": 0, "r": 0, "u": 0}
+        "Total": {"e": 0, "p": 0, "r": 0, "u": 0, "tr": 0}
     }
 
     # Initialize totals for sources
@@ -1196,20 +1177,38 @@ def calculate_column_totals(monthly_report):
         for day, day_report in day_report.items():
             # Iterate over each course and update the totals
             for course in day_report["courses"]:
-                course_totals[course]["e"] += day_report["courses"][course]["e"]
-                course_totals[course]["p"] += day_report["courses"][course]["p"]
-                course_totals[course]["r"] += day_report["courses"][course]["r"]
-                course_totals[course]["u"] += day_report["courses"][course]["u"]
-            # update count for friends, hoarding, website, and others
+                if course != "Total":
+                    course_totals[course]["e"] += day_report["courses"][course]["e"]
+                    course_totals[course]["p"] += day_report["courses"][course]["p"]
+                    course_totals[course]["r"] += day_report["courses"][course]["r"]
+                    course_totals[course]["u"] += day_report["courses"][course]["u"]
+                else:
+                    course_totals["Total"]["e"] += day_report["courses"]["Total"]["e"]
+                    course_totals["Total"]["p"] += day_report["courses"]["Total"]["p"]
+                    course_totals["Total"]["r"] += day_report["courses"]["Total"]["r"]
+                    course_totals["Total"]["u"] += day_report["courses"]["Total"]["u"]
+                    course_totals["Total"]["tr"] += day_report["courses"]["Total"]["tr"]
             source_totals["friends"] += day_report["sources"]["friends"]
             source_totals["hoarding"] += day_report["sources"]["hoarding"]
             source_totals["website"] += day_report["sources"]["website"]
             source_totals["Others"] += day_report["sources"]["Others"]
 
-
-
-
     return course_totals, source_totals
+
+def insert_into_table(month_report):
+    collection = mongo.db["yearly_report"]
+    #check the year and month from the argument passed which is an dictionary if they exist update the record else insert
+    year = month_report["year"]
+    month = month_report["month"]
+
+    #check if the record exists
+    record = collection.find_one({"year": year, "month": month})
+    if record:
+        #update the record
+        collection.update_one({"_id": record["_id"]}, {"$set": month_report})
+    else:
+        #insert the record
+        collection.insert_one(month_report)
 
 if __name__ == '__main__':
     app.run(debug=True)

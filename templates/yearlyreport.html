@@ -100,6 +100,26 @@
             background: #f0f0f0;
         }
 
+        
+        .E {
+            background-color: white;
+        }
+        .P{
+             background-color: white;
+        }
+         /* Hide buttons for downloads */
+         .hidden {
+            display: none;
+        }
+        
+        .R {
+            background-color: rgb(181, 247, 181);
+        }
+
+        .U {
+            background-color: rgb(250, 199, 207);
+        }
+
         /* Highlight for header columns */
        
     </style>
@@ -149,19 +169,55 @@
                 </tr>
             </thead>
             <tbody id="report-body">
-                {% set months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
-                {% for r in report %}
+                {% for data in report %}
                 <tr>
-                    <td>{{ months[r['month'] - 1] }}</td> <!-- Replace month number with month name -->
-                    <td>{{ r['year'] }} (T)</td>
-                    {% for courses in r['courses'] %}
-                    <td>{{ courses['e_count'] }}</td><td>{{ courses['p_count'] }}</td><td>{{ courses['r_count'] }}</td><td>{{courses['u_count']}}</td>
-                    {% endfor %}
-                    <td class="total-col">{{ r['total_e'] }}</td>
-                    <td class="total-col">{{ r['total_p'] }}</td>
-                    <td class="total-col">{{ r['total_r'] }}</td>
-                    <td class="total-col">{{ r['total_u']}}</td>
-                    <td class="total-col"></td>
+                    <td>{{ data['month'] }}</td> 
+                    <td>{{ data['year'] }} (T)</td>
+                    <td class="E">{{ data['courses']['ADCA']['e'] }}</td>
+                    <td class="P">{{ data['courses']['ADCA']['p'] }}</td>
+                    <td class="R">{{ data['courses']['ADCA']['r'] }}</td>
+                    <td class="U">{{ data['courses']['ADCA']['u']}}</td>
+
+                    <td class="E">{{ data['courses']['DCA']['e'] }}</td>
+                    <td class="P">{{ data['courses']['DCA']['p'] }}</td>
+                    <td class="R">{{ data['courses']['DCA']['r'] }}</td>
+                    <td class="U">{{ data['courses']['DCA']['u']}}</td>
+
+                    <td class="E">{{ data['courses']['O level']['e'] }}</td>
+                    <td class="P">{{ data['courses']['O level']['p'] }}</td>
+                    <td class="R">{{ data['courses']['O level']['r'] }}</td>
+                    <td class="U">{{ data['courses']['O level']['u']}}</td>
+
+                    <td class="E">{{ data['courses']['DCAC']['e'] }}</td>
+                    <td class="P">{{ data['courses']['DCAC']['p'] }}</td>
+                    <td class="R">{{ data['courses']['DCAC']['r'] }}</td>
+                    <td class="U">{{ data['courses']['DCAC']['u']}}</td>
+
+                    <td class="E">{{ data['courses']['Internship']['e'] }}</td>
+                    <td class="P">{{ data['courses']['Internship']['p'] }}</td>
+                    <td class="R">{{ data['courses']['Internship']['r'] }}</td>
+                    <td class="U">{{ data['courses']['Internship']['u']}}</td>
+
+                    <td class="E">{{ data['courses']['New Tech']['e'] }}</td>
+                    <td class="P">{{ data['courses']['New Tech']['p'] }}</td>
+                    <td class="R">{{ data['courses']['New Tech']['r'] }}</td>
+                    <td class="U">{{ data['courses']['New Tech']['u']}}</td>
+
+                    <td class="E">{{ data['courses']['Short Term']['e'] }}</td>
+                    <td class="P">{{ data['courses']['Short Term']['p'] }}</td>
+                    <td class="R">{{ data['courses']['Short Term']['r'] }}</td>
+                    <td class="U">{{ data['courses']['Short Term']['u']}}</td>
+
+                    <td class="E">{{ data['courses']['Others']['e'] }}</td>
+                    <td class="P">{{ data['courses']['Others']['p'] }}</td>
+                    <td class="R">{{ data['courses']['Others']['r'] }}</td>
+                    <td class="U">{{ data['courses']['Others']['u']}}</td>
+
+                    <td class="E">{{ data['courses']['Total']['e'] }}</td>
+                    <td class="P">{{ data['courses']['Total']['p'] }}</td>
+                    <td class="R">{{ data['courses']['Total']['u'] }}</td>
+                    <td class="U">{{ data['courses']['Total']['r']}}</td>
+                    <td class="TR">{{data['courses']['Total']['tr']}}</td>
                 </tr>
                 {% endfor %}
                 <tr>
@@ -207,11 +263,11 @@
                     <td class="total-col">{{ total['Others']['r'] }}</td>
                     <td class="total-col">{{total['Others']['u']}}</td>
             
-                    <td class="total-col">{{ total['total_e'] }}</td>
-                    <td class="total-col">{{ total['total_p'] }}</td>
-                    <td class="total-col">{{ total['total_r'] }}</td>
-                    <td class="total-col">{{ total['total_u']}}</td>
-                    <td class="total-col"></td>
+                    <td class="total-col">{{ total['total']['e'] }}</td>
+                    <td class="total-col">{{ total['total']['p'] }}</td>
+                    <td class="total-col">{{ total['total']['r'] }}</td>
+                    <td class="total-col">{{ total['total']['u']}}</td>
+                    <td class="total-col">{{ total['total']['tr'] }}</td>
                 </tr>
             </tbody>
             
