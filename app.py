@@ -579,6 +579,8 @@ def contact():
                 prospectus_date = datetime.today().strftime("%Y-%m-%d")
             else:
                 prospectus_date = None
+
+            upgrade_date = None
             # Extract data from the form
             contact_data = {
                 'date_of_enquiry': request.form.get('today-date'),
@@ -607,8 +609,8 @@ def contact():
                 'register_date': registered_date,
                 'prospectus_date': prospectus_date,
                 'u' : "0",
-                'upgrade_date':upgrade_date,
-                }
+                'upgrade_date':upgrade_date
+            }
 
             mongo.db.contacts.insert_one(contact_data)
             return redirect(url_for('success'))
