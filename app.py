@@ -15,7 +15,7 @@ app.secret_key = 'your_secret_key'
 
 client = MongoClient('mongodb://localhost:27017')
 db = client['mydatabase']
-collection = db['form_data'] 
+collection = db['contacts'] 
 app.config['MONGO_URI'] = "mongodb://localhost:27017/mydatabase"
 mongo = PyMongo(app)
 
@@ -138,174 +138,17 @@ def monthlyreport():
 
 @app.route('/yearlyreport')
 def yearlyreport():
-    '''collection = mongo.db["contacts"]
-
-    # Define the current year and next year for the fiscal period
-    current_year = datetime.today().year
-    next_year = current_year + 1
-
-    # List of months for the report
-    months_list = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3]
-
-    def generate_report_for_period(start_date, end_date):
-        pipeline = [
-            {
-                "$match": {
-                    "date_of_enquiry": {
-                        "$gte": start_date.strftime("%Y-%m-%d"),
-                        "$lt": end_date.strftime("%Y-%m-%d")
-                    }
-                }
-            },
-            {
-                "$project": {
-                    "actual_month": {
-                        "$month": {
-                            "$dateFromString": {
-                                "dateString": "$date_of_enquiry",
-                                "format": "%Y-%m-%d",
-                                "onError": None,
-                                "onNull": None
-                            }
-                        }
-                    },
-                    "course_name": {
-                        "$cond": [
-                            {"$in": ["$course_name", course_list[:-1]]},
-                            "$course_name",
-                            "Others"
-                        ]
-                    },
-                    "e": {"$toInt": "$e"},
-                    "p": {"$toInt": "$p"},
-                    "r": {"$toInt": "$r"},
-                    "u": {"$toInt": "$u"}
-                }
-            },
-            {
-                "$match": {
-                    "actual_month": {"$ne": None}
-                }
-            },
-            {
-                "$group": {
-                    "_id": {
-                        "month": "$actual_month",
-                        "course_name": "$course_name"
-                    },
-                    "e_count": {"$sum": {"$cond": [{"$eq": ["$e", 1]}, 1, 0]}},
-                    "p_count": {"$sum": {"$cond": [{"$eq": ["$p", 1]}, 1, 0]}},
-                    "r_count": {"$sum": {"$cond": [{"$eq": ["$r", 1]}, 1, 0]}},
-                    "u_count": {"$sum": {"$cond": [{"$eq": ["$u", 1]}, 1, 0]}}
-                
-            }
-            },
-            {
-                "$group": {
-                    "_id": "$_id.month",
-                    "courses": {
-                        "$push": {
-                            "course_name": "$_id.course_name",
-                            "e_count": "$e_count",
-                            "p_count": "$p_count",
-                            "r_count": "$r_count",
-                            "u_count": "$u_count"
-                        }
-                    },
-                    "total_e": {"$sum": "$e_count"},
-                    "total_p": {"$sum": "$p_count"},
-                    "total_r": {"$sum": "$r_count"},
-                    "total_u": {"$sum": "$u_count"}
-                }
-            },
-            {
-                "$sort": {"_id": 1}
-            }
-        ]
-
-        return list(collection.aggregate(pipeline))
-
-    # Generate report for April to December (current year)
-    start_april = datetime(current_year, 4, 1)
-    end_december = datetime(current_year, 12, 31)
-    april_to_dec_report = generate_report_for_period(start_april, end_december)
-
-    # Generate report for January to March (next year)
-    start_january = datetime(next_year, 1, 1)
-    end_march = datetime(next_year, 3, 31)
-    jan_to_mar_report = generate_report_for_period(start_january, end_march)
-
-    # Create a default structure for all months (April to March) with zero counts for all courses
-    yearly_report = []
-    for month in months_list:
-        courses_with_zero_counts = [
-            {"course_name": course, "e_count": 0, "p_count": 0, "r_count": 0, "u_count": 0} for course in course_list
-        ]
-        # Add year to each month's report
-        report_year = current_year if month >= 4 else next_year
-        yearly_report.append({
-            "month": month,
-            "year": report_year,  # Add year field
-            "courses": courses_with_zero_counts,
-            "total_e": 0,
-            "total_p": 0,
-            "total_r": 0,
-            "total_u": 0
-        })
-
-    # Merge April to December report into the default structure
-    for db_report in april_to_dec_report:
-        db_month = db_report["_id"]
-        fiscal_month = db_month - 4 + 1  # Map April-Dec to 1-9
-        month_index = fiscal_month - 1  # Convert to 0-based index
-        
-        for db_course in db_report["courses"]:
-            for report_course in yearly_report[month_index]["courses"]:
-                if report_course["course_name"] == db_course["course_name"]:
-                    report_course["e_count"] = db_course["e_count"]
-                    report_course["p_count"] = db_course["p_count"]
-                    report_course["r_count"] = db_course["r_count"]
-                    report_course["u_count"] = db_course["u_count"]
-
-        yearly_report[month_index]["total_e"] = db_report["total_e"]
-        yearly_report[month_index]["total_p"] = db_report["total_p"]
-        yearly_report[month_index]["total_r"] = db_report["total_r"]
-        yearly_report[month_index]["total_u"] = db_report["total_u"]
-
-    # Merge January to March report into the default structure
-    for db_report in jan_to_mar_report:
-        db_month = db_report["_id"]
-        fiscal_month = db_month + 9  # Map Jan-Mar to 10-12
-        month_index = fiscal_month - 1  # Convert to 0-based index
-        
-        for db_course in db_report["courses"]:
-            for report_course in yearly_report[month_index]["courses"]:
-                if report_course["course_name"] == db_course["course_name"]:
-                    report_course["e_count"] = db_course["e_count"]
-                    report_course["p_count"] = db_course["p_count"]
-                    report_course["r_count"] = db_course["r_count"]
-                    report_course["u_count"] = db_course["u_count"]
-
-        yearly_report[month_index]["total_e"] = db_report["total_e"]
-        yearly_report[month_index]["total_p"] = db_report["total_p"]
-        yearly_report[month_index]["total_r"] = db_report["total_r"]
-        yearly_report[month_index]["total_u"] = db_report["total_u"]
-
-    # Calculate total summary (assumed function to calculate total)
-    total_summary = calculate_total_values(yearly_report)'''
-
-
     current_year = datetime.today().year
     current_month = datetime.today().month
 
-    collection = mongo.db["yearly_report"]
+    year_col = mongo.db["yearly_report"]
     # generate the list of months form April to December in String format
     months = [calendar.month_name[i] for i in range(4, 13)]
 
     # Fetch the report for the current year form April to December and store it in a list
     yearly_report = []
     for month in months:
-        report = collection.find_one({"month": month, "year": current_year})
+        report = year_col.find_one({"month": month, "year": current_year})
         if report:
             yearly_report.append(report)
         else:
@@ -334,7 +177,7 @@ def yearlyreport():
         # generate month list for the next year from January to March
     months = [calendar.month_name[i] for i in range(1, 4)]
     for month in months:
-        report = collection.find_one({"month": month, "year": current_year + 1})
+        report = year_col.find_one({"month": month, "year": current_year + 1})
         if report:
             yearly_report.append(report)
         else:
@@ -365,9 +208,9 @@ def yearlyreport():
 
 @app.route('/table')
 def table():
-    collection = mongo.db["form_data"]
+    form_col = mongo.db["form_data"]
     # Fetch all documents from the collection
-    all_documents = collection.find()
+    all_documents = form_col.find()
 
     # Convert the cursor to a list if you need to work with the documents directly
     all_documents = list(all_documents)
@@ -375,7 +218,6 @@ def table():
 
 @app.route('/contact_table')
 def contact_table():
-    collection = mongo.db["contacts"]
     # Fetch all documents from the collection
     all_documents = collection.find()
 
@@ -385,37 +227,38 @@ def contact_table():
 
 @app.route('/dailyreport', methods=['POST', 'GET'])
 def dailyreport():
-    Olevel_e = mongo.db.contacts.count_documents({"course_name": "O Level", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
-    DCAC_e= mongo.db.contacts.count_documents({"course_name": "DCAC", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
-    DCA_e= mongo.db.contacts.count_documents({"course_name": "DCA", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
-    ADCA_e = mongo.db.contacts.count_documents({"course_name": "ADCA", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
-    Internship_e = mongo.db.contacts.count_documents({"course_name": "Internship", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
-    NewTech_e = mongo.db.contacts.count_documents({"course_name": "New Tech", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
-    ShortTerm_e = mongo.db.contacts.count_documents({"course_name": "Short Term", "e":"1", "date_of_enquiry": datetime.today().strftime("%Y-%m-%d")})
+    today = datetime.today().strftime("%Y-%m-%d")
+    Olevel_e = mongo.db.contacts.count_documents({"course_name": "O Level", "e":"1", "date_of_enquiry": today})
+    DCAC_e= mongo.db.contacts.count_documents({"course_name": "DCAC", "e":"1", "date_of_enquiry": today})
+    DCA_e= mongo.db.contacts.count_documents({"course_name": "DCA", "e":"1", "date_of_enquiry": today})
+    ADCA_e = mongo.db.contacts.count_documents({"course_name": "ADCA", "e":"1", "date_of_enquiry": today})
+    Internship_e = mongo.db.contacts.count_documents({"course_name": "Internship", "e":"1", "date_of_enquiry": today})
+    NewTech_e = mongo.db.contacts.count_documents({"course_name": "New Tech", "e":"1", "date_of_enquiry": today})
+    ShortTerm_e = mongo.db.contacts.count_documents({"course_name": "Short Term", "e":"1", "date_of_enquiry": today})
 
-    Olevel_r = mongo.db.contacts.count_documents({"course_name": "O Level", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
-    DCAC_r= mongo.db.contacts.count_documents({"course_name": "DCAC", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
-    DCA_r= mongo.db.contacts.count_documents({"course_name": "DCA", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
-    ADCA_r = mongo.db.contacts.count_documents({"course_name": "ADCA", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
-    Internship_r = mongo.db.contacts.count_documents({"course_name": "Internship", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
-    NewTech_r = mongo.db.contacts.count_documents({"course_name": "New Tech", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
-    ShortTerm_r = mongo.db.contacts.count_documents({"course_name": "Short Term", "r":"1", "register_date": datetime.today().strftime("%Y-%m-%d")})
+    Olevel_r = mongo.db.contacts.count_documents({"course_name": "O Level", "r":"1", "register_date": today})
+    DCAC_r= mongo.db.contacts.count_documents({"course_name": "DCAC", "r":"1", "register_date": today})
+    DCA_r= mongo.db.contacts.count_documents({"course_name": "DCA", "r":"1", "register_date": today})
+    ADCA_r = mongo.db.contacts.count_documents({"course_name": "ADCA", "r":"1", "register_date": today})
+    Internship_r = mongo.db.contacts.count_documents({"course_name": "Internship", "r":"1", "register_date": today})
+    NewTech_r = mongo.db.contacts.count_documents({"course_name": "New Tech", "r":"1", "register_date": today})
+    ShortTerm_r = mongo.db.contacts.count_documents({"course_name": "Short Term", "r":"1", "register_date": today})
 
-    Olevel_p = mongo.db.contacts.count_documents({"course_name": "O Level", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
-    DCAC_p= mongo.db.contacts.count_documents({"course_name": "DCAC", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
-    DCA_p= mongo.db.contacts.count_documents({"course_name": "DCA", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
-    ADCA_p = mongo.db.contacts.count_documents({"course_name": "BCA", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
-    Internship_p = mongo.db.contacts.count_documents({"course_name": "Internship", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
-    NewTech_p = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
-    ShortTerm_p = mongo.db.contacts.count_documents({"course_name": "Short Term", "p":"1", "prospectus_date": datetime.today().strftime("%Y-%m-%d")})
+    Olevel_p = mongo.db.contacts.count_documents({"course_name": "O Level", "p":"1", "prospectus_date": today})
+    DCAC_p= mongo.db.contacts.count_documents({"course_name": "DCAC", "p":"1", "prospectus_date": today})
+    DCA_p= mongo.db.contacts.count_documents({"course_name": "DCA", "p":"1", "prospectus_date": today})
+    ADCA_p = mongo.db.contacts.count_documents({"course_name": "BCA", "p":"1", "prospectus_date": today})
+    Internship_p = mongo.db.contacts.count_documents({"course_name": "Internship", "p":"1", "prospectus_date": today})
+    NewTech_p = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"1", "prospectus_date": today})
+    ShortTerm_p = mongo.db.contacts.count_documents({"course_name": "Short Term", "p":"1", "prospectus_date": today})
 
-    Olevel_u = mongo.db.contacts.count_documents({"course_name": "O Level", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
-    DCAC_u= mongo.db.contacts.count_documents({"course_name": "DCAC", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
-    DCA_u= mongo.db.contacts.count_documents({"course_name": "DCA", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
-    ADCA_u = mongo.db.contacts.count_documents({"course_name": "BCA", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
-    Internship_u = mongo.db.contacts.count_documents({"course_name": "Internship", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
-    NewTech_u = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"u", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
-    ShortTerm_u = mongo.db.contacts.count_documents({"course_name": "Short Term", "u":"1", "upgrade_date": datetime.today().strftime("%Y-%m-%d")})
+    Olevel_u = mongo.db.contacts.count_documents({"course_name": "O Level", "u":"1", "upgrade_date": today})
+    DCAC_u= mongo.db.contacts.count_documents({"course_name": "DCAC", "u":"1", "upgrade_date": today})
+    DCA_u= mongo.db.contacts.count_documents({"course_name": "DCA", "u":"1", "upgrade_date": today})
+    ADCA_u = mongo.db.contacts.count_documents({"course_name": "BCA", "u":"1", "upgrade_date": today})
+    Internship_u = mongo.db.contacts.count_documents({"course_name": "Internship", "u":"1", "upgrade_date": today})
+    NewTech_u = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"u", "upgrade_date": today})
+    ShortTerm_u = mongo.db.contacts.count_documents({"course_name": "Short Term", "u":"1", "upgrade_date": today})
 
     total_e = Olevel_e + DCAC_e +DCA_e+ ADCA_e+ Internship_e + NewTech_e + ShortTerm_e
     total_r = Olevel_r + DCAC_r +DCA_r +ADCA_r+ Internship_r+ NewTech_r + ShortTerm_r
@@ -433,16 +276,13 @@ def dailyreport():
     prospectus = {"Olevel_p": Olevel_p, "DCAC_p": DCAC_p,"DCA_p": DCA_p,  "ADCA_p": ADCA_p, "Internship_p":Internship_p,"NewTech_p": NewTech_p, "ShortTerm_p": ShortTerm_p}
     upgrade = {"Olevel_u": Olevel_u, "DCAC_u": DCAC_u,"DCA_u": DCA_u,  "ADCA_u": ADCA_u, "Internship_u":Internship_u,"NewTech_u": NewTech_u, "ShortTerm_u": ShortTerm_u}
 
-
-    specific_date = datetime.today().strftime("%Y-%m-%d")
-
-    friend = mongo.db.contacts.count_documents({"source": "friends", "e": "1", "date_of_enquiry": specific_date})
-    hoarding = mongo.db.contacts.count_documents({"source": "hoarding", "e": "1", "date_of_enquiry": specific_date})
-    website = mongo.db.contacts.count_documents({"source": "website", "e": "1", "date_of_enquiry": specific_date})
+    friend = mongo.db.contacts.count_documents({"source": "friends", "e": "1", "date_of_enquiry": today})
+    hoarding = mongo.db.contacts.count_documents({"source": "hoarding", "e": "1", "date_of_enquiry": today})
+    website = mongo.db.contacts.count_documents({"source": "website", "e": "1", "date_of_enquiry": today})
     others = mongo.db.contacts.count_documents({
         "source": {"$nin": ["friends", "hoarding", "website"]},  # Sources not in the predefined list
         "e": "1",  # Checking if 'e' is 1
-        "date_of_enquiry": specific_date  # Ensure the enquiry_date matches the specific date
+        "date_of_enquiry": today  # Ensure the enquiry_date matches the specific date
     })
 
     sources = {
@@ -452,9 +292,7 @@ def dailyreport():
         "Others": others
     }
 
-    print(sources)
-
-    reports = report(datetime.today().strftime("%Y-%m-%d"))
+    #reports = report(today)
 
     return render_template('dailyreport.html', enquiry = enquiry, registration = registration, prospectus = prospectus, upgrade = upgrade , total = total, sources = sources)
 
@@ -463,13 +301,12 @@ def dailyreport():
 def index():
 
     username = session.get('username', None)
-    coll = mongo.db["contacts"]
     # Get the total number of documents in the collection
     query = {"r" : "1"}
-    total_documents = coll.count_documents(query)
-    total_enquiries = coll.count_documents({})
+    total_documents = collection.count_documents(query)
+    total_enquiries = collection.count_documents({})
     query = {"e": "1", "p": "0", "r": "0"}
-    pending = coll.count_documents(query)
+    pending = collection.count_documents(query)
 
     pending_documents = find_pending()
 
@@ -481,7 +318,7 @@ def index():
     today = datetime.today().strftime("%Y-%m-%d")
     # Query to count documents with 'today_date' of today
     query = {"register_date": today, "r" : "1"}
-    total_today = coll.count_documents(query)
+    total_today = collection.count_documents(query)
 
     prospectus = find_prospectus()
     return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses, prospectus = prospectus) 
@@ -571,16 +408,6 @@ def student_registration():
 def contact():
     if request.method == 'POST':
         try:
-            if request.form.get('r') == '1':
-                registered_date = datetime.today().strftime("%Y-%m-%d")
-            else:
-                registered_date = None
-            if request.form.get('p') == '1':
-                prospectus_date = datetime.today().strftime("%Y-%m-%d")
-            else:
-                prospectus_date = None
-
-            upgrade_date = None
             # Extract data from the form
             contact_data = {
                 'date_of_enquiry': request.form.get('today-date'),
@@ -598,18 +425,18 @@ def contact():
                 "course_name": request.form.get('coursename'),
                 "new_tech_course_name": request.form.get('newTechCourseName'),
                 "short_term_course_name": request.form.get('shortTermCourseName'),
-                "p": request.form.get('p'),
-                "e": request.form.get('e'),
-                "r": request.form.get('r'),
+                "p": '0',
+                "e": '1',
+                "r": '0',
                 "fees": request.form.get('fees'),
                 'follow_up_status': {
                         'date': request.form.get('date'),
                         'reason': request.form.get('reason')
                     },
-                'register_date': registered_date,
-                'prospectus_date': prospectus_date,
+                'register_date': None,
+                'prospectus_date': None,
                 'u' : "0",
-                'upgrade_date':upgrade_date
+                'upgrade_date': None
             }
 
             mongo.db.contacts.insert_one(contact_data)
@@ -626,7 +453,6 @@ def contact():
 
 @app.route('/update_contact/<string:id>', methods=['GET', 'POST'])
 def update_contact(id):
-    collection = mongo.db["contacts"]
     
     # Convert id to ObjectId
     id = ObjectId(id)
@@ -718,47 +544,6 @@ def save_record():
         print(f"Error updating record: {str(e)}")  # Print the full error message
         return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
 
-"""@app.route('/save_upgrade', methods=['POST'])
-def save_upgrade():
-    try:
-        data = request.json
-        print(f"Upgrade data received: {data}")  # Log the incoming data
-
-        record_id = data.get('id')
-        updated_data = data.get('data')
-
-        # Validate the ObjectId
-        if not ObjectId.is_valid(record_id):
-            print(f"Invalid ObjectId: {record_id}")
-            return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
-
-        # Attempt to update only the course-related fields in the primary collection
-        result = collection.update_one(
-            {'_id': ObjectId(record_id)},
-            {'$set': {
-                'course_name': updated_data.get('course_name'),
-                'new_tech_course_name': updated_data.get('new_tech_course_name'),
-                'short_term_course_name': updated_data.get('short_term_course_name'),
-                'fees': updated_data.get('fees')
-            }}
-        )
-        print(f"Primary upgrade result: {result.raw_result}")  # Log result of primary update
-
-        # Update the secondary collection (if required, same as in save)
-        r = mongo.db.contacts.update_one({"_id": ObjectId(record_id)}, {"$set": {'u': "1"}})
-        print(f"Secondary update result: {r.raw_result}")  # Log result of secondary update
-
-        # Check if any modifications were made
-        if result.modified_count > 0 and r.modified_count > 0:
-            return jsonify({'status': 'success', 'message': 'Course-related data upgraded successfully!'})
-        else:
-            return jsonify({'status': 'success', 'message': 'No changes detected, record already up-to-date.'}), 200
-
-    except Exception as e:
-        print(f"Error upgrading record: {str(e)}")  # Log the error message
-        return jsonify({'status': 'error', 'message': 'Failed to upgrade record: ' + str(e)}), 500"""
-
-
 @app.route('/save_upgrade', methods=['POST'])
 def save_upgrade():
     try:
@@ -815,8 +600,8 @@ def delete_record():
     try:
         data = request.json
         record_id = data.get('id')
-        collection = mongo.db["form_data"]
-        result = collection.delete_one({'_id': ObjectId(record_id)})
+        form_col = mongo.db["form_data"]
+        result = form_col.delete_one({'_id': ObjectId(record_id)})
 
         if result.deleted_count > 0:
             return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
@@ -855,9 +640,6 @@ def save_enquiry():
     except Exception as e:
         print(f"Error updating record: {str(e)}")  # Print the full error message
         return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
-
-
-
 
     try:
         data = request.json
@@ -912,7 +694,6 @@ def deleteEnquiry():
     try:
         data = request.json
         record_id = data.get('id')
-        collection = mongo.db["contacts"]
         result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': {'r': "2"}})
 
         if result.modified_count > 0:
@@ -954,7 +735,6 @@ def check_password(hashed_password, user_password):
     return bcrypt.checkpw(user_password.encode('utf-8'), hashed_password)
 
 def find_pending():
-    collection = mongo.db["contacts"]
     query = {
     "e": "1",
     "p": "0",
@@ -966,7 +746,6 @@ def find_pending():
 
 
 def find_today():
-    collection = mongo.db["contacts"]
     # Get the current date and calculate the start and end of today
     today = datetime.today().strftime("%Y-%m-%d")
 
@@ -976,7 +755,6 @@ def find_today():
     return list(today_documents)
 
 def find_area():
-    collection = mongo.db['contacts']
     pipeline = [
         {
             "$group": {
@@ -993,7 +771,6 @@ def find_area():
     return result
 
 def find_courses():
-    collection = mongo.db['contacts']
 
     # MongoDB aggregation query to count students in each distinct area
     pipeline = [
@@ -1013,7 +790,6 @@ def find_courses():
     return result
 
 def find_prospectus():
-    collection = mongo.db["contacts"]
     query = {"p": "1", "r" : "0"}
     total_prospectus = collection.find(query).sort("follow_up_status.date", 1)
     return list(total_prospectus)
@@ -1051,7 +827,6 @@ def calculate_total_values(data):
 
 
 def report(date):
-    collection = mongo.db["contacts"]
     
     # Specify the date you want to filter by (input date)
     specific_date = date
@@ -1198,19 +973,19 @@ def calculate_column_totals(monthly_report):
     return course_totals, source_totals
 
 def insert_into_table(month_report):
-    collection = mongo.db["yearly_report"]
+    year_col = mongo.db["yearly_report"]
     #check the year and month from the argument passed which is an dictionary if they exist update the record else insert
     year = month_report["year"]
     month = month_report["month"]
 
     #check if the record exists
-    record = collection.find_one({"year": year, "month": month})
+    record = year_col.find_one({"year": year, "month": month})
     if record:
         #update the record
-        collection.update_one({"_id": record["_id"]}, {"$set": month_report})
+        year_col.update_one({"_id": record["_id"]}, {"$set": month_report})
     else:
         #insert the record
-        collection.insert_one(month_report)
+        year_col.insert_one(month_report)
 
 if __name__ == '__main__':
     app.run(debug=True)

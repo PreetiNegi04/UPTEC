@@ -251,14 +251,16 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
+                                                    <div class="recent-message d-flex px-4 py-3">
                                                         {% for document in today_documents %}
-                                                        <div class="recent-message d-flex px-4 py-3">
+                                                        <div class="name ms-4">
                                                                 <td class="mb-1">{{ document['name'] }}</td>
                                                                 <td class="text-muted mb-0">{{ document['follow_up_status']['reason'] }}</td>
                                                                 <td class="text-muted mb-0">{{ document['contact_number'] }}</td>
                                                                 <td class="text-muted mb-0">{{ document['course_name'] }}</td>
                                                         </div>
                                                         {% endfor %}
+                                                    </div>
                                                 </tbody>
                                             </table>
                                         </div>
