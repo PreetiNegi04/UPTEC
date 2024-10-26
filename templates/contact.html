@@ -25,7 +25,7 @@
         <div class="form-row mb-4">
             <div class="col">
                 <label for="today-date">Date of Enquiry :</label>
-        <input type="date" class="form-control" name="today-date" id="today-date" value="" readonly>
+        <input type="date" class="form-control" name="today-date" id="today-date" value="">
             </div>
             <div class="col">
                 <label for="type_of_enquiry">Type of Enquiry:</label>
@@ -248,7 +248,15 @@
                             <label for="t">E:</label>
                             <input type="text" class="form-control" name="e" id="e" maxlength="1">
                         </div>
+
                         <div class="col">
+                            <label for="status">Follow Up Date:</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                        <div class="col">
+                            <textarea id="reason" name="reason" placeholder="Enter the follow-up status"  maxlength="20" required></textarea>
+                        </div>
+                       <!-- <div class="col">
                             <label for="p">P:</label>
                             <input type="text" class="form-control" name="p" id="p" maxlength="1" >
                         </div>
@@ -259,17 +267,18 @@
 
                         <div class="col">
                             <label for="fees">Fees:</label>
-                            <input type="text" id="fees" name="fees" maxlength="6"></div>
+                            <input type="text" id="fees" name="fees" maxlength="6"></div>-->
                     </div>
 
                     <div class="form-row mb-4">
-                        <div class="col">
+                      <!-- <div class="col">
                             <label for="status">Follow Up Date:</label>
                             <input type="date" id="date" name="date" required>
                         </div>
                         <div class="col">
                             <textarea id="reason" name="reason" placeholder="Enter the follow-up status"  maxlength="20" required></textarea>
-                        </div></div>
+                        </div>-->
+                    </div>
 
                       
        
