@@ -103,18 +103,23 @@
     </style>
 </head>
 <body>
-
+    <form method = "post"> 
+<input type = date id = "today_date" name = "today_date">
+<button type="submit" >Submit</button>
+</form>
 <div class="report-container">
     <h2>UCC CENTER DAILY REPORT</h2>
-    <p>Date: <span id="current-date"></span></p>
-    <p>Prepared by: Tanya Gupta</p>
+    <p>Date: <input type = "date"></p>
+
+    <!-- Add your css -->
+    <p>Prepared by: <input type = "text" placeholder="Tanya Gupta"></p>
 
     <table class="report-content">
         <thead>
             <tr>
                 <th>COURSE</th>
                 <th>E</th>
-                <th>P</th>
+                <th>P</th> 
                 <th>R</th>
             </tr>
         </thead>

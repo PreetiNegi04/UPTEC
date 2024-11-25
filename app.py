@@ -227,7 +227,12 @@ def contact_table():
 
 @app.route('/dailyreport', methods=['POST', 'GET'])
 def dailyreport():
-    today = datetime.today().strftime("%Y-%m-%d")
+    if request.method == 'POST':
+        data = request.form
+        today = data.get('today_date')
+        print(today)
+    else:
+        today = datetime.today().strftime("%Y-%m-%d")
     Olevel_e = mongo.db.contacts.count_documents({"course_name": "O Level", "e":"1", "date_of_enquiry": today})
     DCAC_e= mongo.db.contacts.count_documents({"course_name": "DCAC", "e":"1", "date_of_enquiry": today})
     DCA_e= mongo.db.contacts.count_documents({"course_name": "DCA", "e":"1", "date_of_enquiry": today})
