@@ -91,10 +91,17 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-@app.route('/monthlyreport')
+@app.route('/monthlyreport', methods=['POST', 'GET'])
 def monthlyreport():
     try:
-        current_date = datetime.today()
+        if request.method == 'POST':
+            data = request.form
+            current_date = data.get('today_date') 
+            print(type(current_date))
+            # Convert string to datetime object
+            current_date = datetime.strptime(current_date, "%Y-%m-%d")
+        else:
+            current_date = datetime.today()
         year = current_date.year
         month = current_date.month
 
@@ -136,10 +143,18 @@ def monthlyreport():
         print(f"Error: {e}")
         return "An error occurred"
 
-@app.route('/yearlyreport')
+@app.route('/yearlyreport', methods=['POST', 'GET'] )
 def yearlyreport():
-    current_year = datetime.today().year
-    current_month = datetime.today().month
+    if request.method == 'POST':
+        data = request.form
+        current_date = data.get('today_date') 
+        print(type(current_date))
+        # Convert string to datetime object
+        current_date = datetime.strptime(current_date, "%Y-%m-%d")
+    else:
+        current_date = datetime.today()
+    current_year = current_date.year
+    current_month = current_date.month
 
     year_col = mongo.db["yearly_report"]
     # generate the list of months form April to December in String format
@@ -230,7 +245,6 @@ def dailyreport():
     if request.method == 'POST':
         data = request.form
         today = data.get('today_date')
-        print(today)
     else:
         today = datetime.today().strftime("%Y-%m-%d")
     Olevel_e = mongo.db.contacts.count_documents({"course_name": "O Level", "e":"1", "date_of_enquiry": today})
