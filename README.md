@@ -1,4 +1,5 @@
-<h1 align="center">UPTEC</h1>
+<h1 align="center">UPTEC Admission Tracker With Dynamic 
+Reporting and Analysis</h1>
 <p align="center">
 
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-green.svg?style=flat-square)](#contributors-)
@@ -13,13 +14,13 @@
 ## Installation
 1. Clone this repository or download zip
 ```bash
-git clone https://github.com/zuramai/mazer
+git clone https://github.com/PreetiNegi04/UPTEC.git
 ```
-2. Open `mazer/dist/index.html` to see the dashboard
+2. Open `index.html` to see the dashboard
 
 ## Demo and Documentation
-- Open the [demo page](http://zuramai.github.io/mazer/demo)
-- Open the [documentation page](http://zuramai.github.io/mazer/docs)
+![image](https://github.com/user-attachments/assets/6d477fe8-e925-460d-b931-b16ce8e82b11)
+
 
 ## Framework Boilerplate (Starter-kit)
 - [CodeIgniter 4](https://github.com/irsyadulibad/mazer-codeigniter) by [@irsyadulibad](https://github.com/irsyadulibad)
