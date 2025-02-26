@@ -217,6 +217,7 @@ def yearlyreport():
                     "Others": 0
                     }
             })
+            
     total_summary = calculate_total_values(yearly_report)
     return render_template('yearlyreport.html', report=yearly_report, year=current_year, total = total_summary, year1 = current_year, year2 = current_year + 1)
 
