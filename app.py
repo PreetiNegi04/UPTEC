@@ -137,7 +137,7 @@ def monthlyreport():
 
         insert_into_table(yearly_report)
 
-        return render_template('monthlyreport.html', report=monthly_report, course_total=course_total, source_total=source_total)
+        return render_template('monthlyreport.html', report=monthly_report, course_total=course_total, source_total=source_total, month = month, year = year)
 
     except Exception as e:
         print(f"Error: {e}")
@@ -218,7 +218,7 @@ def yearlyreport():
                     }
             })
     total_summary = calculate_total_values(yearly_report)
-    return render_template('yearlyreport.html', report=yearly_report, year=current_year, total = total_summary)
+    return render_template('yearlyreport.html', report=yearly_report, year=current_year, total = total_summary, year1 = current_year, year2 = current_year + 1)
 
 
 @app.route('/table')
@@ -313,7 +313,7 @@ def dailyreport():
 
     #reports = report(today)
 
-    return render_template('dailyreport.html', enquiry = enquiry, registration = registration, prospectus = prospectus, upgrade = upgrade , total = total, sources = sources)
+    return render_template('dailyreport.html', enquiry = enquiry, registration = registration, prospectus = prospectus, upgrade = upgrade , total = total, sources = sources, date = today)
 
 
 @app.route('/index')
