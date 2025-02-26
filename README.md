@@ -1,5 +1,5 @@
-<h1 align="center">Mazer Dashboard</h1>
-<p align="center">Mazer is a Admin Dashboard Template that can help you develop faster. Made with Bootstrap 5. No jQuery dependency.</p>
+<h1 align="center">UPTEC Admission Tracker With Dynamic 
+Reporting and Analysis</h1>
 <p align="center">
 
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-green.svg?style=flat-square)](#contributors-)
@@ -14,23 +14,16 @@
 ## Installation
 1. Clone this repository or download zip
 ```bash
-git clone https://github.com/zuramai/mazer
+git clone https://github.com/PreetiNegi04/UPTEC.git
 ```
-2. Open `mazer/dist/index.html` to see the dashboard
+2. Open `index.html` to see the dashboard
 
-## Demo and Documentation
-- Open the [demo page](http://zuramai.github.io/mazer/demo)
-- Open the [documentation page](http://zuramai.github.io/mazer/docs)
+## Demo 
+![image](https://github.com/user-attachments/assets/98994a1f-a54e-4d24-b801-d54c0801135a)
 
-## Framework Boilerplate (Starter-kit)
-- [CodeIgniter 4](https://github.com/irsyadulibad/mazer-codeigniter) by [@irsyadulibad](https://github.com/irsyadulibad)
-- [Laravel + Livewire](https://github.com/zuramai/laravel-mazer) by me
-- [NuxtJS](https://github.com/fauzan121002/mazer-nuxt) by [@fauzan121002](https://github.com/fauzan121002)
-- Did you make in another framework? [Contribute](https://github.com/zuramai/mazer/blob/main/CONTRIBUTING.md) or message me at [Twitter](https://twitter.com/amsaugi) 
+![image](https://github.com/user-attachments/assets/6d477fe8-e925-460d-b931-b16ce8e82b11)
 
  ## Contributing
-
-- Fork it ( https://github.com/zuramai/mazer/fork )
 - Create your feature branch (`git checkout -b my-new-feature`)
 - Commit your changes (`git commit -am 'Add some feature'`)
 - Push to the branch (`git push origin my-new-feature`)
@@ -42,12 +35,4 @@ git clone https://github.com/zuramai/mazer
 
 ## License
 Mazer is under MIT License.
-
-## About the Author
-Mazer is created by <a href="https://ahmadsaugi.com">Saugi</a>. 
-
- ## Donate
- You can support me at [Ko-fi](https://ko-fi.com/saugi) or [Trakteer](https://trakteer.id/saugi)
- 
- <a href="https://buymeacoffee.com/saugi" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
  
