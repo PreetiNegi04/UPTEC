@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCC Center Short Term EPR Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>  
+    <style>
+        /* General styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+
+        .report-container {
+            width: fit-content;
+            max-width: fit-content;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: lightyellow;
+            border: 1px solid #000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin: 0 0 20px;
+            font-size: 22px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .R {
+            background-color: rgb(181, 247, 181);
+        }
+
+        .U {
+            background-color: rgb(250, 199, 207);
+        }
+
+        .T {
+            background-color: rgb(248, 219, 248);
+        }
+
+        .O {
+            background-color: lightcyan;
+        }
+
+        /* Styling for Sunday rows */
+        .sunday-row {
+            background-color: #87CEFA; /* Sky blue background for Sundays */
+            font-weight: bold;
+        }
+
+        /* Media category */
+        .media-category {
+            font-weight: bold;
+            background-color: #e0e0e0;
+        }
+
+        /* Media section sub-columns */
+        .media-sub-columns th {
+            background-color: #FFA07A;
+        }
+
+        /* Total column styling */
+        .total-column {
+            background-color: yellow;
+            font-weight: bold;
+        }
+
+        .E {
+            background-color: white;
+        }
+        .P{
+             background-color: white;
+        }
+         /* Hide buttons for downloads */
+         .hidden {
+            display: none;
+        }
+
+        /* Styling for download menu */
+        .download-toolbar {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+
+        .download-menu-icon {
+            cursor: pointer;
+        }
+
+        .download-menu {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 30px;
+            right: 0;
+            width: 150px;
+            display: none;
+        }
+
+        .download-menu-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .download-menu-item:hover {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <form method = "post"> 
+        <input type = date id = "today_date" name = "today_date">
+        <button type="submit" >Submit</button>
+    </form>
+    <div class="report-container">
+        <!------Add center name css------------>
+        <h2 id="report-title">UCC CENTER SHORT TERM EPR REPORT FOR {{month}}'{{year}} </span></h2>
+        <table id="report-table">
+            <thead>
+                <tr>
+                    <th colspan="1"></th>
+                    <th colspan="4">CCC</th>
+                    <th colspan="4">MS Office And Internet</th>
+                    <th colspan="4">MS Office with Tally Prime</th>
+                    <th colspan="4">Tally Prime</th>
+                    <th colspan="4">ProE</th>
+                    <th colspan="4">MATLAB</th>
+                    <th colspan="4">Corel Draw</th>
+                    <th colspan="4">PageMaker</th>
+                    <th colspan="4">Adobe Photoshop</th>
+                    <th colspan="4">Web Page Designing</th>
+                    <th colspan="4">ASP.NET with MVC</th>
+                    <th colspan="4">LinQ AND JSON</th>
+                    <th colspan="4">PHP and My SQL</th>
+                    <th colspan="4">Javascript</th>
+                    <th colspan="4">C</th>
+                    <th colspan="4">C++</th>
+                    <th colspan="4">App Development</th>
+                    <th colspan="4">Python</th>
+                    <th colspan="4">Core JAVA</th>
+                    <th colspan="4">Advanced JAVA</th>
+                    <th colspan="4">Cloud Computing</th>
+
+                    
+                    <th colspan="5" class="total-column">Total</th>
+                    <th colspan="4" class="media-category">Media</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-U">R</th>
+                    <th class="highlight-R">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+                    
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">R</th>
+                    <th class="highlight-U">U</th>
+
+                    <th class="highlight-E">E</th>
+                    <th class="highlight-P">P</th>
+                    <th class="highlight-R">U</th>
+                    <th class="highlight-U">R</th>
+                    <th class="highlight-TR">TR</th>
+
+                    <th class="high-media">Friends</th>
+                    <th class="high-media">Hoarding</th>
+                    <th class="high-media">Website</th>
+                    <th class="high-media">Others</th>
+                </tr>
+            </thead>
+            <tbody id="report-body">
+                {% for date, data in report %}
+                <tr>
+                    <td>{{ date }}</td>
+                    <!-- Courses columns -->
+                    {% for course in course_list %}
+                    <td class="E">{{ data.courses[course].e }}</td>
+                    <td class="P">{{ data.courses[course].p }}</td>
+                    <td class="R">{{ data.courses[course].r }}</td>
+                    <td class="U">{{ data.courses[course].u }}</td>
+                    {% endfor %}
+                    <!-- Daily Total -->
+                    <td class="E">{{ data.total.e }}</td>
+                    <td class="P">{{ data.total.p }}</td>
+                    <td class="R">{{ data.total.r }}</td>
+                    <td class="U">{{ data.total.u }}</td>
+                    <td class="TR">{{ data.total.tr }}</td>
+                    <!-- Sources -->
+                    <td>{{ data.sources.friends }}</td>
+                    <td>{{ data.sources.hoarding }}</td>
+                    <td>{{ data.sources.website }}</td>
+                    <td>{{ data.sources.Others }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="total-column">
+                    <td>Monthly Total</td>
+                    {% for course in course_list %}
+                    <td>{{ course_total[course].e }}</td>
+                    <td>{{ course_total[course].p }}</td>
+                    <td>{{ course_total[course].r }}</td>
+                    <td>{{ course_total[course].u }}</td>
+                    {% endfor %}
+                    <td>{{ course_total.Total.e }}</td>
+                    <td>{{ course_total.Total.p }}</td>
+                    <td>{{ course_total.Total.r }}</td>
+                    <td>{{ course_total.Total.u }}</td>
+                    <td>{{ course_total.Total.tr }}</td>
+                    <td>{{ source_total.friends }}</td>
+                    <td>{{ source_total.hoarding }}</td>
+                    <td>{{ source_total.website }}</td>
+                    <td>{{ source_total.Others }}</td>
+                </tr>
+            </tfoot>
+            
+        </table>
+    </div>
+
+    <div class="download-toolbar">
+        <div class="download-menu-icon" title="Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path fill="none" d="M0 0h24v24H0V0z"></path>
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
+            </svg>
+        </div>
+        <div class="download-menu">
+            <div class="download-menu-item" id="downloadPDF">Download PDF</div>
+            <div class="download-menu-item" id="downloadCSV">Download CSV</div>
+            <div class="download-menu-item" id="downloadImage">Download Image</div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelector('.download-menu-icon').addEventListener('click', function() {
+        const menu = document.querySelector('.download-menu');
+        menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
+    });
+
+    document.getElementById('downloadPDF').addEventListener('click', function() {
+        generatePDF();
+    });
+
+    document.getElementById('downloadCSV').addEventListener('click', function() {
+        generateCSV();
+    });
+
+    document.getElementById('downloadImage').addEventListener('click', function() {
+        generateImage();
+    });
+
+    function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    toggleButtonsVisibility(true);
+
+    html2canvas(document.querySelector('.report-container'), { ignoreElements: element => element.classList.contains('hidden') }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('l', 'mm', 'a4'); // Landscape, millimeters, A4 paper size
+
+        // Define dimensions for A4 paper in landscape mode
+        const pageWidth = 297; // A4 width in mm (Landscape)
+        const pageHeight = 210; // A4 height in mm (Landscape)
+
+        // Calculate image dimensions
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        
+        // Calculate scaling factor to fit the page width and height
+        const widthRatio = pageWidth / imgWidth;
+        const heightRatio = pageHeight / imgHeight;
+        const scaleRatio = Math.min(widthRatio, heightRatio);
+
+        const scaledImgWidth = imgWidth * scaleRatio;
+        const scaledImgHeight = imgHeight * scaleRatio;
+
+        // Center the image on the page
+        const xOffset = (pageWidth - scaledImgWidth) / 2;
+        const yOffset = (pageHeight - scaledImgHeight) / 2;
+
+        pdf.addImage(imgData, 'PNG', xOffset, yOffset, scaledImgWidth, scaledImgHeight);
+
+        pdf.save('report.pdf');
+    }).catch(error => {
+        console.error('Error generating PDF:', error);
+    }).finally(() => {
+        toggleButtonsVisibility(false);
+    });
+}
+
+function generateCSV() {
+    toggleButtonsVisibility(true);
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    const rows = document.querySelectorAll('#report-table tr');
+    
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('th, td');
+        const rowArray = Array.from(cells).map(cell => {
+            const text = cell.innerText.replace(/,/g, ''); // Remove commas to avoid breaking CSV format
+            return `"${text}"`; // Enclose in quotes to handle commas in text
+        });
+        csvContent += rowArray.join(',') + "\n";
+    });
+
+    const downloadLink = document.createElement('a');
+    downloadLink.setAttribute('href', encodeURI(csvContent));
+    downloadLink.setAttribute('download', 'report.csv');
+    downloadLink.click();
+
+    toggleButtonsVisibility(false);
+}
+
+
+   
+    function generateImage() {
+        toggleButtonsVisibility(true);
+
+        html2canvas(document.querySelector('.report-container'), { ignoreElements: element => element.classList.contains('download-btn') }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const downloadLink = document.createElement('a');
+            downloadLink.href = imgData;
+            downloadLink.download = 'report.png';
+            downloadLink.click();
+        }).catch(error => {
+            console.error('Error generating image:', error);
+        }).finally(() => {
+            toggleButtonsVisibility(false);
+        });
+    }
+
+    function toggleButtonsVisibility(hide) {
+        const buttons = document.querySelectorAll('.download-btn');
+        buttons.forEach(button => {
+            button.classList.toggle('hidden', hide);
+        });
+    }
+
+    generateTableForMonth();
+
+    
+    function calculateTotalTR() {
+   
+    const totalU = parseInt(document.querySelector('#total-adca-u').innerText || 0);
+    const totalR = parseInt(document.querySelector('#total-adca-r').innerText || 0);
+    
+   
+    const totalTR = totalU + totalR;
+
+    
+    document.querySelector('#total-adca-tr').innerText = totalTR;
+}
+
+// Ensure the function runs to update the TR column
+calculateTotalTR();
+
+
+
+    </script>
+</body>
+</html>

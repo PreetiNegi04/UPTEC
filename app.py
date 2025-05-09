@@ -6,8 +6,9 @@ import bcrypt
 from datetime import datetime, timedelta
 from bson import ObjectId
 from flask import jsonify
-from datetime import datetime
 import calendar
+from dateutil.relativedelta import relativedelta
+from bson.son import SON
 
 app = Flask(__name__)
 
@@ -97,9 +98,10 @@ def monthlyreport():
         if request.method == 'POST':
             data = request.form
             current_date = data.get('today_date') 
-            print(type(current_date))
             # Convert string to datetime object
             current_date = datetime.strptime(current_date, "%Y-%m-%d")
+            print(type(current_date))
+            get_short_term_course_report(current_date)
         else:
             current_date = datetime.today()
         year = current_date.year
@@ -709,6 +711,172 @@ def save_enquiry():
         return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
 
 
+@app.route('/short_term_report', methods=['POST', 'GET'])
+def get_short_term_course_report():
+    course_list = ["CCC", "MS Office And Internet", "MS Office with Tally Prime", "Tally Prime", 
+                  "ProE", "MATLAB", "Corel Draw", "PageMaker", "Adobe Photoshop", "Web Page Designing", 
+                  "ASP.NET with MVC", "PHP and My SQL", "Javascript", "C", "C++", "App Development", 
+                  "Python", "Core JAVA", "Advanced JAVA", "Cloud Computing"]
+    known_sources = ["friends", "hoarding", "website"]
+
+    try:
+        if request.method == 'POST':
+            current_date = datetime.strptime(request.form['today_date'], "%Y-%m-%d")
+        else:
+            current_date = datetime.today()
+
+        year = current_date.year
+        month = current_date.month
+        num_days = calendar.monthrange(year, month)[1]
+        
+        # Create date range using actual Date objects
+        dates = [datetime(year, month, day) for day in range(1, num_days + 1)]
+        date_strings = [d.strftime("%Y-%m-%d") for d in dates]
+
+        # Aggregation pipeline for daily course data (using proper date handling)
+        pipeline_courses = [
+            {"$addFields": {
+                "events": [
+                    {"type": "e", "date": "$date_of_enquiry"},
+                    {"type": "p", "date": "$prospectus_date"},
+                    {"type": "r", "date": "$register_date"},
+                    {"type": "u", "date": "$upgrade_date"}
+                ]
+            }},
+            {"$unwind": "$events"},
+            {"$addFields": {
+                "date": {
+                    "$dateTrunc": {
+                        "date": "$events.date",
+                        "unit": "day"
+                    }
+                }
+            }},
+            {"$match": {
+                "date": {"$in": dates},
+                "course_name": {"$in": course_list + ["Others"]}
+            }},
+            {"$group": {
+                "_id": {
+                    "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$date"}},
+                    "course": "$course_name",
+                    "type": "$events.type"
+                },
+                "count": {"$sum": 1}
+            }}
+        ]
+
+        # Aggregation pipeline for daily source data
+        pipeline_sources = [
+            {"$match": {
+                "date_of_enquiry": {"$gte": dates[0], "$lte": dates[-1]},
+                "e": "1"
+            }},
+            {"$addFields": {
+                "date": {
+                    "$dateTrunc": {
+                        "date": "$date_of_enquiry",
+                        "unit": "day"
+                    }
+                }
+            }},
+            {"$group": {
+                "_id": {
+                    "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$date"}},
+                    "source": {
+                        "$cond": {
+                            "if": {"$in": ["$source", known_sources]},
+                            "then": "$source",
+                            "else": "Others"
+                        }
+                    }
+                },
+                "count": {"$sum": 1}
+            }}
+        ]
+
+        # Execute aggregations
+        course_results = mongo.db.contacts.aggregate(pipeline_courses)
+        source_results = mongo.db.contacts.aggregate(pipeline_sources)
+
+        # Initialize daily data structure with proper date handling
+        daily_data = {
+            d_str: {
+                "courses": {course: {"e": 0, "p": 0, "r": 0, "u": 0} for course in course_list + ["Others"]},
+                "sources": {source: 0 for source in known_sources + ["Others"]},
+                "total": {"e": 0, "p": 0, "r": 0, "u": 0, "tr": 0}
+            }
+            for d_str in date_strings
+        }
+
+        # Process course results
+        for doc in course_results:
+            date_str = doc["_id"]["date"]
+            course = doc["_id"]["course"] if doc["_id"]["course"] in course_list else "Others"
+            event_type = doc["_id"]["type"]
+            count = doc["count"]
+            
+            if date_str in daily_data and course in daily_data[date_str]["courses"]:
+                daily_data[date_str]["courses"][course][event_type] += count
+                daily_data[date_str]["total"][event_type] += count
+
+        # Process source results
+        for doc in source_results:
+            date_str = doc["_id"]["date"]
+            source = doc["_id"]["source"]
+            count = doc["count"]
+            
+            if date_str in daily_data and source in daily_data[date_str]["sources"]:
+                daily_data[date_str]["sources"][source] += count
+
+        # Calculate daily TR (Total Registrations)
+        for date_str in daily_data:
+            daily_data[date_str]["total"]["tr"] = (
+                daily_data[date_str]["total"]["r"] + 
+                daily_data[date_str]["total"]["u"]
+            )
+
+        # Convert to sorted list of dates
+        sorted_dates = sorted(daily_data.items(), key=lambda x: x[0])
+
+        # Calculate monthly totals
+        monthly_course_totals = {course: {"e": 0, "p": 0, "r": 0, "u": 0} 
+                               for course in course_list + ["Others", "Total"]}
+        monthly_source_totals = {source: 0 for source in known_sources + ["Others"]}
+
+        for date_str, data in sorted_dates:
+            # Course totals
+            for course in course_list + ["Others"]:
+                for event in ["e", "p", "r", "u"]:
+                    monthly_course_totals[course][event] += data["courses"][course][event]
+                    monthly_course_totals["Total"][event] += data["courses"][course][event]
+            
+            # Source totals
+            for source in known_sources + ["Others"]:
+                monthly_source_totals[source] += data["sources"][source]
+
+        # Calculate monthly TR
+        monthly_course_totals["Total"]["tr"] = (
+            monthly_course_totals["Total"]["r"] + 
+            monthly_course_totals["Total"]["u"]
+        )
+
+        return render_template(
+            'short_term_report.html',
+            report=sorted_dates,
+            course_total=monthly_course_totals,
+            source_total=monthly_source_totals,
+            month=current_date.strftime("%B"),
+            year=year,
+            course_list=course_list
+        )
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return "An error occurred", 500
+    
+
+
 @app.route('/enquiry/delete', methods=['POST'])
 def deleteEnquiry():
     try:
@@ -860,7 +1028,7 @@ def report(date):
     ShortTerm_e = mongo.db.contacts.count_documents({"course_name": "Short Term", "e":"1", "date_of_enquiry": specific_date})
     others_e = mongo.db.contacts.count_documents({
         "course_name": {"$nin": course_list},  # Courses not in the predefined list
-        "e": "1",  # Checking if 'u' is 1
+        "e": "1",  # Checking if 'e' is 1
         "enquiry_date": specific_date  # Ensure the upgrade_date matches the specific date
     })
 
@@ -873,7 +1041,7 @@ def report(date):
     ShortTerm_r = mongo.db.contacts.count_documents({"course_name": "Short Term", "r":"1", "register_date": specific_date})
     others_r = mongo.db.contacts.count_documents({
         "course_name": {"$nin": course_list},  # Courses not in the predefined list
-        "r": "1",  # Checking if 'u' is 1
+        "r": "1",  # Checking if 'r' is 1
         "register_date": specific_date  # Ensure the upgrade_date matches the specific date
     })
 
