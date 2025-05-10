@@ -925,6 +925,109 @@ def get_short_term_course_report():
         return "An error occurred", 500
     
 
+# Add this new route in your Flask app
+@app.route('/qualification_report', methods=['GET', 'POST'])
+def qualification_report():
+    course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term"]
+    qualifications = ["High School", "Undergraduate", "Graduate", "Postgraduate"]
+
+    try:
+        # Get selected month
+        if request.method == 'POST':
+            selected_date = datetime.strptime(request.form['report_month'], "%Y-%m")
+        else:
+            selected_date = datetime.today()
+        
+        year = selected_date.year
+        month = selected_date.month
+        start_date = datetime(year, month, 1)
+        end_date = datetime(year, month, calendar.monthrange(year, month)[1], 23, 59, 59)
+
+        # Aggregation pipeline
+        pipeline = [
+            {"$match": {
+                "e": "1",
+                "$expr": {
+                    "$and": [
+                        {"$gte": [{"$dateFromString": {"dateString": "$date_of_enquiry"}}, start_date]},
+                        {"$lte": [{"$dateFromString": {"dateString": "$date_of_enquiry"}}, end_date]}
+                    ]
+                }
+            }},
+            {"$project": {
+                "qualification": {
+                    "$cond": [
+                        {"$in": ["$qualification", qualifications]},
+                        "$qualification",
+                        "Others"
+                    ]
+                },
+                "course": {
+                    "$cond": [
+                        {"$in": ["$course_name", course_list]},
+                        "$course_name",
+                        "Others"
+                    ]
+                }
+            }},
+            {"$group": {
+                "_id": {
+                    "qualification": "$qualification",
+                    "course": "$course"
+                },
+                "count": {"$sum": 1}
+            }},
+            {"$group": {
+                "_id": "$_id.qualification",
+                "courses": {
+                    "$push": {
+                        "course": "$_id.course",
+                        "count": "$count"
+                    }
+                }
+            }}
+        ]
+
+        results = list(mongo.db.contacts.aggregate(pipeline))
+
+        # Initialize data structure with zeros
+        report_data = {q: {c: 0 for c in course_list + ["Others"]} for q in qualifications + ["Others"]}
+
+        # Populate data from results
+        for entry in results:
+            qual = entry["_id"]
+            for course_entry in entry["courses"]:
+                course = course_entry["course"]
+                count = course_entry["count"]
+                if qual in report_data and course in report_data[qual]:
+                    report_data[qual][course] = count
+
+        col_totals = {course: 0 for course in course_list + ["Others"]}
+        row_totals = {qual: 0 for qual in qualifications + ["Others"]}
+        grand_total = 0
+
+        for qual in report_data:
+            for course in report_data[qual]:
+                count = report_data[qual][course]
+                row_totals[qual] += count
+                col_totals[course] += count
+                grand_total += count
+
+        return render_template(
+            'qualification_report.html',
+            qualifications=qualifications,
+            courses=course_list + ["Others"],
+            report_data=report_data,
+            month_name=start_date.strftime("%B %Y"),
+            current_month=datetime.today().strftime("%Y-%m"),
+            row_totals=row_totals,
+            col_totals=col_totals,
+            grand_total=grand_total
+        )
+
+    except Exception as e:
+        print(f"Error generating qualification report: {str(e)}")
+        return "Error generating report", 500
 
 @app.route('/enquiry/delete', methods=['POST'])
 def deleteEnquiry():

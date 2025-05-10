@@ -1,0 +1,66 @@
+<!-- templates/qualification_report.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monthly Qualification Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .date-picker { margin-bottom: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .qual-header { background-color: #45a049; }
+        .total-row { background-color: #ffeb3b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Monthly Qualification-wise Course Enquiry Report - {{ month_name }}</h2>
+    
+    <form method="post" class="date-picker">
+        <!-- templates/qualification_report.html -->
+        <!-- Update the input field in the form -->
+        <input type="month" name="report_month" 
+              value="{{ request.form.report_month if request.method == 'POST' else '' }}"
+              max="{{ current_month }}">
+        <button type="submit">Generate Report</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="qual-header">Qualification</th>
+                {% for course in courses %}
+                <th>{{ course }}</th>
+                {% endfor %}
+                <th class="total-row">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+          {% for qual in qualifications %}
+          <tr>
+              <td class="qual-header">{{ qual }}</td>
+              {% for course in courses %}
+              <td>{{ report_data[qual][course] }}</td>
+              {% endfor %}
+              <td class="total-row">{{ row_totals[qual] }}</td>
+          </tr>
+          {% endfor %}
+          <tr>
+              <td class="qual-header">Others</td>
+              {% for course in courses %}
+              <td>{{ report_data['Others'][course] }}</td>
+              {% endfor %}
+              <td class="total-row">{{ row_totals['Others'] }}</td>
+          </tr>
+          <tr>
+              <td class="total-row">Total</td>
+              {% for course in courses %}
+              <td class="total-row">{{ col_totals[course] }}</td>
+              {% endfor %}
+              <td class="total-row">{{ grand_total }}</td>
+          </tr>
+        </tbody>
+    </table>
+</body>
+</html>
