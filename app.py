@@ -715,7 +715,7 @@ def save_enquiry():
 def get_short_term_course_report():
     course_list = ["CCC", "MS Office And Internet", "MS Office with Tally Prime", "Tally Prime", 
                   "ProE", "MATLAB", "Corel Draw", "PageMaker", "Adobe Photoshop", "Web Page Designing", 
-                  "ASP.NET with MVC", "PHP and My SQL", "Javascript", "C", "C++", "App Development", 
+                  "ASP.NET with MVC , LinQ AND JSON", "PHP and My SQL", "Javascript", "C", "C++", "App Development", 
                   "Python", "Core JAVA", "Advanced JAVA", "Cloud Computing"]
     known_sources = ["friends", "hoarding", "website"]
 
@@ -729,114 +729,166 @@ def get_short_term_course_report():
         month = current_date.month
         num_days = calendar.monthrange(year, month)[1]
         
-        # Create date range using actual Date objects
-        dates = [datetime(year, month, day) for day in range(1, num_days + 1)]
-        date_strings = [d.strftime("%Y-%m-%d") for d in dates]
+        # Create UTC date range boundaries
+        start_date = datetime(year, month, 1)
+        end_date = datetime(year, month, num_days, 23, 59, 59)
 
-        # Aggregation pipeline for daily course data (using proper date handling)
+        # Aggregation pipeline for daily course data
         pipeline_courses = [
             {"$addFields": {
-                "events": [
-                    {"type": "e", "date": "$date_of_enquiry"},
-                    {"type": "p", "date": "$prospectus_date"},
-                    {"type": "r", "date": "$register_date"},
-                    {"type": "u", "date": "$upgrade_date"}
-                ]
-            }},
-            {"$unwind": "$events"},
-            {"$addFields": {
-                "date": {
-                    "$dateTrunc": {
-                        "date": "$events.date",
-                        "unit": "day"
-                    }
-                }
+                "course": {
+                    "$cond": [
+                        {"$and": [
+                            {"$ifNull": ["$short_term_course_name", False]},
+                            {"$in": ["$short_term_course_name", course_list]}
+                        ]},
+                        "$short_term_course_name",
+                        "Others"
+                    ]
+                },
+                "e": {"$cond": [{"$eq": ["$e", "1"]}, 1, 0]},
+                "p": {"$cond": [{"$eq": ["$p", "1"]}, 1, 0]},
+                "r": {"$cond": [{"$eq": ["$r", "1"]}, 1, 0]},
+                "u": {"$cond": [{"$eq": ["$u", "1"]}, 1, 0]},
+                "e_date": {"$dateFromString": {"dateString": "$date_of_enquiry"}},
+                "p_date": {"$dateFromString": {"dateString": "$prospectus_date"}},
+                "r_date": {"$dateFromString": {"dateString": "$register_date"}},
+                "u_date": {"$dateFromString": {"dateString": "$upgrade_date"}}
             }},
             {"$match": {
-                "date": {"$in": dates},
-                "course_name": {"$in": course_list + ["Others"]}
+                "$or": [
+                    {"e_date": {"$gte": start_date, "$lte": end_date}},
+                    {"p_date": {"$gte": start_date, "$lte": end_date}},
+                    {"r_date": {"$gte": start_date, "$lte": end_date}},
+                    {"u_date": {"$gte": start_date, "$lte": end_date}}
+                ]
             }},
-            {"$group": {
-                "_id": {
-                    "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$date"}},
-                    "course": "$course_name",
-                    "type": "$events.type"
-                },
-                "count": {"$sum": 1}
+            {"$facet": {
+                "enquiries": [
+                    {"$match": {"e": 1}},
+                    {"$addFields": {
+                        "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$e_date"}}
+                    }},
+                    {"$group": {
+                        "_id": {"date": "$date", "course": "$course"},
+                        "count": {"$sum": 1}
+                    }}
+                ],
+                "prospectus": [
+                    {"$match": {"p": 1}},
+                    {"$addFields": {
+                        "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$p_date"}}
+                    }},
+                    {"$group": {
+                        "_id": {"date": "$date", "course": "$course"},
+                        "count": {"$sum": 1}
+                    }}
+                ],
+                "registrations": [
+                    {"$match": {"r": 1}},
+                    {"$addFields": {
+                        "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$r_date"}}
+                    }},
+                    {"$group": {
+                        "_id": {"date": "$date", "course": "$course"},
+                        "count": {"$sum": 1}
+                    }}
+                ],
+                "upgrades": [
+                    {"$match": {"u": 1}},
+                    {"$addFields": {
+                        "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$u_date"}}
+                    }},
+                    {"$group": {
+                        "_id": {"date": "$date", "course": "$course"},
+                        "count": {"$sum": 1}
+                    }}
+                ]
             }}
         ]
 
         # Aggregation pipeline for daily source data
         pipeline_sources = [
             {"$match": {
-                "date_of_enquiry": {"$gte": dates[0], "$lte": dates[-1]},
+                "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), "$lte": end_date.strftime("%Y-%m-%d")},
                 "e": "1"
             }},
             {"$addFields": {
-                "date": {
-                    "$dateTrunc": {
-                        "date": "$date_of_enquiry",
-                        "unit": "day"
+                "source": {
+                    "$let": {
+                        "vars": {
+                            "first_source": {"$arrayElemAt": ["$source", 0]}
+                        },
+                        "in": {
+                            "$cond": [
+                                {"$in": ["$$first_source", known_sources]},
+                                "$$first_source",
+                                "Others"
+                            ]
+                        }
                     }
-                }
+                },
+                "date_obj": {"$dateFromString": {"dateString": "$date_of_enquiry"}}
+            }},
+            {"$match": {
+                "date_obj": {"$gte": start_date, "$lte": end_date}
             }},
             {"$group": {
                 "_id": {
-                    "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$date"}},
-                    "source": {
-                        "$cond": {
-                            "if": {"$in": ["$source", known_sources]},
-                            "then": "$source",
-                            "else": "Others"
-                        }
-                    }
+                    "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$date_obj"}},
+                    "source": "$source"
                 },
                 "count": {"$sum": 1}
             }}
         ]
 
         # Execute aggregations
-        course_results = mongo.db.contacts.aggregate(pipeline_courses)
+        course_data = list(mongo.db.contacts.aggregate(pipeline_courses))[0]
         source_results = mongo.db.contacts.aggregate(pipeline_sources)
 
-        # Initialize daily data structure with proper date handling
+        # Initialize daily data structure
+        date_strings = [(start_date + timedelta(days=i)).strftime("%Y-%m-%d") 
+                       for i in range(num_days)]
         daily_data = {
-            d_str: {
-                "courses": {course: {"e": 0, "p": 0, "r": 0, "u": 0} for course in course_list + ["Others"]},
+            d: {
+                "courses": {course: {"e": 0, "p": 0, "r": 0, "u": 0} 
+                           for course in course_list + ["Others"]},
                 "sources": {source: 0 for source in known_sources + ["Others"]},
                 "total": {"e": 0, "p": 0, "r": 0, "u": 0, "tr": 0}
             }
-            for d_str in date_strings
+            for d in date_strings
         }
 
-        # Process course results
-        for doc in course_results:
-            date_str = doc["_id"]["date"]
-            course = doc["_id"]["course"] if doc["_id"]["course"] in course_list else "Others"
-            event_type = doc["_id"]["type"]
-            count = doc["count"]
-            
-            if date_str in daily_data and course in daily_data[date_str]["courses"]:
-                daily_data[date_str]["courses"][course][event_type] += count
-                daily_data[date_str]["total"][event_type] += count
+        # Process course data
+        for category in ['enquiries', 'prospectus', 'registrations', 'upgrades']:
+            event_type = category[0]  # e, p, r, u
+            for doc in course_data.get(category, []):
+                date_str = doc['_id']['date']
+                course = doc['_id']['course']
+                count = doc['count']
+                
+                if date_str in daily_data:
+                    if course in daily_data[date_str]['courses']:
+                        daily_data[date_str]['courses'][course][event_type] += count
+                        daily_data[date_str]['total'][event_type] += count
 
-        # Process source results
+        # Process source data
         for doc in source_results:
-            date_str = doc["_id"]["date"]
-            source = doc["_id"]["source"]
-            count = doc["count"]
+            date_str = doc['_id']['date']
+            source = doc['_id']['source']
+            count = doc['count']
             
-            if date_str in daily_data and source in daily_data[date_str]["sources"]:
-                daily_data[date_str]["sources"][source] += count
+            if date_str in daily_data:
+                daily_data[date_str]['sources'][source] += count
 
-        # Calculate daily TR (Total Registrations)
-        for date_str in daily_data:
-            daily_data[date_str]["total"]["tr"] = (
-                daily_data[date_str]["total"]["r"] + 
-                daily_data[date_str]["total"]["u"]
+        # Calculate daily TR and ensure all dates exist
+        for date_str in date_strings:
+            daily_data[date_str]['total']['tr'] = (
+                daily_data[date_str]['total']['r'] + 
+                daily_data[date_str]['total']['u']
             )
 
-        # Convert to sorted list of dates
+        # Convert to sorted list
         sorted_dates = sorted(daily_data.items(), key=lambda x: x[0])
 
         # Calculate monthly totals
@@ -845,20 +897,17 @@ def get_short_term_course_report():
         monthly_source_totals = {source: 0 for source in known_sources + ["Others"]}
 
         for date_str, data in sorted_dates:
-            # Course totals
             for course in course_list + ["Others"]:
-                for event in ["e", "p", "r", "u"]:
-                    monthly_course_totals[course][event] += data["courses"][course][event]
-                    monthly_course_totals["Total"][event] += data["courses"][course][event]
+                for event in ['e', 'p', 'r', 'u']:
+                    monthly_course_totals[course][event] += data['courses'][course][event]
+                    monthly_course_totals['Total'][event] += data['courses'][course][event]
             
-            # Source totals
             for source in known_sources + ["Others"]:
-                monthly_source_totals[source] += data["sources"][source]
+                monthly_source_totals[source] += data['sources'][source]
 
-        # Calculate monthly TR
-        monthly_course_totals["Total"]["tr"] = (
-            monthly_course_totals["Total"]["r"] + 
-            monthly_course_totals["Total"]["u"]
+        monthly_course_totals['Total']['tr'] = (
+            monthly_course_totals['Total']['r'] + 
+            monthly_course_totals['Total']['u']
         )
 
         return render_template(
