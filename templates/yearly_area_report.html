@@ -1,0 +1,56 @@
+<!-- templates/yearly_area_report.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yearly Area Report</title>
+    <style>
+        /* Add your preferred styling here */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }
+        th { background-color: #4CAF50; color: white; }
+        .total-row { background-color: #ffeb3b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Yearly Area Report - {{ year }}</h2>
+    <form method="post">
+        <input type="number" name="report_year" 
+               value="{{ year }}" min="2000" max="{{ current_year }}">
+        <button type="submit">Generate Report</button>
+    </form>
+
+    {% if areas %}
+    <table>
+        <thead>
+            <tr>
+                <th>Area</th>
+                {% for course in courses %}
+                <th>{{ course }}</th>
+                {% endfor %}
+                <th class="total-row">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for area in areas %}
+            <tr>
+                <td>{{ area }}</td>
+                {% for course in courses %}
+                <td>{{ report_data.get(area, {}).get(course, 0) }}</td>
+                {% endfor %}
+                <td class="total-row">{{ totals.area_totals.get(area, 0) }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td>Total</td>
+                {% for course in courses %}
+                <td>{{ totals.course_totals.get(course, 0) }}</td>
+                {% endfor %}
+                <td>{{ totals.grand_total }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% else %}
+    <p>No data available for {{ year }}</p>
+    {% endif %}
+</body>
+</html>

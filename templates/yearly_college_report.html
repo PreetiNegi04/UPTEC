@@ -1,0 +1,61 @@
+<!-- templates/yearly_college_report.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yearly College Report</title>
+    <style>
+        /* Add your preferred styling here */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }
+        th { background-color: #4CAF50; color: white; }
+        .total-row { background-color: #ffeb3b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Yearly College Report - {{ year }}</h2>
+    <form method="post">
+        <input type="number" name="report_year" 
+          value="{{ year }}"
+          max="{{ current_year }}"
+          step="1"
+          style="width: 100px;">
+        <button type="submit">Generate Report</button>
+    </form>
+
+    {% if colleges %}
+    <div class="scroll-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="college-header">College</th>
+                    {% for course in courses %}
+                    <th>{{ course }}</th>
+                    {% endfor %}
+                    <th class="total-row">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for college in colleges %}
+                <tr>
+                    <td class="college-header">{{ college }}</td>
+                    {% for course in courses %}
+                    <td>{{ report_data[college][course] }}</td>
+                    {% endfor %}
+                    <td class="total-row">{{ totals.college_totals[college] }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-row">
+                    <td>Total</td>
+                    {% for course in courses %}
+                    <td>{{ totals.course_totals[course] }}</td>
+                    {% endfor %}
+                    <td>{{ totals.grand_total }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No data available for {{ year }}</p>
+    {% endif %}
+</body>
+</html>

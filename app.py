@@ -1249,6 +1249,271 @@ def deleteEnquiry():
         print(f"Error deleting record: {e}")
         return jsonify({'status': 'error', 'message': 'Failed to delete record'}), 500
 
+# Yearly Area Report Route
+@app.route('/yearly_area_report', methods=['GET', 'POST'])
+def yearly_area_report():
+    course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term"]
+
+    try:
+        selected_year = datetime.today().year
+        if request.method == 'POST' and 'report_year' in request.form:
+            selected_year = int(request.form['report_year'])
+        
+        start_date = datetime(selected_year, 1, 1)
+        end_date = datetime(selected_year, 12, 31, 23, 59, 59)
+
+        # Get areas
+        area_pipeline = [
+            {"$match": {
+                "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), 
+                                   "$lte": end_date.strftime("%Y-%m-%d")},
+                "e": "1",
+                "area": {"$exists": True, "$ne": ""}
+            }},
+            {"$group": {
+                "_id": "$area",
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"count": -1}},
+            {"$limit": 15}
+        ]
+
+        area_results = list(mongo.db.contacts.aggregate(area_pipeline))
+        areas = [doc["_id"] for doc in area_results if doc.get("_id")]
+
+        # Main report data
+        report_data = {area: {course: 0 for course in course_list + ["Others"]} 
+                      for area in areas}
+        totals = {
+            "area_totals": {area: 0 for area in areas},
+            "course_totals": {course: 0 for course in course_list + ["Others"]},
+            "grand_total": 0
+        }
+
+        if areas:
+            report_pipeline = [
+                {"$match": {
+                    "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), 
+                                      "$lte": end_date.strftime("%Y-%m-%d")},
+                    "e": "1",
+                    "area": {"$in": areas}
+                }},
+                {"$project": {
+                    "area": "$area",
+                    "course": {
+                        "$cond": [
+                            {"$in": ["$course_name", course_list]},
+                            "$course_name",
+                            "Others"
+                        ]
+                    }
+                }},
+                {"$group": {
+                    "_id": {"area": "$area", "course": "$course"},
+                    "count": {"$sum": 1}
+                }}
+            ]
+
+            report_results = list(mongo.db.contacts.aggregate(report_pipeline))
+
+            for doc in report_results:
+                area = doc["_id"]["area"]
+                course = doc["_id"]["course"]
+                count = doc["count"]
+                
+                if area in report_data and course in report_data[area]:
+                    report_data[area][course] = count
+                    totals["area_totals"][area] += count
+                    totals["course_totals"][course] += count
+                    totals["grand_total"] += count
+
+        return render_template(
+            'yearly_area_report.html',
+            areas=areas,
+            courses=course_list + ["Others"],
+            report_data=report_data,
+            totals=totals,
+            year=selected_year,
+            current_year=datetime.today().year
+        )
+
+    except Exception as e:
+        print(f"Yearly Area Report Error: {str(e)}")
+        return "Error generating report", 500
+
+# Yearly Qualification Report Route
+@app.route('/yearly_qualification_report', methods=['GET', 'POST'])
+def yearly_qualification_report():
+    course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term"]
+    qualifications = ["High School", "Undergraduate", "Graduate", "Postgraduate"]
+
+    try:
+        selected_year = datetime.today().year
+        if request.method == 'POST' and 'report_year' in request.form:
+            selected_year = int(request.form['report_year'])
+        
+        start_date = datetime(selected_year, 1, 1)
+        end_date = datetime(selected_year, 12, 31, 23, 59, 59)
+
+        # Main report pipeline
+        report_data = {q: {c: 0 for c in course_list + ["Others"]} 
+                      for q in qualifications + ["Others"]}
+        totals = {
+            "qualification_totals": {q: 0 for q in qualifications + ["Others"]},
+            "course_totals": {c: 0 for c in course_list + ["Others"]},
+            "grand_total": 0
+        }
+
+        report_pipeline = [
+            {"$match": {
+                "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), 
+                                   "$lte": end_date.strftime("%Y-%m-%d")},
+                "e": "1"
+            }},
+            {"$project": {
+                "qualification": {
+                    "$cond": [
+                        {"$in": ["$qualification", qualifications]},
+                        "$qualification",
+                        "Others"
+                    ]
+                },
+                "course": {
+                    "$cond": [
+                        {"$in": ["$course_name", course_list]},
+                        "$course_name",
+                        "Others"
+                    ]
+                }
+            }},
+            {"$group": {
+                "_id": {
+                    "qualification": "$qualification",
+                    "course": "$course"
+                },
+                "count": {"$sum": 1}
+            }}
+        ]
+
+        report_results = list(mongo.db.contacts.aggregate(report_pipeline))
+
+        for doc in report_results:
+            qual = doc["_id"]["qualification"]
+            course = doc["_id"]["course"]
+            count = doc["count"]
+            
+            if qual in report_data and course in report_data[qual]:
+                report_data[qual][course] = count
+                totals["qualification_totals"][qual] += count
+                totals["course_totals"][course] += count
+                totals["grand_total"] += count
+
+        return render_template(
+            'yearly_qualification_report.html',
+            qualifications=qualifications,
+            courses=course_list + ["Others"],
+            report_data=report_data,
+            totals=totals,
+            year=selected_year,
+            current_year=datetime.today().year
+        )
+
+    except Exception as e:
+        print(f"Yearly Qualification Report Error: {str(e)}")
+        return "Error generating report", 500
+
+@app.route('/yearly_college_report', methods=['GET', 'POST'])
+def yearly_college_report():
+    course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term"]
+
+    try:
+        selected_year = datetime.today().year
+        if request.method == 'POST' and 'report_year' in request.form:
+            selected_year = int(request.form['report_year'])
+        
+        start_date = datetime(selected_year, 1, 1)
+        end_date = datetime(selected_year, 12, 31, 23, 59, 59)
+
+        # Get colleges (same pattern as monthly reports)
+        college_pipeline = [
+            {"$match": {
+                "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), 
+                                   "$lte": end_date.strftime("%Y-%m-%d")},
+                "e": "1",
+                "college_name": {"$exists": True, "$ne": ""}
+            }},
+            {"$group": {
+                "_id": "$college_name",
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"count": -1}},
+            {"$limit": 15}
+        ]
+
+        college_results = list(mongo.db.contacts.aggregate(college_pipeline))
+        colleges = [doc["_id"] for doc in college_results if doc.get("_id")]
+
+        # Main report pipeline (same as monthly pattern)
+        report_data = {college: {course: 0 for course in course_list + ["Others"]} 
+                      for college in colleges}
+        totals = {
+            "college_totals": {college: 0 for college in colleges},
+            "course_totals": {course: 0 for course in course_list + ["Others"]},
+            "grand_total": 0
+        }
+
+        if colleges:
+            report_pipeline = [
+                {"$match": {
+                    "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), 
+                                      "$lte": end_date.strftime("%Y-%m-%d")},
+                    "e": "1",
+                    "college_name": {"$in": colleges}
+                }},
+                {"$project": {
+                    "college": "$college_name",
+                    "course": {
+                        "$cond": [
+                            {"$in": ["$course_name", course_list]},
+                            "$course_name",
+                            "Others"
+                        ]
+                    }
+                }},
+                {"$group": {
+                    "_id": {"college": "$college", "course": "$course"},
+                    "count": {"$sum": 1}
+                }}
+            ]
+
+            report_results = list(mongo.db.contacts.aggregate(report_pipeline))
+
+            for doc in report_results:
+                college = doc["_id"]["college"]
+                course = doc["_id"]["course"]
+                count = doc["count"]
+                
+                if college in report_data and course in report_data[college]:
+                    report_data[college][course] = count
+                    totals["college_totals"][college] += count
+                    totals["course_totals"][course] += count
+                    totals["grand_total"] += count
+
+        return render_template(
+            'yearly_college_report.html',
+            colleges=colleges,
+            courses=course_list + ["Others"],
+            report_data=report_data,
+            totals=totals,
+            year=selected_year,
+            current_year=datetime.today().year
+        )
+
+    except Exception as e:
+        print(f"Yearly College Report Error: {str(e)}")
+        return "Error generating report", 500
+    
+
 def validate_username(username):
     # Username should be at least 8 characters long, containing at least one uppercase letter, one lowercase letter, and one digit
     if re.fullmatch(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$', username):

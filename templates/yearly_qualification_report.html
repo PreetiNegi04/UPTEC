@@ -1,0 +1,56 @@
+<!-- templates/yearly_qualification_report.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yearly Qualification Report</title>
+    <style>
+        /* Add your preferred styling here */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }
+        th { background-color: #4CAF50; color: white; }
+        .total-row { background-color: #ffeb3b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Yearly Qualification Report - {{ year }}</h2>
+    <form method="post">
+        <input type="number" name="report_year" 
+               value="{{ year }}" min="2000" max="{{ current_year }}">
+        <button type="submit">Generate Report</button>
+    </form>
+
+    {% if report_data %}
+    <table>
+        <thead>
+            <tr>
+                <th>Qualification</th>
+                {% for course in courses %}
+                <th>{{ course }}</th>
+                {% endfor %}
+                <th class="total-row">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for qual in qualifications %}
+            <tr>
+                <td>{{ qual }}</td>
+                {% for course in courses %}
+                <td>{{ report_data[qual][course] }}</td>
+                {% endfor %}
+                <td class="total-row">{{ totals.qualification_totals[qual] }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td>Total</td>
+                {% for course in courses %}
+                <td>{{ totals.course_totals[course] }}</td>
+                {% endfor %}
+                <td>{{ totals.grand_total }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% else %}
+    <p>No data available for {{ year }}</p>
+    {% endif %}
+</body>
+</html>
