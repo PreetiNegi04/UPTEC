@@ -1,0 +1,60 @@
+<!-- templates/college_report.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>College-wise Monthly Report</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #4CAF50; color: white; position: sticky; top: 0; }
+        tr:hover { background-color: #f5f5f5; }
+        .college-header { background-color: #45a049; }
+        .total-row { background-color: #ffeb3b; font-weight: bold; }
+        .scroll-container { max-height: 80vh; overflow: auto; }
+        .date-picker { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h2>College-wise Course Enquiry Report - {{ month_name }}</h2>
+    
+    <form method="post" class="date-picker">
+        <input type="month" name="report_month" 
+               value="{{ request.form.report_month if request.method == 'POST' else '' }}"
+               max="{{ current_month }}">
+        <button type="submit">Generate Report</button>
+    </form>
+
+    <div class="scroll-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="college-header">College</th>
+                    {% for course in courses %}
+                    <th>{{ course }}</th>
+                    {% endfor %}
+                    <th class="total-row">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for college in colleges %}
+                <tr>
+                    <td class="college-header">{{ college }}</td>
+                    {% for course in courses %}
+                    <td>{{ report_data[college][course] }}</td>
+                    {% endfor %}
+                    <td class="total-row">{{ totals.college_totals[college] }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-row">
+                    <td>Total</td>
+                    {% for course in courses %}
+                    <td>{{ totals.course_totals[course] }}</td>
+                    {% endfor %}
+                    <td>{{ totals.grand_total }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+

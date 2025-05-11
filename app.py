@@ -9,6 +9,7 @@ from flask import jsonify
 import calendar
 from dateutil.relativedelta import relativedelta
 from bson.son import SON
+from collections import defaultdict
 
 app = Flask(__name__)
 
@@ -653,7 +654,7 @@ def save_enquiry():
         result = mongo.db.contacts.update_one({'_id': ObjectId(record_id)}, {'$set': updated_data})
 
         # Check for modifications
-        if result.modified_count > 0 or r.modified_count > 0:
+        if result.modified_count > 0:
             return jsonify({'status': 'success', 'message': 'Record updated successfully!'})
         else:
             # If no modifications were made, consider it successful
@@ -1028,6 +1029,209 @@ def qualification_report():
     except Exception as e:
         print(f"Error generating qualification report: {str(e)}")
         return "Error generating report", 500
+
+@app.route('/college_report', methods=['GET', 'POST'])
+def college_report():
+    course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term"]
+
+    try:
+        # Date handling
+        if request.method == 'POST':
+            selected_date = datetime.strptime(request.form['report_month'], "%Y-%m")
+        else:
+            selected_date = datetime.today()
+
+        year = selected_date.year
+        month = selected_date.month
+        start_date = datetime(year, month, 1)
+        end_date = datetime(year, month, calendar.monthrange(year, month)[1], 23, 59, 59)
+
+        # Get top colleges without Others
+        college_pipeline = [
+            {"$match": {
+                "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), 
+                                   "$lte": end_date.strftime("%Y-%m-%d")},
+                "e": "1",
+                "college_name": {"$exists": True, "$ne": ""}
+            }},
+            {"$group": {
+                "_id": "$college_name",
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"count": -1}}
+        ]
+
+        college_results = list(mongo.db.contacts.aggregate(college_pipeline))
+        colleges = [doc["_id"] for doc in college_results if doc["_id"]]
+
+        # Main aggregation pipeline
+        report_pipeline = [
+            {"$match": {
+                "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), 
+                                   "$lte": end_date.strftime("%Y-%m-%d")},
+                "e": "1",
+                "college_name": {"$in": colleges}
+            }},
+            {"$project": {
+                "college": "$college_name",
+                "course": {
+                    "$cond": [
+                        {"$in": ["$course_name", course_list]},
+                        "$course_name",
+                        "Others"
+                    ]
+                }
+            }},
+            {"$group": {
+                "_id": {
+                    "college": "$college",
+                    "course": "$course"
+                },
+                "count": {"$sum": 1}
+            }},
+            {"$group": {
+                "_id": "$_id.college",
+                "courses": {"$push": {"course": "$_id.course", "count": "$count"}}
+            }}
+        ]
+
+        report_results = list(mongo.db.contacts.aggregate(report_pipeline))
+
+        # Initialize report data
+        report_data = {college: {course: 0 for course in course_list + ["Others"]} 
+                      for college in colleges}
+        totals = {
+            "college_totals": {college: 0 for college in colleges},
+            "course_totals": {course: 0 for course in course_list + ["Others"]},
+            "grand_total": 0
+        }
+
+        # Populate data
+        for college_data in report_results:
+            college = college_data["_id"]
+            if college not in report_data:
+                continue
+                
+            for course_entry in college_data["courses"]:
+                course = course_entry["course"]
+                count = course_entry["count"]
+                if course in report_data[college]:
+                    report_data[college][course] = count
+                    totals["college_totals"][college] += count
+                    totals["course_totals"][course] += count
+                    totals["grand_total"] += count
+
+        return render_template(
+            'college_report.html',
+            colleges=colleges,
+            courses=course_list + ["Others"],
+            report_data=report_data,
+            totals=totals,
+            month_name=start_date.strftime("%B %Y"),
+            current_month=datetime.today().strftime("%Y-%m")
+        )
+
+    except Exception as e:
+        print(f"Error generating college report: {str(e)}")
+        return "Error generating report", 500
+    
+@app.route('/area_report', methods=['GET', 'POST'])
+def area_report():
+    course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term"]
+    try:
+        # Date handling
+        selected_date = datetime.today()
+        if request.method == 'POST':
+            if 'report_month' in request.form:
+                selected_date = datetime.strptime(request.form['report_month'], "%Y-%m")
+        
+        year = selected_date.year
+        month = selected_date.month
+        start_date = datetime(year, month, 1)
+        end_date = datetime(year, month, calendar.monthrange(year, month)[1], 23, 59, 59)
+
+        # Get top areas
+        area_pipeline = [
+            {"$match": {
+                "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), 
+                                   "$lte": end_date.strftime("%Y-%m-%d")},
+                "e": "1",
+                "area": {"$exists": True, "$ne": ""}
+            }},
+            {"$group": {
+                "_id": "$area",
+                "count": {"$sum": 1}
+            }},
+            {"$sort": {"count": -1}},
+            {"$limit": 15}
+        ]
+
+        area_results = list(mongo.db.contacts.aggregate(area_pipeline))
+        areas = [doc["_id"] for doc in area_results if doc.get("_id")]
+
+        # Main pipeline
+        report_data = {}
+        totals = {
+            "area_totals": defaultdict(int),
+            "course_totals": defaultdict(int),
+            "grand_total": 0
+        }
+
+        if areas:
+            report_pipeline = [
+                {"$match": {
+                    "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), 
+                                      "$lte": end_date.strftime("%Y-%m-%d")},
+                    "e": "1",
+                    "area": {"$in": areas}
+                }},
+                {"$project": {
+                    "area": "$area",
+                    "course": {
+                        "$cond": [
+                            {"$in": ["$course_name", course_list]},
+                            "$course_name",
+                            "Others"
+                        ]
+                    }
+                }},
+                {"$group": {
+                    "_id": {"area": "$area", "course": "$course"},
+                    "count": {"$sum": 1}
+                }}
+            ]
+
+            report_results = list(mongo.db.contacts.aggregate(report_pipeline))
+
+            # Initialize report data
+            report_data = {area: {course: 0 for course in course_list + ["Others"]} 
+                         for area in areas}
+
+            # Populate data
+            for doc in report_results:
+                area = doc["_id"]["area"]
+                course = doc["_id"]["course"]
+                count = doc["count"]
+                
+                if area in report_data and course in report_data[area]:
+                    report_data[area][course] = count
+                    totals["area_totals"][area] += count
+                    totals["course_totals"][course] += count
+                    totals["grand_total"] += count
+
+        return render_template(
+            'area_report.html',
+            areas=areas,
+            courses=course_list + ["Others"],
+            report_data=report_data,
+            totals=totals,
+            month_name=start_date.strftime("%B %Y"),
+            current_month=datetime.today().strftime("%Y-%m")
+        )
+
+    except Exception as e:
+        print(f"Error generating area report: {str(e)}")
+        return render_template('error.html', error_message=str(e)), 500
 
 @app.route('/enquiry/delete', methods=['POST'])
 def deleteEnquiry():
