@@ -504,23 +504,31 @@ def update_contact(id):
 
 @app.route('/success', methods=['POST', 'GET'])
 def success():
-    username = session.get('username', None)
     return render_template('success.html') 
 
 @app.route('/document/<string:id>/action/delete')
 def delete_document(id):
-    # Convert the string id to an ObjectId
-    id = ObjectId(id)
-    # Delete the document with the given ID
-    mongo.db.form_data.delete_one({"_id": id})
+    username = session.get('username')
+    if username == "Admin123":
+        # Convert the string id to an ObjectId
+        id = ObjectId(id)
+        mongo.db.contacts.delete_one({"_id": id})
+    else:
+        # If the user is not "Admin123", redirect to the index page
+        flash("You do not have permission to delete this document.", "error")
     return redirect(url_for('table'))
 
 @app.route('/enquiry/<string:id>/action/delete')
 def delete_enquiry(id):
-    # Convert the string id to an ObjectId
-    id = ObjectId(id)
-    # Delete the document with the given ID
-    mongo.db.contacts.update_one({"_id": id}, {"$set": {'r': "2"}})
+    username = session.get('username')
+    if username == "Admin123":
+        # Convert the string id to an ObjectId
+        id = ObjectId(id)
+        # Delete the document with the given ID
+        mongo.db.contacts.delete_one({"_id": id})
+    else:
+        # If the user is not "Admin123", redirect to the index page
+        flash("You do not have permission to delete this document.", "error")
     return redirect(url_for('index'))
 
 @app.route('/enquiry/<string:id>/action/registered')
@@ -620,20 +628,21 @@ def save_upgrade():
 
 @app.route('/delete', methods=['POST'])
 def delete_record():
-    try:
-        data = request.json
-        record_id = data.get('id')
-        form_col = mongo.db["form_data"]
-        result = form_col.delete_one({'_id': ObjectId(record_id)})
+    username = session.get('username')
+    if username != "Admin123":
+        return jsonify({'status': 'error', 'message': 'You do not have permission to delete this record.'}), 403
+    else:
+        try:
+            data = request.json
+            record_id = data.get('id')
+            result = collection.delete_one({'_id': ObjectId(record_id)})
 
-        if result.deleted_count > 0:
-            return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
-        else:
-            print(f"Error no record")
-            return jsonify({'status': 'error', 'message': 'No record was deleted'}), 500
-    except Exception as e:
-        print(f"Error deleting record: {e}")
-        return jsonify({'status': 'error', 'message': 'Failed to delete record'}), 500
+            if result.deleted_count > 0:
+                return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
+            else:
+                return jsonify({'status': 'error', 'message': 'No record was deleted'}), 500
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': 'Failed to delete record'}), 500
 
 
 @app.route('/enquiry/save', methods=['POST'])
@@ -1235,19 +1244,23 @@ def area_report():
 
 @app.route('/enquiry/delete', methods=['POST'])
 def deleteEnquiry():
-    try:
-        data = request.json
-        record_id = data.get('id')
-        result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': {'r': "2"}})
+    username = session.get('username')
+    if username != "Admin123":
+        return jsonify({'status': 'error', 'message': 'You do not have permission to delete this record.'}), 403
+    else:
+        try:
+            data = request.json
+            record_id = data.get('id')
+            result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': {'r': "2"}})
 
-        if result.modified_count > 0:
-            return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
-        else:
-            print(f"Error no record")
-            return jsonify({'status': 'error', 'message': 'No record was deleted'}), 500
-    except Exception as e:
-        print(f"Error deleting record: {e}")
-        return jsonify({'status': 'error', 'message': 'Failed to delete record'}), 500
+            if result.modified_count > 0:
+                return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
+            else:
+                print(f"Error no record")
+                return jsonify({'status': 'error', 'message': 'No record was deleted'}), 500
+        except Exception as e:
+            print(f"Error deleting record: {e}")
+            return jsonify({'status': 'error', 'message': 'Failed to delete record'}), 500
 
 # Yearly Area Report Route
 @app.route('/yearly_area_report', methods=['GET', 'POST'])
