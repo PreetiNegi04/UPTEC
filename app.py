@@ -227,9 +227,9 @@ def yearlyreport():
 
 @app.route('/table')
 def table():
-    form_col = mongo.db["form_data"]
+    
     # Fetch all documents from the collection
-    all_documents = form_col.find()
+    all_documents = mongo.db.contacts.find({"r": "1"})
 
     # Convert the cursor to a list if you need to work with the documents directly
     all_documents = list(all_documents)
@@ -368,64 +368,6 @@ def forget_password():
             message = 'Email doesn\'t exist!'
     return render_template('auth-forgot-password.html', message=message)
 
-@app.route('/student_registration', methods=['POST', 'GET'])
-def student_registration():
-    if request.method == 'POST':
-        # Get form data
-        form_data = {
-            "name": request.form.get('uname'),
-            "programme": request.form.get('prog'),
-            "address": request.form.get('address'),
-            "area": request.form.get('area'),
-            "centre": request.form.get('centre'),
-            "hours": request.form.get('hours'),
-            "ampm": request.form.get('ampm'),
-            "today_date": request.form.get('today-date'),
-            "mobile": request.form.get('mobile'),
-            "whatsapp": request.form.get('whatsapp'),
-            "email": request.form.get('email'),
-            "dob": request.form.get('dob'),
-            "marital_status": request.form.get('mstatus'),
-            "qualification": request.form.get('qualification'),
-            "college_status": request.form.get('college-status'),
-            "current_college": request.form.get('current-college'),
-            "previous_college": request.form.get('previous-college'),
-            "ews": request.form.get('ews'),
-            "father_name": request.form.get('gname'),
-            "occupation": request.form.get('occupation'),
-            "organization_address": request.form.get('addoforg'),
-            "designation": request.form.get('desg'),
-            "family_mobile": request.form.get('mobile'),
-            "objectives": request.form.getlist('objectives'),
-            "source": request.form.getlist('source'),
-            "specific_source": request.form.get('newspaperRadioText'),
-            "course_name": request.form.get('coursename'),
-            "new_tech_course_name": request.form.get('newTechCourseName'),
-            "short_term_course_name": request.form.get('shortTermCourseName'),
-            "course_mode": request.form.get('course_mode'),
-            "course_duration": request.form.get('course_duration'),
-            "fees": request.form.get('fees'),
-            "secfees": request.form.get('secfees'),
-            "course_advised": request.form.get('courseadv'),
-            "p": request.form.get('p'),
-            "e": request.form.get('e'),
-            "r": request.form.get('r'),
-            "approved": request.form.get('approved'),
-            "fremark": request.form.get('fremark'),
-        }
-        try:
-            # Save to MongoDB
-            mongo.db.form_data.insert_one(form_data)
-            return redirect(url_for('success'))  # Replace 'success' with the name of the route you want to redirect to
-        except Exception as e:
-            app.logger.error(f"Error occurred while saving student registration data: {e}")
-            flash("An error occurred while saving your data. Please try again later.", "error")
-            return redirect(url_for('student_registration'))
-
-    # If it's a GET request, render the student registration form
-    return render_template('student_registration.html')
-        # Save to MongoDB
-         # Replace with the actual template you are using
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -486,14 +428,6 @@ def update_contact(id):
         
         # Update the document with the given ID
         collection.update_one({"_id": id}, {"$set": {'r': "1", 'register_date': datetime.today().strftime("%Y-%m-%d"), 'fees': fees}})
-    
-        target_collection = mongo.db['form_data']
-        
-        document = collection.find_one({"_id": ObjectId(id)})
-
-        if document:
-            # Insert the document into the target collection
-            target_collection.insert_one(document)
             
         return redirect(url_for('success'))
     
@@ -512,7 +446,10 @@ def delete_document(id):
     if username == "Admin123":
         # Convert the string id to an ObjectId
         id = ObjectId(id)
+        record = mongo.db.contacts.find_one({"_id": id})
         mongo.db.contacts.delete_one({"_id": id})
+        mongo.db.form_data.insert_one(record)
+
     else:
         # If the user is not "Admin123", redirect to the index page
         flash("You do not have permission to delete this document.", "error")
@@ -525,7 +462,10 @@ def delete_enquiry(id):
         # Convert the string id to an ObjectId
         id = ObjectId(id)
         # Delete the document with the given ID
+        record = mongo.db.contacts.find_one({"_id": id})
         mongo.db.contacts.delete_one({"_id": id})
+        mongo.db.form_data.insert_one(record)
+
     else:
         # If the user is not "Admin123", redirect to the index page
         flash("You do not have permission to delete this document.", "error")
@@ -538,9 +478,26 @@ def registered(id):
 
 @app.route('/enquiry/<string:id>/action/prospectus')
 def prospectus(id):
+    return redirect(url_for('prospectus_update', id=id))
+
+@app.route('/prospectus_update/<string:id>', methods=['GET', 'POST'])
+def prospectus_update(id):
+    # Convert id to ObjectId
     id = ObjectId(id)
-    mongo.db.contacts.update_one({"_id": id}, {"$set": {'p': '1', 'prospectus_date': datetime.today().strftime("%Y-%m-%d")}})
-    return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        
+        p_number = request.form.get('prospectus_number')
+        # Update the document with the given ID
+        mongo.db.contacts.update_one({"_id": id}, {"$set": {'p': '1', 'prospectus_date': datetime.today().strftime("%Y-%m-%d")}})
+        mongo.db.contacts.update_one({"_id": id}, {"$set": {'prospectus_number': p_number}})
+
+        return redirect(url_for('success'))
+    
+    # Retrieve the document to display on the update_contact page
+    document = collection.find_one({"_id": id})
+    
+    return render_template('prospectus_update.html', document=document)
 
 @app.route('/save', methods=['POST'])
 def save_record():
@@ -550,6 +507,9 @@ def save_record():
 
         record_id = data.get('id')
         updated_data = data.get('data')
+
+        id = ObjectId(record_id)
+        mongo.db.contacts.update_one({"_id": id}, {"$set": updated_data})
 
         # Validate the ObjectId
         if not ObjectId.is_valid(record_id):
@@ -575,7 +535,7 @@ def save_record():
         print(f"Error updating record: {str(e)}")  # Print the full error message
         return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
 
-@app.route('/save_upgrade', methods=['POST'])
+@app.route('/save_upgrade', methods=['POST', 'GET'])
 def save_upgrade():
     try:
         # Get the JSON data from the request
@@ -599,24 +559,9 @@ def save_upgrade():
             {'$set': update_data}
         )
 
-        # Step 3: Update the form_data collection
-        result_form_data = mongo.db.form_data.update_one(
-            {'_id': ObjectId(contact_id)},
-            {'$set': {
-                'course_name': updated_fields.get('course_name'),
-                'new_tech_course_name': updated_fields.get('new_tech_course_name'),
-                'short_term_course_name': updated_fields.get('short_term_course_name'),
-                'fees': updated_fields.get('fees'),
-            }}
-        )
-
         # Check if the update was acknowledged for contacts collection
         if result_contacts.modified_count == 0:
             return jsonify({'status': 'error', 'message': 'No records updated in contacts collection.'}), 400
-
-        # Check if the update was acknowledged for form_data collection
-        if result_form_data.modified_count == 0:
-            return jsonify({'status': 'error', 'message': 'No records updated in form_data collection.'}), 400
 
         return jsonify({'status': 'success'}), 200
 
@@ -635,7 +580,9 @@ def delete_record():
         try:
             data = request.json
             record_id = data.get('id')
+            data = mongo.db.contacts.find_one({'_id': ObjectId(record_id)})
             result = collection.delete_one({'_id': ObjectId(record_id)})
+            mongo.db.form_data.insert_one(data)
 
             if result.deleted_count > 0:
                 return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
@@ -1251,9 +1198,11 @@ def deleteEnquiry():
         try:
             data = request.json
             record_id = data.get('id')
-            result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': {'r': "2"}})
+            data = mongo.db.contacts.find_one({'_id': ObjectId(record_id)})
+            result = mongo.db.contacts.delete_one({'_id': ObjectId(record_id)})
+            mongo.db.form_data.insert_one({data})
 
-            if result.modified_count > 0:
+            if result.deleted_count > 0:
                 return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
             else:
                 print(f"Error no record")

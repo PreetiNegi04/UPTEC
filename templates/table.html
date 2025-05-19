@@ -438,13 +438,17 @@ function saveRow(saveButton) {
     }
 }
 
-// Function to handle delete button click (optional, can add confirmation if needed)
 function deleteRow(deleteButton) {
+    // Ask for confirmation
     if (confirm("Are you sure you want to delete this row?")) {
+        // Get the parent <tr> of the button
         var row = deleteButton.parentNode.parentNode;
-        row.remove(); // Or add your delete logic here
+        // Remove the row from the table
+        row.parentNode.removeChild(row);
     }
 }
+
+
 
 </script>
 
