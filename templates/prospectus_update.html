@@ -298,25 +298,33 @@ button[type="submit"]:hover {
                             <input type="text" class="form-control" name="r" id="r" value = "{{document['r']}}" readonly>
                         </div>
 
-                        <div class="col">
+                     
+                        
 
-                            <label for="prospectus">Prospectus Number:</label>
-                            <select class="form-control" name="prospectus" id="prospectus">
+                    </div>
+                        <div class="form-row mb-4">
+            <div class="col">
+                <label for="prospectus">Prospectus Format:</label>
+                <select class="form-control" name="prospectus" id="prospectus">
                                 <option value="O">O</option>
                                 <option value="PPS">PPS</option>
                             </select>
-                            <input type="text" id="prospectus_number" name="prospectus_number" pattern="^\d{6}$" maxlength="6" required title="Please enter exactly 6 digits.">
-                            
-                        </div>
+            </div>
+            <div class="col">
+                <label for="prospectus_number">Prospectus Number: </label>
+                <input type="text" id="prospectus_number" name="prospectus_number" pattern="^\d{6}$" maxlength="6" required title="Please enter exactly 6 digits.">
+            </div>
+           
+        </div>
 
-                    </div>
 
                     <div class="form-row mb-4">
                         <div class="col">
-                            <label for="status">Follow Up Status:</label>
+                            <label for="status">Follow Up Date:</label>
                             <input type="date" id="date" name="date" value = "{{document['follow_up_status']['date']}}" readonly>
                         </div>
                         <div class="col">
+                            <label for="status">Follow Up Status:</label>
                             <input type = text id="reason" name="reason" value = "{{document['follow_up_status']['reason']}}" readonly>
                         </div>
                     </div>
