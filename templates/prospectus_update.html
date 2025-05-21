@@ -299,8 +299,16 @@ button[type="submit"]:hover {
                         </div>
 
                         <div class="col">
-                            <label for="prospectus_number">Prospectus Number:</label>
-                            <input type="text" id="prospectus_number" name="prospectus_number" required></div>
+
+                            <label for="prospectus">Prospectus Number:</label>
+                            <select class="form-control" name="prospectus" id="prospectus">
+                                <option value="O">O</option>
+                                <option value="PPS">PPS</option>
+                            </select>
+                            <input type="text" id="prospectus_number" name="prospectus_number" pattern="^\d{6}$" maxlength="6" required title="Please enter exactly 6 digits.">
+                            
+                        </div>
+
                     </div>
 
                     <div class="form-row mb-4">

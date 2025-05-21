@@ -487,7 +487,7 @@ def prospectus_update(id):
     
     if request.method == 'POST':
         
-        p_number = request.form.get('prospectus_number')
+        p_number = request.form.get('prospectus')+request.form.get('prospectus_number')
         # Update the document with the given ID
         mongo.db.contacts.update_one({"_id": id}, {"$set": {'p': '1', 'prospectus_date': datetime.today().strftime("%Y-%m-%d")}})
         mongo.db.contacts.update_one({"_id": id}, {"$set": {'prospectus_number': p_number}})
