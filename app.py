@@ -101,7 +101,6 @@ def monthlyreport():
             current_date = data.get('today_date') 
             # Convert string to datetime object
             current_date = datetime.strptime(current_date, "%Y-%m-%d")
-            print(type(current_date))
             get_short_term_course_report(current_date)
         else:
             current_date = datetime.today()
@@ -117,7 +116,6 @@ def monthlyreport():
             (start_of_month + timedelta(days=i)).strftime("%Y-%m-%d")
             for i in range((end_of_month - start_of_month).days + 1)
         ]
-
 
         # Initialize the result structure
         monthly_report = []
@@ -275,13 +273,13 @@ def dailyreport():
     NewTech_p = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"1", "prospectus_date": today})
     ShortTerm_p = mongo.db.contacts.count_documents({"course_name": "Short Term", "p":"1", "prospectus_date": today})
 
-    Olevel_u = mongo.db.contacts.count_documents({"course_name": "O Level", "u":"1", "upgrade_date": today})
-    DCAC_u= mongo.db.contacts.count_documents({"course_name": "DCAC", "u":"1", "upgrade_date": today})
-    DCA_u= mongo.db.contacts.count_documents({"course_name": "DCA", "u":"1", "upgrade_date": today})
-    ADCA_u = mongo.db.contacts.count_documents({"course_name": "BCA", "u":"1", "upgrade_date": today})
-    Internship_u = mongo.db.contacts.count_documents({"course_name": "Internship", "u":"1", "upgrade_date": today})
-    NewTech_u = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"u", "upgrade_date": today})
-    ShortTerm_u = mongo.db.contacts.count_documents({"course_name": "Short Term", "u":"1", "upgrade_date": today})
+    Olevel_u = mongo.db.contacts.count_documents({"upgrade_course": "O Level", "u":"1", "upgrade_date": today})
+    DCAC_u= mongo.db.contacts.count_documents({"upgrade_course": "DCAC", "u":"1", "upgrade_date": today})
+    DCA_u= mongo.db.contacts.count_documents({"upgrade_course": "DCA", "u":"1", "upgrade_date": today})
+    ADCA_u = mongo.db.contacts.count_documents({"upgrade_course": "BCA", "u":"1", "upgrade_date": today})
+    Internship_u = mongo.db.contacts.count_documents({"upgrade_course": "Internship", "u":"1", "upgrade_date": today})
+    NewTech_u = mongo.db.contacts.count_documents({"upgrade_course": "New Tech", "p":"u", "upgrade_date": today})
+    ShortTerm_u = mongo.db.contacts.count_documents({"upgrade_course": "Short Term", "u":"1", "upgrade_date": today})
 
     total_e = Olevel_e + DCAC_e +DCA_e+ ADCA_e+ Internship_e + NewTech_e + ShortTerm_e
     total_r = Olevel_r + DCAC_r +DCA_r +ADCA_r+ Internship_r+ NewTech_r + ShortTerm_r
@@ -401,7 +399,9 @@ def contact():
                 'register_date': None,
                 'prospectus_date': None,
                 'u' : "0",
-                'upgrade_date': None
+                'upgrade_date': None,
+                'upgrade_course': "",
+                'upgrade_short_term_course': ""
             }
 
             mongo.db.contacts.insert_one(contact_data)
@@ -545,9 +545,9 @@ def save_upgrade():
 
         # Step 1: Prepare the update data
         update_data = {
-            'course_name': updated_fields.get('course_name'),
+            'upgrade_course': updated_fields.get('course_name'),
             'new_tech_course_name': updated_fields.get('new_tech_course_name'),
-            'short_term_course_name': updated_fields.get('short_term_course_name'),
+            'upgrade_short_term_course': updated_fields.get('short_term_course_name'),
             'fees': updated_fields.get('fees'),
             'u': "1",  # Set 'u' to 1
             'upgrade_date': datetime.today().strftime("%Y-%m-%d")  # Set the current date
@@ -668,6 +668,11 @@ def save_enquiry():
         return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
 
 
+from flask import Flask, request, render_template
+from datetime import datetime, timedelta
+import calendar
+from uuid import uuid4
+
 @app.route('/short_term_report', methods=['POST', 'GET'])
 def get_short_term_course_report():
     course_list = ["CCC", "MS Office And Internet", "MS Office with Tally Prime", "Tally Prime", 
@@ -700,6 +705,16 @@ def get_short_term_course_report():
                             {"$in": ["$short_term_course_name", course_list]}
                         ]},
                         "$short_term_course_name",
+                        "Others"
+                    ]
+                },
+                "upgrade_course": {
+                    "$cond": [
+                        {"$and": [
+                            {"$ifNull": ["$upgrade_short_term_course", False]},
+                            {"$in": ["$upgrade_short_term_course", course_list]}
+                        ]},
+                        "$upgrade_short_term_course",
                         "Others"
                     ]
                 },
@@ -757,14 +772,14 @@ def get_short_term_course_report():
                         "date": {"$dateToString": {"format": "%Y-%m-%d", "date": "$u_date"}}
                     }},
                     {"$group": {
-                        "_id": {"date": "$date", "course": "$course"},
+                        "_id": {"date": "$date", "course": "$upgrade_course"},
                         "count": {"$sum": 1}
                     }}
                 ]
             }}
         ]
 
-        # Aggregation pipeline for daily source data
+        # Aggregation pipeline for daily source data (unchanged)
         pipeline_sources = [
             {"$match": {
                 "date_of_enquiry": {"$gte": start_date.strftime("%Y-%m-%d"), "$lte": end_date.strftime("%Y-%m-%d")},
@@ -880,111 +895,6 @@ def get_short_term_course_report():
     except Exception as e:
         print(f"Error: {str(e)}")
         return "An error occurred", 500
-    
-
-# Add this new route in your Flask app
-@app.route('/qualification_report', methods=['GET', 'POST'])
-def qualification_report():
-    course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term"]
-    qualifications = ["High School", "Undergraduate", "Graduate", "Postgraduate"]
-
-    try:
-        # Get selected month
-        if request.method == 'POST':
-            selected_date = datetime.strptime(request.form['report_month'], "%Y-%m")
-        else:
-            selected_date = datetime.today()
-        
-        year = selected_date.year
-        month = selected_date.month
-        start_date = datetime(year, month, 1)
-        end_date = datetime(year, month, calendar.monthrange(year, month)[1], 23, 59, 59)
-
-        # Aggregation pipeline
-        pipeline = [
-            {"$match": {
-                "e": "1",
-                "$expr": {
-                    "$and": [
-                        {"$gte": [{"$dateFromString": {"dateString": "$date_of_enquiry"}}, start_date]},
-                        {"$lte": [{"$dateFromString": {"dateString": "$date_of_enquiry"}}, end_date]}
-                    ]
-                }
-            }},
-            {"$project": {
-                "qualification": {
-                    "$cond": [
-                        {"$in": ["$qualification", qualifications]},
-                        "$qualification",
-                        "Others"
-                    ]
-                },
-                "course": {
-                    "$cond": [
-                        {"$in": ["$course_name", course_list]},
-                        "$course_name",
-                        "Others"
-                    ]
-                }
-            }},
-            {"$group": {
-                "_id": {
-                    "qualification": "$qualification",
-                    "course": "$course"
-                },
-                "count": {"$sum": 1}
-            }},
-            {"$group": {
-                "_id": "$_id.qualification",
-                "courses": {
-                    "$push": {
-                        "course": "$_id.course",
-                        "count": "$count"
-                    }
-                }
-            }}
-        ]
-
-        results = list(mongo.db.contacts.aggregate(pipeline))
-
-        # Initialize data structure with zeros
-        report_data = {q: {c: 0 for c in course_list + ["Others"]} for q in qualifications + ["Others"]}
-
-        # Populate data from results
-        for entry in results:
-            qual = entry["_id"]
-            for course_entry in entry["courses"]:
-                course = course_entry["course"]
-                count = course_entry["count"]
-                if qual in report_data and course in report_data[qual]:
-                    report_data[qual][course] = count
-
-        col_totals = {course: 0 for course in course_list + ["Others"]}
-        row_totals = {qual: 0 for qual in qualifications + ["Others"]}
-        grand_total = 0
-
-        for qual in report_data:
-            for course in report_data[qual]:
-                count = report_data[qual][course]
-                row_totals[qual] += count
-                col_totals[course] += count
-                grand_total += count
-
-        return render_template(
-            'qualification_report.html',
-            qualifications=qualifications,
-            courses=course_list + ["Others"],
-            report_data=report_data,
-            month_name=start_date.strftime("%B %Y"),
-            current_month=datetime.today().strftime("%Y-%m"),
-            row_totals=row_totals,
-            col_totals=col_totals,
-            grand_total=grand_total
-        )
-
-    except Exception as e:
-        print(f"Error generating qualification report: {str(e)}")
-        return "Error generating report", 500
 
 @app.route('/college_report', methods=['GET', 'POST'])
 def college_report():
@@ -1641,15 +1551,15 @@ def report(date):
         "prospectus_date": specific_date  # Ensure the upgrade_date matches the specific date
     })
 
-    Olevel_u = mongo.db.contacts.count_documents({"course_name": "O Level", "u":"1", "upgrade_date": specific_date})
-    DCAC_u= mongo.db.contacts.count_documents({"course_name": "DCAC", "u":"1", "upgrade_date": specific_date})
-    DCA_u= mongo.db.contacts.count_documents({"course_name": "DCA", "u":"1", "upgrade_date": specific_date})
-    ADCA_u = mongo.db.contacts.count_documents({"course_name": "BCA", "u":"1", "upgrade_date": specific_date})
-    Internship_u = mongo.db.contacts.count_documents({"course_name": "Internship", "u":"1", "upgrade_date": specific_date})
-    NewTech_u = mongo.db.contacts.count_documents({"course_name": "New Tech", "p":"u", "upgrade_date": specific_date})
-    ShortTerm_u = mongo.db.contacts.count_documents({"course_name": "Short Term", "u":"1", "upgrade_date": specific_date})
+    Olevel_u = mongo.db.contacts.count_documents({"upgrade_course": "O Level", "u":"1", "upgrade_date": specific_date})
+    DCAC_u= mongo.db.contacts.count_documents({"upgrade_course": "DCAC", "u":"1", "upgrade_date": specific_date})
+    DCA_u= mongo.db.contacts.count_documents({"upgrade_course": "DCA", "u":"1", "upgrade_date": specific_date})
+    ADCA_u = mongo.db.contacts.count_documents({"upgrade_course": "BCA", "u":"1", "upgrade_date": specific_date})
+    Internship_u = mongo.db.contacts.count_documents({"upgrade_course": "Internship", "u":"1", "upgrade_date": specific_date})
+    NewTech_u = mongo.db.contacts.count_documents({"upgrade_course": "New Tech", "p":"u", "upgrade_date": specific_date})
+    ShortTerm_u = mongo.db.contacts.count_documents({"upgrade_course": "Short Term", "u":"1", "upgrade_date": specific_date})
     others_u = mongo.db.contacts.count_documents({
-        "course_name": {"$nin": course_list},  # Courses not in the predefined list
+        "upgrade_course": {"$nin": course_list},  # Courses not in the predefined list
         "u": "1",  # Checking if 'u' is 1
         "upgrade_date": specific_date  # Ensure the upgrade_date matches the specific date
     })

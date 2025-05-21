@@ -231,29 +231,23 @@
          oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
          title="Enter exactly 10 digits" required>
 </td>
-
-                              <!--  <td><input type="text" class="address" value="{{ doc.address }}"></td>
-                <td><input type="text" class="area" value="{{ doc.area }}"></td>
-                <td><input type="text" class="qualification" value="{{ doc.qualification }}"></td>
-                <td><input type="text" class="college_name" value="{{ doc.college_name}}"></td>
-                <td><input type="text" class="objectives" value="{{ doc.objectives|join(', ') }}"></td>
-                <td><input type="text" class="source" value="{{ doc.source |join(', ')}}"></td>
-                <td><input type="text" class="specific_source" value="{{specific_source}}"></td>-->
-                <td><input type="text" class="course_name" value="{{ doc.course_name}}"></td>
+{% if doc.upgrade_course == ""%}
+<td><input type="text" class="course_name" value="{{ doc.course_name}}"></td>
+{% else %}
+<td><input type="text" class="course_name" value="{{ doc.upgrade_course}}"></td>
+{% endif %}
                 <td><input type="text" class="new_tech_course_name" value="{{ doc.new_tech_course_name}}"></td>
+{%if doc.upgrade_short_term_course == ""%}
                 <td><input type="text" class="short_term_course_name" value="{{ doc.short_term_course_name}}"></td>
-               <!-- <td><input type="text" class="e" value="{{ doc.e}}" readonly></td>
-                <td><input type="text" class="p" value="{{ doc.p}}" readonly></td>
-                <td><input type="text" class="r" value="{{ doc.r}}" readonly></td>-->
+{% else %}
+                <td><input type="text" class="short_term_course_name" value="{{ doc.upgrade_short_term_course}}"></td>
+{% endif %}
                <td>
   <input type="text" pattern="\d{6}" maxlength="6" minlength="6"
          class="fees" value="{{ doc.fees }}"
          oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)"
          title="Enter exactly 6 digits" required>
 </td>
-
-                <!--<td><input type="date" class="follow_up_status date" value="{{ doc.follow_up_status.date}}"></td>
-                <td><input type="text" class="follow_up_status reason" value="{{ doc.follow_up_status.reason }}"></td>-->
 
                 <td class="action-buttons">
                     <button class="editButton" onclick="editRow(this)">Edit</button>
