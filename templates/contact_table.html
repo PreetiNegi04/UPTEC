@@ -196,8 +196,20 @@
                 <td><input type="date" class="programme" value="{{ doc.date_of_enquiry }}"></td>
                 <td><input type="text" class="type_of_enquiry" value="{{ doc.type_of_enquiry }}"></td>
                 <td><input type="text" class="name" value="{{ doc.name }}"></td>
-                <td><input type="text" class="contact_number" value="{{ doc.contact_number }}"></td>
-                <td><input type="text" class="whatsapp" value="{{ doc.whatsapp }}"></td>
+               <td>
+  <input type="text" pattern="\d{10}" maxlength="10" minlength="10"
+         class="contact_number" value="{{ doc.contact_number }}"
+         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+         title="Enter exactly 10 digits" required>
+</td>
+
+<td>
+  <input type="text" pattern="\d{10}" maxlength="10" minlength="10"
+         class="whatsapp" value="{{ doc.whatsapp }}"
+         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+         title="Enter exactly 10 digits" required>
+</td>
+
                 <td><input type="text" class="address" value="{{ doc.address }}"></td>
                 <td><input type="text" class="area" value="{{ doc.area }}"></td>
                 <td><input type="text" class="qualification" value="{{ doc.qualification }}"></td>
@@ -211,7 +223,13 @@
                 <td><input type="text" class="p" value="{{ doc.p}}"></td>
                 <td><input type="text" class="e" value="{{ doc.e}}"></td>
                 <td><input type="text" class="r" value="{{ doc.r}}"></td>
-                <td><input type="text" class="fees" value="{{ doc.fees}}"></td>
+                <td>
+  <input type="text" pattern="\d{6}" maxlength="6" minlength="6"
+         class="fees" value="{{ doc.fees }}"
+         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)"
+         title="Enter exactly 6 digits" required>
+</td>
+
                 <td><input type="date" class="follow_up_status date" value="{{ doc.follow_up_status.date}}"></td>
                 <td><input type="text" class="follow_up_status reason" value="{{ doc.follow_up_status.reason }}"></td>
                 <td class="action-buttons">
