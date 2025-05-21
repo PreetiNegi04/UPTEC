@@ -46,12 +46,25 @@
             background: #f0f0f0;
         }
          .report-container {
-            width: auto;
+            width: 1300px;
             background-color: white;
             padding: 10px;
             border: 1px solid black;
             margin: 0 auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+         h2 {
+            text-align: center;
+            margin: 0;
+            font-size: 26px;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            
+            padding-bottom: 5px;
         }
 
     </style>
@@ -61,7 +74,7 @@
     
     <form method="post" class="date-picker">
         <input type="month" name="report_month" 
-               value="{{ request.form.report_month if request.method == 'POST' else '' }}"
+               value="{{ request.form.report_month if request.method == 'POST' and request.form.report_month else current_month}}"
                max="{{ current_month }}">
         <button type="submit">Generate Report</button>
     </form>
