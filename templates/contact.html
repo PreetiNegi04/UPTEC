@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enquiry Form</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link  rel ="stylesheet" href="static\contactcss.css" >
+    <link  rel ="stylesheet" href="static/contactcss.css" >
 
     
 </head>
+
 <body>
     <header>
         <h1>Enquiry Form</h1>
@@ -44,11 +45,30 @@
         <div class="form-row mb-4">
             <div class="col">
                 <label for="contact">Contact Number:</label>
-        <input type="tel" maxlength="10" id="contact" name="contact" required>
+<input type="text"
+       id="contact"
+       name="contact"
+       maxlength="10"
+       minlength="10"
+       pattern="\d{10}"
+       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+       title="Enter exactly 10 digits"
+       required>
+
             </div>
             <div class="col">
                 <label for="whatsapp">WhatsApp No:</label>
-                <input type="tel" maxlength="10" class="form-control" name="whatsapp" id="whatsapp" required>
+<input type="text"
+       class="form-control"
+       name="whatsapp"
+       id="whatsapp"
+       maxlength="10"
+       minlength="10"
+       pattern="\d{10}"
+       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
+       title="Enter exactly 10 digits"
+       required>
+
             </div>
            
         </div>
