@@ -10,7 +10,7 @@ body {
     align-items: center;
     height: 100vh;
     width: 100%;
-    overflow: hidden;
+    overflow: scroll;
 
 }
 .form-section{
@@ -172,4 +172,36 @@ button[type="submit"]:hover {
 .radio-group div:hover input[type="radio"] + label {
     color: #1E90FF; /* Blue */
     margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column; /* Stack items vertically */
+        height: auto; /* Let the height grow as needed */
+    }
+
+    .image-section {
+        width: 100%;
+        height: auto;
+        border-radius: 10px 10px 0 0; /* Round top corners */
+    }
+
+    .image-section img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .form-section {
+        width: 100%;
+        height: auto;
+        padding: 15px;
+        border-radius: 0 0 10px 10px; /* Round bottom corners */
+    }
+
+    form {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
 }
