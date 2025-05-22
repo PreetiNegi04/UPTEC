@@ -620,59 +620,6 @@ def save_enquiry():
         print(f"Error updating record: {str(e)}")  # Print the full error message
         return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
 
-    try:
-        data = request.json
-        print(f"Data received: {data}")  # Log the incoming data
-
-        record_id = data.get('id')
-        updated_data = data.get('data')
-
-        # Validate the ObjectId
-        if not ObjectId.is_valid(record_id):
-            print(f"Invalid ObjectId: {record_id}")
-            return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
-
-        # Log the existing record before updating
-        existing_record = collection.find_one({'_id': ObjectId(record_id)})
-        if not existing_record:
-            print(f"No record found with ID: {record_id}")
-            return jsonify({'status': 'error', 'message': 'Record not found'}), 404
-
-        print(f"Existing record before update: {existing_record}")
-
-        # Prepare the update query, ensuring nested fields are updated properly
-        update_query = {'$set': {
-            'name': updated_data['name'],
-            'contact_number': updated_data['contact_number'],
-            'type_of_enquiry': updated_data['type_of_enquiry'],
-            'course_name': updated_data['course_name'],
-            'address': updated_data['address'],
-            'area': updated_data['area'],
-            'qualification': updated_data['qualification'],
-            'college_name': updated_data['college_name'],
-            'follow_up_status.date': updated_data['follow_up_status']['date'],
-            'follow_up_status.reason': updated_data['follow_up_status']['reason']
-        }}
-
-        # Attempt to update the primary collection
-        result = mongo.db.contacts.update_one({'_id': ObjectId(record_id)}, update_query)
-        print(f"Primary update result: {result.raw_result}")  # Log result of primary update
-
-        if result.modified_count > 0:
-            return jsonify({'status': 'success', 'message': 'Record updated successfully!'}), 200
-        else:
-            return jsonify({'status': 'success', 'message': 'Record was already up-to-date.'}), 200
-
-    except Exception as e:
-        print(f"Error updating record: {str(e)}")  # Print the full error message
-        return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
-
-
-from flask import Flask, request, render_template
-from datetime import datetime, timedelta
-import calendar
-from uuid import uuid4
-
 @app.route('/short_term_report', methods=['POST', 'GET'])
 def get_short_term_course_report():
     course_list = ["CCC", "MS Office And Internet", "MS Office with Tally Prime", "Tally Prime", 
@@ -1213,6 +1160,94 @@ def yearly_area_report():
         print(f"Yearly Area Report Error: {str(e)}")
         return "Error generating report", 500
 
+@app.route('/qualification_report', methods=['GET', 'POST'])
+def qualification_report():
+    course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term"]
+    qualifications = ["High School", "Undergraduate", "Graduate", "Postgraduate"]
+
+    try:
+        # Date handling
+        if request.method == 'POST':
+            selected_date = datetime.strptime(request.form['report_month'], "%Y-%m")
+        else:
+            selected_date = datetime.today()
+        
+        year = selected_date.year
+        month = selected_date.month
+        start_date = datetime(year, month, 1)
+        end_date = datetime(year, month, calendar.monthrange(year, month)[1], 23, 59, 59)
+
+        # Aggregation pipeline
+        pipeline = [
+            {"$match": {
+                "date_of_enquiry": {
+                    "$gte": start_date.strftime("%Y-%m-%d"),
+                    "$lte": end_date.strftime("%Y-%m-%d")
+                },
+                "e": "1"
+            }},
+            {"$project": {
+                "qualification": {
+                    "$cond": [
+                        {"$in": ["$qualification", qualifications]},
+                        "$qualification",
+                        "Others"
+                    ]
+                },
+                "course": {
+                    "$cond": [
+                        {"$in": ["$course_name", course_list]},
+                        "$course_name",
+                        "Others"
+                    ]
+                }
+            }},
+            {"$group": {
+                "_id": {
+                    "qualification": "$qualification",
+                    "course": "$course"
+                },
+                "count": {"$sum": 1}
+            }}
+        ]
+
+        results = list(mongo.db.contacts.aggregate(pipeline))
+
+        # Initialize data structures
+        report_data = {q: {c: 0 for c in course_list + ["Others"]} 
+                      for q in qualifications + ["Others"]}
+        col_totals = {course: 0 for course in course_list + ["Others"]}
+        row_totals = {qual: 0 for qual in qualifications + ["Others"]}
+        grand_total = 0
+
+        # Populate data from results
+        for doc in results:
+            qual = doc["_id"]["qualification"]
+            course = doc["_id"]["course"]
+            count = doc["count"]
+            
+            if qual in report_data and course in report_data[qual]:
+                report_data[qual][course] = count
+                row_totals[qual] += count
+                col_totals[course] += count
+                grand_total += count
+
+        return render_template(
+            'qualification_report.html',
+            qualifications=qualifications,
+            courses=course_list + ["Others"],
+            report_data=report_data,
+            month_name=start_date.strftime("%B %Y"),
+            current_month=datetime.today().strftime("%Y-%m"),
+            row_totals=row_totals,
+            col_totals=col_totals,
+            grand_total=grand_total
+        )
+
+    except Exception as e:
+        print(f"Error generating qualification report: {str(e)}")
+        return "Error generating report", 500
+    
 # Yearly Qualification Report Route
 @app.route('/yearly_qualification_report', methods=['GET', 'POST'])
 def yearly_qualification_report():
