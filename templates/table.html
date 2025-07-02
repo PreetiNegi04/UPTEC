@@ -185,38 +185,25 @@
         </div>
         <thead>
             <tr>
-                
-              <!--  <th>Date of enquiry</th>
-                <th>Type of enquiry</th>-->
                 <th>Name</th>
                 <th>Contact Number</th>
                 <th>Whatsapp Number</th>
-               <!-- <th>Address</th>
-                <th>Area</th>
-                <th>Qualification</th>
-                <th>Institution Name</th>
-                <th>Objectives</th>
-                <th>Source</th>
-                <th>Specific Source</th>-->
                 <th>Course Name</th>
                 <th>New Tech Course Name</th>
                 <th>Short Term Course Name</th>
-               <!-- <th>P</th>
-                <th>E</th>
-                <th>R</th>-->
+               
                 <th>Fees</th>
-               <!--<th>Follow up date</th>
-                <th>Follow up Reason</th>-->
-                
+                <th>Duration</th>
+                <th>Payment Type</th>
+                <th>number of Installments</th>
+                <th>Initial Installment</th>
+                <th>Monthly Installment</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for doc in all_documents %}
             <tr data-id="{{ doc._id }}">
-                
-               <!-- <td><input type="date" class="date_of_enquiry" value="{{ doc.date_of_enquiry }}" readonly></td>
-                <td><input type="text" class="type_of_enquiry" value="{{ doc.type_of_enquiry }}" readonly></td>-->
                 <td><input type="text" class="name" value="{{ doc.name }}"></td>
                 <td>
   <input type="text" pattern="\d{10}" maxlength="10" minlength="10"
@@ -248,7 +235,25 @@
          oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)"
          title="Enter exactly 6 digits" required>
 </td>
-
+<td>
+    <input type="text" class="duration" value="{{ doc.duration }}"
+         oninput="this.value = this.value" required></td>
+<td>                
+    <input type="text" 
+         class="payment_type" value="{{ doc.payment_type }}"
+         oninput="this.value = this.value" required></td>
+<td>
+    <input type="text" pattern="\d{1,2}" maxlength="2" minlength="1"
+         class="no_of_installments" value="{{ doc.no_of_installments }}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2)" required>
+</td>
+<td>
+    <input type="text" pattern="\d{1,6}" maxlength="6" minlength="1"
+         class="first_installment" value="{{ doc.first_installment }}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" required>
+</td>
+<td>
+    <input type="text" pattern="\d{1,6}" maxlength="6" minlength="1"
+         class="monthly_installment" value="{{ doc.monthly_installment }}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" required>
+</td>
                 <td class="action-buttons">
                     <button class="editButton" onclick="editRow(this)">Edit</button>
                     <button class="upgradeButton" onclick="editRow(this)">Upgrade</button>
@@ -308,7 +313,7 @@ $(document).ready(function() {
     $('.upgradeButton').click(function() {
         var row = $(this).closest('tr');
         // Enable only course-related fields for upgrade
-        row.find('.course_name, .new_tech_course_name, .short_term_course_name, .fees').prop('disabled', false);
+        row.find('.course_name, .new_tech_course_name, .short_term_course_name, .fees, .duration, .payment_type, .monthly_installment, .no_of_installments, .first_installment').prop('disabled', false);
         // Show Save Upgrade button and disable Upgrade button
         row.find('.saveUpgrade').show();
         row.find('.saveButton').hide();
