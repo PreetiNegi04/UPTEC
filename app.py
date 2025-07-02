@@ -7,8 +7,6 @@ from datetime import datetime, timedelta
 from bson import ObjectId
 from flask import jsonify
 import calendar
-from dateutil.relativedelta import relativedelta
-from bson.son import SON
 from collections import defaultdict
 
 app = Flask(__name__)
@@ -23,6 +21,45 @@ mongo = PyMongo(app)
 
 course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term", "Others"]
 
+course_fees = {
+    "CCC": ["2 Month", 3000],
+    "MS Office And Internet": ["1 Month", 3500],
+    "MS Office with Tally Prime" : ["2.5 Month", 7000],
+    "Tally Prime" : ["1.5 Month", 5000], 
+    "ProE" : ["1 Month", 6000],
+    "MATLAB": ["1 Month", 6000],
+    "Corel Draw" : ["30 hours", 3000],
+    "PageMaker" : ["30 hours", 3000],
+    "Adobe Photoshop" : ["30 hours", 3500],
+    "Web Page Designing" : ["1.5 Month", 5000], 
+    "ASP.NET with MVC , LinQ AND JSON" : ["1.5 Month", 6000],
+    "PHP and My SQL" : ["1.5 Month", 6000],
+    "Javascript" : ["2 Month", 3000],
+    "C" : ["1.5 Month", 8000],
+    "C++" : ["1 Month", 4500],
+    "App Development" : ["2 Month", 7500],
+    "Python" : ["1 Month", 5500],
+    "Core JAVA" : ["2 Month", 4500],
+    "Advanced JAVA" : ["2 Month", 10500], 
+    "Cloud Computing" : ["2 Month", 4500],
+    "ADCA" : ["6 month", 14000],
+    "DCA" : [],
+    "O level": [],
+    "DCAC" : ["6 month", 12000],
+    "Internship" : ["2 month", 6000],
+    "Advance Excel": [],
+    "Advance Excel With VBA" : [],
+    "Digital Marketing" : ["2 Month", 9000],
+    "Advance Python With Django" : [],
+    "Full Stack Web Development" : [],
+    "Node Js" : [],
+    "Internet Of Things" : ["1.5 Month", 8000],
+    "Data Analytics Using Python" : ["2.5 Month", 12800],
+    "Data Analytics Using R Lang " : ["2.5 Month", 11000],
+    "Data Science" : [],
+    "AI and ML" : ["2 Month", 11000],
+    "AI and ML With Python ":["3 Month", 15000]
+}
 
 #routes 
 @app.route('/', methods=['POST', 'GET'])
@@ -342,7 +379,7 @@ def index():
     total_today = collection.count_documents(query)
 
     prospectus = find_prospectus()
-    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses, prospectus = prospectus) 
+    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses, prospectus = prospectus, course_fees = course_fees) 
 
 @app.route('/forget-password', methods=['POST', 'GET'])
 def forget_password():
@@ -453,9 +490,10 @@ def delete_enquiry(id):
     return redirect(url_for('index'))
 
 
-@app.route('/register_student', methods=['POST'])
+@app.route('/register_student', methods=['POST', 'GET'])
 def register_student():
     try:
+        print('inside the function')
         student_id = request.form['student_id']
         obj_id = ObjectId(student_id)
 
@@ -463,7 +501,9 @@ def register_student():
         update_data = {
             "r": "1",
             "register_date": datetime.today().strftime("%Y-%m-%d"),
-            "payment_type": payment_type
+            "payment_type": payment_type,
+            "fees" : request.form.get('totalFees'),
+            "duration" : request.form.get('courseDuration')
         }
 
         if payment_type == 'full':
@@ -472,8 +512,11 @@ def register_student():
             update_data["admission_fee"] = int(request.form.get('admission_fee_i'))
             update_data["no_of_installments"] = int(request.form.get('no_of_installments'))
             update_data["first_installment"] = int(request.form.get('first_installment'))
+            update_data["monthly_installment"] = int(request.form.get('monthly_installment'))
+            
 
         collection.update_one({"_id": obj_id}, {"$set": update_data})
+        print("Updated")
         flash("Registered Student information saved successfully!", "success")
         return redirect(url_for('index'))  # Replace with actual route
     except Exception as e:

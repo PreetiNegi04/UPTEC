@@ -377,10 +377,23 @@
                                                 <h6 class="text-muted mb-0">Course : {{ document['course_name'] }}</h6>
                                                 <div class="action-buttons">
                                                 <!-- Button to open modal -->
+                                                 {%if document['course_name'] == "Short Term" %}
                                                 <button class="btn btn-sm btn-success" 
-                                                        onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['course_name'] }}')">
+                                                    onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['short_term_course_name'] }}', '{{course_fees[document['short_term_course_name']][0]}}', '{{course_fees[document['short_term_course_name']][1]}}')">
                                                     Register
                                                 </button>
+                                                {% elif document['course_name'] == "New Tech" %}
+                                                <button class="btn btn-sm btn-success"
+                                                    onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['new_tech_course_name'] }}', '{{course_fees[document['new_tech_course_name']][0]}}', '{{course_fees[document['new_tech_course_name']][1]}}')">
+                                                Register
+                                                </button>
+                                                {% else %}
+                                                <button class="btn btn-sm btn-success"
+                                                    onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['course_name'] }}', '{{course_fees[document['course_name']][0]}}', '{{course_fees[document['course_name']][1]}}')">
+                                                Register
+                                                </button>
+                                                {% endif %}
+                                                    
 
                                                 <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
                                                 </div>
@@ -503,38 +516,56 @@
             <div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content p-3">
-                <form method="POST" action="/register_student">
-                    <div class="modal-header">
-                    <h5 class="modal-title">Register Student</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+                    <form method="POST" action="/register_student">
+                        <div class="modal-header">
+                        <h5 class="modal-title">Register Student</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
 
-                    <div class="modal-body">
-                    <input type="hidden" name="student_id" id="modalStudentId">
-                    <p><strong>Name:</strong> <span id="modalStudentName"></span></p>
-                    <p><strong>Course:</strong> <span id="modalCourseName"></span></p>
+                        <div class="modal-body">
+                        <input type="hidden" name="student_id" id="modalStudentId">
+                        <p><strong>Name:</strong> <span id="modalStudentName"></span></p>
+                        <p><strong>Course:</strong> <span id="modalCourseName"></span></p>
 
-                    <div>
-                        <label><input type="radio" name="payment_type" value="full" onchange="toggleFields()"> Full Payment</label>
-                        <label class="ms-3"><input type="radio" name="payment_type" value="installment" onchange="toggleFields()"> Installment</label>
-                    </div>
+                        <!--add total fees and duration -->
+                        <!-- Total Fees -->
+                        <div class="mb-2">
+                            <label class="form-label">Total Fees</label>
+                            <input id = "totalFees" type="number" name="totalFees" class="form-control" 
+                                pattern="^\d{3,6}$" maxlength="6" 
+                                title="Please enter only digits." 
+                                value="{{ totalFees }}"/>
+                        </div>
 
-                    <div id="fullPaymentFields" style="display:none;" class="mt-2">
-                        <label>Admission Fee: <input type="number" name="admission_fee" class="form-control" pattern="^\d{3,6}$" maxlength="6" required title="Please enter only digits."/></label>
-                    </div>
+                        <!-- Duration -->
+                        <div class="mb-2">
+                            <label class="form-label">Duration</label>
+                            <input id = "courseDuration" type="text" name="courseDuration" class="form-control" 
+                                value="{{ courseDuration }}"/>
+                        </div>
 
-                    <div id="installmentFields" style="display:none;" class="mt-2">
-                        <label>Admission Fee: <input type="number" name="admission_fee_i" class="form-control" pattern="^\d{3,6}$" maxlength="6" required title="Please enter only digits."/></label>
-                        <label>No. of Installments: <input type="number" name="no_of_installments" class="form-control" pattern="^\d{1,2}$" maxlength="2" required title="Please enter only digits."/></label>
-                        <label>First Installment: <input type="number" name="first_installment" class="form-control" pattern="^\d{3,5}$" maxlength="6" required title="Please enter only digits."/></label>
-                    </div>
-                    </div>
+                        <div>
+                            <label><input type="radio" name="payment_type" value="full" onchange="toggleFields()"> Full Payment</label>
+                            <label class="ms-3"><input type="radio" name="payment_type" value="installment" onchange="toggleFields()"> Installment</label>
+                        </div>
 
-                    <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
+                        <div id="fullPaymentFields" style="display:none;" class="mt-2">
+                            <label>Admission Fee: <input type="number" name="admission_fee" class="form-control" pattern="^\d{3,6}$" maxlength="6"  title="Please enter only digits."/></label>
+                        </div>
+
+                        <div id="installmentFields" style="display:none;" class="mt-2">
+                            <label>Admission Fee: <input type="number" name="admission_fee_i" class="form-control" pattern="^\d{3,6}$" maxlength="6"  title="Please enter only digits."/></label>
+                            <label>No. of Installments: <input type="number" name="no_of_installments" class="form-control" pattern="^\d{1,2}$" maxlength="2" title="Please enter only digits."/></label>
+                            <label>First Installment: <input type="number" name="first_installment" class="form-control" pattern="^\d{3,5}$" maxlength="6" title="Please enter only digits."/></label>
+                            <label>Monthly Installments: <input type="number" name="monthly_installment" class="form-control" pattern="^\d{3,5}$" maxlength="6" title="Please enter only digits."/></label>
+                        </div>
+                        </div>
+
+                        <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             </div>
@@ -566,12 +597,14 @@
     </script>
 
     <script>
-        function openModal(id, name, course) {
+        function openModal(id, name, course, duration, fees) {
             document.getElementById('modalStudentId').value = id;
             document.getElementById('modalStudentName').innerText = name;
             document.getElementById('modalCourseName').innerText = course;
             document.getElementById('fullPaymentFields').style.display = 'none';
             document.getElementById('installmentFields').style.display = 'none';
+            document.getElementById('totalFees').value = fees;
+            document.getElementById('courseDuration').value = duration;
 
             var myModal = new bootstrap.Modal(document.getElementById('registrationModal'), {
                 keyboard: false
