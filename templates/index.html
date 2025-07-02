@@ -62,6 +62,7 @@
     
 </head>
 
+
 <body>
     <div id="app">
         <div id="sidebar" class="active">
@@ -205,7 +206,19 @@
                     <i class="bi bi-justify fs-3"></i>
                 </a>
             </header>
-
+            <!-- ✅ FLASH MESSAGES GO HERE -->
+            <div class="container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
             <div class="page-heading">
                 <h3>Students and Enquiries Statistics</h3>
             </div>
@@ -333,7 +346,12 @@
                                                 <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
                                                 <h6 class="text-muted mb-0">Course : {{ document['course_name'] }}</h6>
                                                 <div class="action-buttons">
-                                                <a href="/enquiry/{{document['_id']}}/action/prospectus" class="prospectus-btn">Prospectus</a>
+
+                                                <button class="btn btn-sm btn-info"
+                                                    onclick="openProspectusModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['course_name'] }}')">
+                                                Prospectus
+                                            </button>
+
                                                 <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
                                                 </div>
                                             </div>
@@ -358,7 +376,12 @@
                                                 <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
                                                 <h6 class="text-muted mb-0">Course : {{ document['course_name'] }}</h6>
                                                 <div class="action-buttons">
-                                                <a href="/enquiry/{{document['_id']}}/action/registered" class="edit-btn">Registered</a>
+                                                <!-- Button to open modal -->
+                                                <button class="btn btn-sm btn-success" 
+                                                        onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['course_name'] }}')">
+                                                    Register
+                                                </button>
+
                                                 <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
                                                 </div>
                                             </div>
@@ -437,6 +460,85 @@
                     </div>
                 </section>
             </div>
+            <!-- Prospectus Modal -->
+            <div class="modal fade" id="prospectusModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content p-3">
+                <form method="POST" action="/prospectus_update">
+                    <div class="modal-header">
+                    <h5 class="modal-title">Prospectus Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                    <input type="hidden" name="student_id" id="prospectusStudentId">
+                    <p><strong>Name:</strong> <span id="prospectusStudentName"></span></p>
+                    <p><strong>Course:</strong> <span id="prospectusCourseName"></span></p>
+
+                    <div class="mb-2">
+                        <label class="form-label">Prospectus Prefix</label>
+                        <select class="form-select" name="prospectus">
+                            <option value="O">O</option>
+                            <option value="PPS">PPS</option>
+                        
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Prospectus Number</label>
+                        <input type="text" id="prospectus_number" name="prospectus_number" pattern="^\d{6}$" maxlength="6" required title="Please enter exactly 6 digits.">
+                    </div>
+                    </div>
+
+                    <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content p-3">
+                <form method="POST" action="/register_student">
+                    <div class="modal-header">
+                    <h5 class="modal-title">Register Student</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                    <input type="hidden" name="student_id" id="modalStudentId">
+                    <p><strong>Name:</strong> <span id="modalStudentName"></span></p>
+                    <p><strong>Course:</strong> <span id="modalCourseName"></span></p>
+
+                    <div>
+                        <label><input type="radio" name="payment_type" value="full" onchange="toggleFields()"> Full Payment</label>
+                        <label class="ms-3"><input type="radio" name="payment_type" value="installment" onchange="toggleFields()"> Installment</label>
+                    </div>
+
+                    <div id="fullPaymentFields" style="display:none;" class="mt-2">
+                        <label>Admission Fee: <input type="number" name="admission_fee" class="form-control" pattern="^\d{3,6}$" maxlength="6" required title="Please enter only digits."/></label>
+                    </div>
+
+                    <div id="installmentFields" style="display:none;" class="mt-2">
+                        <label>Admission Fee: <input type="number" name="admission_fee_i" class="form-control" pattern="^\d{3,6}$" maxlength="6" required title="Please enter only digits."/></label>
+                        <label>No. of Installments: <input type="number" name="no_of_installments" class="form-control" pattern="^\d{1,2}$" maxlength="2" required title="Please enter only digits."/></label>
+                        <label>First Installment: <input type="number" name="first_installment" class="form-control" pattern="^\d{3,5}$" maxlength="6" required title="Please enter only digits."/></label>
+                    </div>
+                    </div>
+
+                    <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+            </div>
+
 
             <footer>
                
@@ -450,6 +552,40 @@
     <script src="static\js\pages\dashboard.js"></script>
 
     <script src="static/js/main.js"></script>
+    <script>
+        function openProspectusModal(id, name, course) {
+            document.getElementById('prospectusStudentId').value = id;
+            document.getElementById('prospectusStudentName').innerText = name;
+            document.getElementById('prospectusCourseName').innerText = course;
+
+            var modal = new bootstrap.Modal(document.getElementById('prospectusModal'), {
+                keyboard: false
+            });
+            modal.show();
+        }
+    </script>
+
+    <script>
+        function openModal(id, name, course) {
+            document.getElementById('modalStudentId').value = id;
+            document.getElementById('modalStudentName').innerText = name;
+            document.getElementById('modalCourseName').innerText = course;
+            document.getElementById('fullPaymentFields').style.display = 'none';
+            document.getElementById('installmentFields').style.display = 'none';
+
+            var myModal = new bootstrap.Modal(document.getElementById('registrationModal'), {
+                keyboard: false
+            });
+            myModal.show();
+        }
+
+        function toggleFields() {
+            const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
+            document.getElementById('fullPaymentFields').style.display = paymentType === 'full' ? 'block' : 'none';
+            document.getElementById('installmentFields').style.display = paymentType === 'installment' ? 'block' : 'none';
+        }
+</script>
+
 </body>
 
 </html>

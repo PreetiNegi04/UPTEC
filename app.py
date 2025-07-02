@@ -416,25 +416,6 @@ def contact():
     # If GET request, render the contact form
     return render_template('contact.html')
 
-@app.route('/update_contact/<string:id>', methods=['GET', 'POST'])
-def update_contact(id):
-    
-    # Convert id to ObjectId
-    id = ObjectId(id)
-    
-    if request.method == 'POST':
-        # Get the form data
-        fees = request.form.get('fees')
-        
-        # Update the document with the given ID
-        collection.update_one({"_id": id}, {"$set": {'r': "1", 'register_date': datetime.today().strftime("%Y-%m-%d"), 'fees': fees}})
-            
-        return redirect(url_for('success'))
-    
-    # Retrieve the document to display on the update_contact page
-    document = collection.find_one({"_id": id})
-    
-    return render_template('update_contact.html', document=document)
 
 @app.route('/success', methods=['POST', 'GET'])
 def success():
@@ -471,33 +452,60 @@ def delete_enquiry(id):
         flash("You do not have permission to delete this document.", "error")
     return redirect(url_for('index'))
 
-@app.route('/enquiry/<string:id>/action/registered')
-def registered(id):
-    # Redirect to update_contact route, passing the id
-    return redirect(url_for('update_contact', id=id))
 
-@app.route('/enquiry/<string:id>/action/prospectus')
-def prospectus(id):
-    return redirect(url_for('prospectus_update', id=id))
+@app.route('/register_student', methods=['POST'])
+def register_student():
+    try:
+        student_id = request.form['student_id']
+        obj_id = ObjectId(student_id)
 
-@app.route('/prospectus_update/<string:id>', methods=['GET', 'POST'])
-def prospectus_update(id):
-    # Convert id to ObjectId
-    id = ObjectId(id)
-    
-    if request.method == 'POST':
-        
-        p_number = request.form.get('prospectus')+request.form.get('prospectus_number')
-        # Update the document with the given ID
-        mongo.db.contacts.update_one({"_id": id}, {"$set": {'p': '1', 'prospectus_date': datetime.today().strftime("%Y-%m-%d")}})
-        mongo.db.contacts.update_one({"_id": id}, {"$set": {'prospectus_number': p_number}})
+        payment_type = request.form.get('payment_type')
+        update_data = {
+            "r": "1",
+            "register_date": datetime.today().strftime("%Y-%m-%d"),
+            "payment_type": payment_type
+        }
 
-        return redirect(url_for('success'))
-    
-    # Retrieve the document to display on the update_contact page
-    document = collection.find_one({"_id": id})
-    
-    return render_template('prospectus_update.html', document=document)
+        if payment_type == 'full':
+            update_data["admission_fee"] = int(request.form.get('admission_fee'))
+        elif payment_type == 'installment':
+            update_data["admission_fee"] = int(request.form.get('admission_fee_i'))
+            update_data["no_of_installments"] = int(request.form.get('no_of_installments'))
+            update_data["first_installment"] = int(request.form.get('first_installment'))
+
+        collection.update_one({"_id": obj_id}, {"$set": update_data})
+        flash("Registered Student information saved successfully!", "success")
+        return redirect(url_for('index'))  # Replace with actual route
+    except Exception as e:
+        flash("An error occurred while saving info.", "danger")
+        return redirect(url_for('index'))
+
+
+@app.route('/prospectus_update', methods=['POST'])
+def prospectus_update():
+    try:
+        student_id = request.form['student_id']
+        obj_id = ObjectId(student_id)
+
+        p_prefix = request.form.get('prospectus')
+        p_number = request.form.get('prospectus_number')
+        full_number = p_prefix + p_number
+
+        mongo.db.contacts.update_one(
+            {"_id": obj_id},
+            {"$set": {
+                'p': '1',
+                'prospectus_date': datetime.today().strftime("%Y-%m-%d"),
+                'prospectus_number': full_number
+            }}
+        )
+
+        flash("Prospectus information saved successfully!", "success")
+        return redirect(url_for('index'))  # Replace with actual route
+    except Exception as e:
+        flash("An error occurred while saving prospectus info.", "danger")
+        return redirect(url_for('index')) 
+
 
 @app.route('/save', methods=['POST'])
 def save_record():
