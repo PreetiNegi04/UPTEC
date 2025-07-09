@@ -227,19 +227,16 @@ def login():
 
 @app.route('/logout')
 def logout():
-    print(dict(session))
     session.pop('username', None)
     session.pop('otp', None)
     session.pop('otp_expiry', None)
     session.pop('temp_user', None)
     session.clear()
-    print(dict(session))
     return redirect(url_for('login'))
 
 
 @app.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
-    print("I am inside verify_otp")
     message = ''
     if request.method == 'POST':
         input_otp = request.form.get('otp')
@@ -328,7 +325,6 @@ def monthlyreport():
         return render_template('monthlyreport.html', report=monthly_report, course_total=course_total, source_total=source_total, month = month, year = year)
 
     except Exception as e:
-        print(f"Error: {e}")
         return "An error occurred"
 
 @app.route('/yearlyreport', methods=['POST', 'GET'] )
@@ -336,7 +332,6 @@ def yearlyreport():
     if request.method == 'POST':
         data = request.form
         current_date = data.get('today_date') 
-        print(type(current_date))
         # Convert string to datetime object
         current_date = datetime.strptime(current_date, "%Y-%m-%d")
     else:
@@ -644,7 +639,6 @@ def delete_enquiry(id):
 @app.route('/register_student', methods=['POST', 'GET'])
 def register_student():
     try:
-        print('inside the function')
         student_id = request.form['student_id']
         obj_id = ObjectId(student_id)
 
@@ -667,7 +661,6 @@ def register_student():
             
 
         collection.update_one({"_id": obj_id}, {"$set": update_data})
-        print("Updated")
         flash("Registered Student information saved successfully!", "success")
         return redirect(url_for('index'))  # Replace with actual route
     except Exception as e:
@@ -705,7 +698,6 @@ def prospectus_update():
 def save_record():
     try:
         data = request.json
-        print(f"Data received: {data}")  # Log the incoming data
 
         record_id = data.get('id')
         updated_data = data.get('data')
@@ -715,16 +707,13 @@ def save_record():
 
         # Validate the ObjectId
         if not ObjectId.is_valid(record_id):
-            print(f"Invalid ObjectId: {record_id}")
             return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
 
         # Attempt to update the primary collection
         result = collection.update_one({'_id': ObjectId(record_id)}, {'$set': updated_data})
-        print(f"Primary update result: {result.raw_result}")  # Log result of primary update
 
         # Attempt to update the secondary collection
         r = mongo.db.contacts.update_one({"_id": ObjectId(record_id)}, {"$set": {'u': "1"}})
-        print(f"Secondary update result: {r.raw_result}")  # Log result of secondary update
 
         # Check for modifications
         if result.modified_count > 0 and r.modified_count > 0:
@@ -734,7 +723,6 @@ def save_record():
             return jsonify({'status': 'success', 'message': 'Record was already up-to-date.'}), 200
 
     except Exception as e:
-        print(f"Error updating record: {str(e)}")  # Print the full error message
         return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
 
 @app.route('/save_upgrade', methods=['POST', 'GET'])
@@ -798,14 +786,12 @@ def delete_record():
 def save_enquiry():
     try:
         data = request.json
-        print(f"Data received: {data}")  # Log the incoming data
 
         record_id = data.get('id')
         updated_data = data.get('data')
 
         # Validate the ObjectId
         if not ObjectId.is_valid(record_id):
-            print(f"Invalid ObjectId: {record_id}")
             return jsonify({'status': 'error', 'message': 'Invalid record ID'}), 400
 
         # Attempt to update the primary collection
@@ -819,7 +805,6 @@ def save_enquiry():
             return jsonify({'status': 'success', 'message': 'Record was already up-to-date.'}), 200
 
     except Exception as e:
-        print(f"Error updating record: {str(e)}")  # Print the full error message
         return jsonify({'status': 'error', 'message': 'Failed to update record: ' + str(e)}), 500
 
 @app.route('/short_term_report', methods=['POST', 'GET'])
@@ -1042,7 +1027,6 @@ def get_short_term_course_report():
         )
 
     except Exception as e:
-        print(f"Error: {str(e)}")
         return "An error occurred", 500
 
 @app.route('/college_report', methods=['GET', 'POST'])
@@ -1147,7 +1131,6 @@ def college_report():
         )
 
     except Exception as e:
-        print(f"Error generating college report: {str(e)}")
         return "Error generating report", 500
     
 @app.route('/area_report', methods=['GET', 'POST'])
@@ -1245,7 +1228,6 @@ def area_report():
         )
 
     except Exception as e:
-        print(f"Error generating area report: {str(e)}")
         return render_template('error.html', error_message=str(e)), 500
 
 @app.route('/enquiry/delete', methods=['POST'])
@@ -1264,10 +1246,8 @@ def deleteEnquiry():
             if result.deleted_count > 0:
                 return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
             else:
-                print(f"Error no record")
                 return jsonify({'status': 'error', 'message': 'No record was deleted'}), 500
         except Exception as e:
-            print(f"Error deleting record: {e}")
             return jsonify({'status': 'error', 'message': 'Failed to delete record'}), 500
 
 # Yearly Area Report Route
@@ -1359,7 +1339,6 @@ def yearly_area_report():
         )
 
     except Exception as e:
-        print(f"Yearly Area Report Error: {str(e)}")
         return "Error generating report", 500
 
 @app.route('/qualification_report', methods=['GET', 'POST'])
@@ -1447,7 +1426,6 @@ def qualification_report():
         )
 
     except Exception as e:
-        print(f"Error generating qualification report: {str(e)}")
         return "Error generating report", 500
     
 # Yearly Qualification Report Route
@@ -1528,7 +1506,6 @@ def yearly_qualification_report():
         )
 
     except Exception as e:
-        print(f"Yearly Qualification Report Error: {str(e)}")
         return "Error generating report", 500
 
 @app.route('/yearly_college_report', methods=['GET', 'POST'])
@@ -1619,7 +1596,6 @@ def yearly_college_report():
         )
 
     except Exception as e:
-        print(f"Yearly College Report Error: {str(e)}")
         return "Error generating report", 500
     
 
