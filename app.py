@@ -10,6 +10,9 @@ import calendar
 from collections import defaultdict
 from flask_mail import Mail, Message
 import random
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 app = Flask(__name__)
@@ -110,12 +113,11 @@ def register():
             message = 'Passwords do not match!'
         else:
             # All validations passed — send OTP
-            hashed_password = hash_password(password)
             otp = str(random.randint(100000, 999999))
             session['pending_registration'] = {
                 'username': username,
                 'email': email,
-                'password': hashed_password
+                'password': password
             }
             session['otp'] = otp
             session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
@@ -150,7 +152,12 @@ def verify_register_otp():
 
         if input_otp == real_otp:
             user_data = session.get('pending_registration')
+            email = user_data['email']
+            username = user_data['username']
+            password = user_data['password']
+            user_data['password'] = hash_password(password)  # Ensure password is hashed
             mongo.db.user.insert_one(user_data)
+            send_registration_email(email, username, password)
             session['username'] = 'Admin123'  # log the user in
             session.pop('pending_registration', None)
             session.pop('otp', None)
@@ -160,6 +167,31 @@ def verify_register_otp():
             message = 'Invalid OTP!'
 
     return render_template('verify_otp.html', message=message)
+
+
+def send_registration_email(to_email, username, password):
+    subject = 'Registration Successful - UPTEC'
+    body = f"""
+    Hello {username},
+
+    Thank you for registering.
+
+    Here are your login credentials:
+    Username: {username}
+    Password: {password}
+
+    Please do not share this information with anyone.
+
+    Regards,
+    UPTEC Team
+    """
+
+    msg = Message(subject,
+                  sender=app.config['MAIL_USERNAME'],
+                  recipients=[to_email])
+    msg.body = body
+    mail.send(msg)
+
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -186,7 +218,6 @@ def login():
             msg = Message('Your OTP Code', sender=app.config['MAIL_USERNAME'], recipients=[user['email']])
             msg.body = f"Your OTP is: {otp}\nIt will expire in 2 minutes."
             mail.send(msg)
-
             return redirect(url_for('verify_otp'))
         else:
             message = 'Invalid username or password!'
@@ -208,8 +239,7 @@ def logout():
 
 @app.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
-    if 'username' in session:
-        return redirect(url_for('index'))
+    print("I am inside verify_otp")
     message = ''
     if request.method == 'POST':
         input_otp = request.form.get('otp')
