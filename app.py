@@ -8,10 +8,27 @@ from bson import ObjectId
 from flask import jsonify
 import calendar
 from collections import defaultdict
+from flask_mail import Mail, Message
+import random
+
 
 app = Flask(__name__)
 
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'uptec340@gmail.com'         # replace
+app.config['MAIL_PASSWORD'] = 'uemhceftizpiyull'            # app password (not Gmail password)
+
+mail = Mail(app)
+
 app.secret_key = 'your_secret_key'
+
+app.config['SESSION_COOKIE_SECURE'] = False  # True if using HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 
 client = MongoClient('mongodb://localhost:27017')
 db = client['mydatabase']
@@ -66,8 +83,10 @@ course_fees = {
 def start():
     return redirect(url_for('login'))
 
-@app.route('/register', methods=['POST', 'GET'])
+'''@app.route('/register', methods=['POST', 'GET'])
 def register():
+    if 'username' in session:
+        return redirect(url_for('index'))
     message = ''
     if request.method == 'POST':
         data = request.form
@@ -99,36 +118,176 @@ def register():
                 'password': hashed_password
             }
             mongo.db.user.insert_one(user)
+            session['temp_user'] = str(user['_id'])  # Save user id temporarily
 
-            user_data = mongo.db.user.find_one({'username': username})
-            new_username = user_data['username']
+            # Generate and save OTP
+            otp = str(random.randint(100000, 999999))
+            session['otp'] = otp
+            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
 
-            return redirect(url_for('index', username = username))
+            # Send OTP
+            msg = Message('Your OTP Code', sender=app.config['MAIL_USERNAME'], recipients=[user['email']])
+            msg.body = f"Your OTP is: {otp}\nIt will expire in 2 minutes."
+            mail.send(msg)
+
+            return redirect(url_for('verify_otp'))
+        
+    return render_template('auth-register.html', message=message)'''
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if 'username' in session:
+        return redirect(url_for('index'))
+
+    message = ''
+    if request.method == 'POST':
+        data = request.form
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+        confirm_password = data.get('confirm')
+
+        user_found = mongo.db.user.find_one({'username': username})
+        email_found = mongo.db.user.find_one({'email': email})
+
+        if user_found:
+            message = 'Username already exists!'
+        elif email_found:
+            message = 'Email already exists!'
+        elif not validate_email(email):
+            message = 'Invalid email!'
+        elif not validate_username(username):
+            message = 'Username must be at least 8 characters long and contain uppercase, lowercase, and digit!'
+        elif not validate_password(password):
+            message = 'Password must be at least 8 characters long and contain uppercase, lowercase, and digit!'
+        elif password != confirm_password:
+            message = 'Passwords do not match!'
+        else:
+            # All validations passed — send OTP
+            hashed_password = hash_password(password)
+            otp = str(random.randint(100000, 999999))
+            session['pending_registration'] = {
+                'username': username,
+                'email': email,
+                'password': hashed_password
+            }
+            session['otp'] = otp
+            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=5)).isoformat()
+
+            # Send OTP via email
+            msg = Message(subject="OTP Verification - Registration",
+                          sender=app.config['MAIL_USERNAME'],
+                          recipients=[email])
+            msg.body = f"Your OTP for registration is: {otp}\nIt will expire in 5 minutes."
+            mail.send(msg)
+
+            return redirect(url_for('verify_register_otp'))
+
     return render_template('auth-register.html', message=message)
+
+@app.route('/verify_register_otp', methods=['GET', 'POST'])
+def verify_register_otp():
+    if 'username' in session:
+        return redirect(url_for('index'))
+
+    message = ''
+    if request.method == 'POST':
+        input_otp = request.form.get('otp')
+        real_otp = session.get('otp')
+        expiry = session.get('otp_expiry')
+
+        if not session.get('pending_registration'):
+            message = 'Session expired. Please register again.'
+            return redirect(url_for('register'))
+
+        if datetime.utcnow() > datetime.fromisoformat(expiry):
+            session.clear()
+            message = 'OTP expired. Please register again.'
+            return redirect(url_for('register'))
+
+        if input_otp == real_otp:
+            user_data = session.get('pending_registration')
+            mongo.db.user.insert_one(user_data)
+            session['username'] = user_data['username']  # log the user in
+            session.pop('pending_registration', None)
+            session.pop('otp', None)
+            session.pop('otp_expiry', None)
+            return redirect(url_for('index'))
+        else:
+            message = 'Invalid OTP!'
+
+    return render_template('verify_otp.html', message=message)
+
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    if 'username' in session:
+        return redirect(url_for('index'))
     message = ''
     if request.method == 'POST':
         data = request.form
         username = data.get('username')
         password = data.get('password')
 
-        user_found = mongo.db.user.find_one({'username': username})
+        user = mongo.db.user.find_one({'username': username})
 
-        if user_found and check_password(user_found['password'], password):
-            session['username'] = username
-            logged_user = username
-            return redirect(url_for('index'))
+        if user and check_password(user['password'], password):
+            session['temp_user'] = str(user['_id'])  # Save user id temporarily
+
+            # Generate and save OTP
+            otp = str(random.randint(100000, 999999))
+            session['otp'] = otp
+            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
+
+            # Send OTP
+            msg = Message('Your OTP Code', sender=app.config['MAIL_USERNAME'], recipients=[user['email']])
+            msg.body = f"Your OTP is: {otp}\nIt will expire in 2 minutes."
+            mail.send(msg)
+
+            return redirect(url_for('verify_otp'))
         else:
             message = 'Invalid username or password!'
 
     return render_template('auth-login.html', message=message)
 
+
 @app.route('/logout')
 def logout():
+    print(dict(session))
+    session.pop('username', None)
+    session.pop('otp', None)
+    session.pop('otp_expiry', None)
+    session.pop('temp_user', None)
     session.clear()
+    print(dict(session))
     return redirect(url_for('login'))
+
+
+@app.route('/verify_otp', methods=['GET', 'POST'])
+def verify_otp():
+    if 'username' in session:
+        return redirect(url_for('index'))
+    message = ''
+    if request.method == 'POST':
+        input_otp = request.form.get('otp')
+        stored_otp = session.get('otp')
+        expiry = session.get('otp_expiry')
+
+        if datetime.utcnow() > datetime.fromisoformat(expiry):
+            message = 'OTP expired. Please login again.'
+            session.clear()
+            return redirect(url_for('login'))
+
+        if input_otp == stored_otp:
+            session['username'] = mongo.db.user.find_one({'_id': ObjectId(session['temp_user'])})['username']
+            session.pop('otp', None)
+            session.pop('otp_expiry', None)
+            session.pop('temp_user', None)
+            return redirect(url_for('index'))
+        else:
+            message = 'Invalid OTP!'
+    return render_template('verify_otp.html', message=message)
+
 
 @app.route('/monthlyreport', methods=['POST', 'GET'])
 def monthlyreport():
@@ -357,8 +516,8 @@ def dailyreport():
 
 @app.route('/index')
 def index():
-
-    username = session.get('username', None)
+    if 'username' not in session:
+        return redirect(url_for('login'))
     # Get the total number of documents in the collection
     query = {"r" : "1"}
     total_documents = collection.count_documents(query)
@@ -379,7 +538,7 @@ def index():
     total_today = collection.count_documents(query)
 
     prospectus = find_prospectus()
-    return render_template('index.html', username = username, total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses, prospectus = prospectus, course_fees = course_fees) 
+    return render_template('index.html',  username = session['username'], total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses, prospectus = prospectus, course_fees = course_fees) 
 
 @app.route('/forget-password', methods=['POST', 'GET'])
 def forget_password():
@@ -1756,3 +1915,11 @@ def insert_into_table(month_report):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+@app.after_request
+def add_no_cache_headers(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, private, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
