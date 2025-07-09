@@ -416,11 +416,31 @@
                                         <img src="static\images\faces\1.jpg" alt="Face 1">
                                     </div>
                                     <div class="ms-3 name">
-                                        <h3>Admin Details</h3>
+                                        <h3>User Details</h3>
                                         <h5 class="font-bold">{{username}}</h5>
+                                        {% if is_admin %}
+                                        <div class="mt-4">
+                                        <a href="{{ url_for('register') }}" class="btn btn-primary">Create User</a>
+                                        <button class="btn btn-danger btn-sm mt-2 ms-2" onclick="toggleDeleteCard()">Delete User</button>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <!-- 🔽 Hidden Delete User Card -->
+                        <div id="deleteUserCard" class="card mt-4" style="display: none; max-width: 400px;">
+                        <div class="card-body">
+                            <h5 class="card-title">Delete User</h5>
+                            <form method="POST" action="{{ url_for('delete_user') }}">
+                            <div class="mb-3">
+                                <label for="deleteUsername" class="form-label">Username</label>
+                                <input type="text" class="form-control" name="username" id="deleteUsername" required>
+                            </div>
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                            <button type="button" class="btn btn-secondary ms-2" onclick="toggleDeleteCard()">Cancel</button>
+                            </form>
+                        </div>
                         </div>
                         <div class="card">
                             <div class="card-header">
@@ -596,6 +616,7 @@
         }
     </script>
 
+
     <script>
         function openModal(id, name, course, duration, fees) {
             document.getElementById('modalStudentId').value = id;
@@ -616,6 +637,10 @@
             const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
             document.getElementById('fullPaymentFields').style.display = paymentType === 'full' ? 'block' : 'none';
             document.getElementById('installmentFields').style.display = paymentType === 'installment' ? 'block' : 'none';
+        }
+        function toggleDeleteCard() {
+            const card = document.getElementById("deleteUserCard");
+            card.style.display = card.style.display === "none" ? "block" : "none";
         }
 </script>
 
