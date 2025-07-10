@@ -495,8 +495,6 @@ def dailyreport():
         "Others": others
     }
 
-    #reports = report(today)
-
     return render_template('dailyreport.html', enquiry = enquiry, registration = registration, prospectus = prospectus, upgrade = upgrade , total = total, sources = sources, date = today)
 
 
@@ -527,28 +525,69 @@ def index():
     prospectus = find_prospectus()
     return render_template('index.html',  username = session['username'], total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses, prospectus = prospectus, course_fees = course_fees, is_admin = is_admin) 
 
-@app.route('/forget-password', methods=['POST', 'GET'])
+
+@app.route('/forget-password', methods=['GET', 'POST'])
 def forget_password():
     message = ''
     if request.method == 'POST':
-        data = request.form
-        email = data.get('email')
-        password = data.get('password')
-        confirm_password = data['confirm']
+        email = request.form.get('email')
+        user = mongo.db.user.find_one({'email': email})
 
-        email_found = mongo.db.user.find_one({'email': email})
+        if user:
+            otp = str(random.randint(100000, 999999))
+            session['reset_user_id'] = str(user['_id'])
+            session['reset_otp'] = otp
+            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=5)).isoformat()
 
-        if email_found:
-            if password != confirm_password:
-                message = 'Passwords do not match!'
-            else:
-                mongo.user.update_one({'email': email}, {'$set': {'password': password}})
-                message = 'Password updated successfully!'
-                return redirect(url_for('login'))
+            msg = Message('OTP for Password Reset', sender=app.config['MAIL_USERNAME'], recipients=[email])
+            msg.body = f"Your OTP to reset password is: {otp}. It will expire in 5 minutes."
+            mail.send(msg)
+
+            return redirect(url_for('verify_reset_otp'))
         else:
-            message = 'Email doesn\'t exist!'
+            message = "Email doesn't exist!"
     return render_template('auth-forgot-password.html', message=message)
 
+@app.route('/verify-reset-otp', methods=['GET', 'POST'])
+def verify_reset_otp():
+    message = ''
+    if request.method == 'POST':
+        input_otp = request.form.get('otp')
+        stored_otp = session.get('reset_otp')
+        expiry = session.get('otp_expiry')
+
+        if not stored_otp or datetime.utcnow() > datetime.fromisoformat(expiry):
+            message = 'OTP expired or invalid. Please try again.'
+            session.clear()
+            return redirect(url_for('forget_password'))
+
+        if input_otp == stored_otp:
+            # OTP is correct, allow password reset
+            return redirect(url_for('reset_password'))
+        else:
+            message = 'Invalid OTP!'
+    return render_template('verify_reset_otp.html', message=message)
+
+@app.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    message = ''
+    if request.method == 'POST':
+        password = request.form.get('password')
+        confirm = request.form.get('confirm')
+
+        if password != confirm:
+            message = 'Passwords do not match!'
+        else:
+            user_id = session.get('reset_user_id')
+            if user_id:
+                password = hash_password(password)  # Ensure password is hashed
+                mongo.db.user.update_one({'_id': ObjectId(user_id)}, {'$set': {'password': password}})
+                session.clear()
+                message = 'Password reset successfully!'
+                return redirect(url_for('login'))
+            else:
+                message = 'Session expired. Please try again.'
+    return render_template('reset_password.html', message=message)
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():

@@ -178,7 +178,7 @@
 
 <h1>Registered Student Data</h1>  
 <div class="table-container">
-    <table id="dataTable">
+    <!--table id="dataTable">
         <div class="search-container">
             <label id="searchLabel">Search:</label>
             <input type="text" id="searchBar" placeholder="Search by Name">
@@ -220,10 +220,19 @@
 </td>
 {% if doc.upgrade_course == ""%}
 <td><input type="text" class="course_name" value="{{ doc.course_name}}"></td>
+<td>
+  <select class="course_name">
+  <option value="O Level" {% if doc.course_name == 'O Level' or doc.upgrade_course == 'O Level' %}selected{% endif %}>O Level</option>
+  <option value="DCAC" {% if doc.course_name == 'DCAC' or doc.upgrade_course == 'DCAC' %}selected{% endif %}>DCAC</option>
+  <option value="DCA" {% if doc.course_name == 'DCA' or doc.upgrade_course == 'DCA' %}selected{% endif %}>DCA</option>
+  <option value="ADCA" {% if doc.course_name == 'ADCA' or doc.upgrade_course == 'ADCA' %}selected{% endif %}>ADCA</option>
+  <option value="Internship" {% if doc.course_name == 'Internship' or doc.upgrade_course == 'Internship' %}selected{% endif %}>Internship</option>
+</select>
+</td>
 {% else %}
 <td><input type="text" class="course_name" value="{{ doc.upgrade_course}}"></td>
 {% endif %}
-                <td><input type="text" class="new_tech_course_name" value="{{ doc.new_tech_course_name}}"></td>
+        <td><input type="text" class="new_tech_course_name" value="{{ doc.new_tech_course_name}}"></td>
 {%if doc.upgrade_short_term_course == ""%}
                 <td><input type="text" class="short_term_course_name" value="{{ doc.short_term_course_name}}"></td>
 {% else %}
@@ -264,10 +273,78 @@
             </tr>
             {% endfor %}
         </tbody>
+    </table-->
+    <table id="dataTable">
+        <div class="search-container">
+            <label id="searchLabel">Search:</label>
+            <input type="text" id="searchBar" placeholder="Search by Name">
+        </div>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Contact Number</th>
+                <th>Whatsapp Number</th>
+                <th>Course Name</th>
+                <th>New Tech Course Name</th>
+                <th>Short Term Course Name</th>
+                <th>Fees</th>
+                <th>Duration</th>
+                <th>Payment Type</th>
+                <th>number of Installments</th>
+                <th>Initial Installment</th>
+                <th>Monthly Installment</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in all_documents %}
+            <tr data-id="{{ doc._id }}">
+                <td><input type="text" class="name" value="{{ doc.name }}" disabled></td>
+                <td>
+                    <input type="text" class="contact_number" value="{{ doc.contact_number }}" pattern="\d{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required disabled>
+                </td>
+                <td>
+                    <input type="text" class="whatsapp" value="{{ doc.whatsapp }}" pattern="\d{10}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required disabled>
+                </td>
+
+                <!-- Course Name -->
+                <td><span class="field course_name" data-original="{% if 'upgrade_course' in doc %}{{ doc.upgrade_course }}{% else %}{{ doc.course_name }}{% endif %}">{% if 'upgrade_course' in doc %}{{ doc.upgrade_course }}{% else %}{{ doc.course_name }}{% endif %}</span></td>
+
+                <!-- New Tech Course -->
+                <td><span class="field new_tech_course_name" data-original="{% if 'upgrade_new_tech_course' in doc %}{{ doc.upgrade_new_tech_course }}{% else %}{{ doc.new_tech_course_name }}{% endif %}">{% if 'upgrade_new_tech_course' in doc %}{{ doc.upgrade_new_tech_course }}{% else %}{{ doc.new_tech_course_name }}{% endif %}</span></td>
+
+                <!-- Short Term Course -->
+                <td><span class="field short_term_course_name"
+                    data-original="{% if 'upgrade_short_term_course' in doc %}{{ doc.upgrade_short_term_course }}{% else %}{{ doc.short_term_course_name }}{% endif %}">
+                    {% if 'upgrade_short_term_course' in doc %}{{ doc.upgrade_short_term_course }}{% else %}{{ doc.short_term_course_name }}{% endif %}
+                </span></td>
+
+                <td>
+                    <input type="text" class="fees" value="{{ doc.fees }}" pattern="\d{1,6}" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required disabled>
+                </td>
+                <td><input type="text" class="duration" value="{{ doc.duration }}" required disabled></td>
+
+                <!-- Payment Type -->
+                <td><span class="field payment_type" data-original="{{ doc.payment_type }}">{{ doc.payment_type }}</span></td>
+
+                <td><input type="text" class="no_of_installments" value="{{ doc.no_of_installments }}" pattern="\d{1,2}" maxlength="2" required disabled></td>
+                <td><input type="text" class="first_installment" value="{{ doc.first_installment }}" pattern="\d{1,6}" maxlength="6" required disabled></td>
+                <td><input type="text" class="monthly_installment" value="{{ doc.monthly_installment }}" pattern="\d{1,6}" maxlength="6" required disabled></td>
+
+                <td class="action-buttons">
+                    <button class="editButton">Edit</button>
+                    <button class="upgradeButton">Upgrade</button>
+                    <button class="saveButton" style="display:none;">Save</button>
+                    <button class="saveUpgrade" style="display:none;">Save Upgrade</button>
+                    <button class="deleteButton">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </div>
 
-<script>
+<!--script>
 
 
 $(document).ready(function() {
@@ -467,7 +544,163 @@ function deleteRow(deleteButton) {
 
 
 
+</script-->
+<script>
+function createDropdown(currentValue, optionsArray, className) {
+    let dropdown = `<select class="${className}">`;
+    dropdown += `<option value="">None</option>`; // None option
+    optionsArray.forEach(opt => {
+        const selected = (opt === currentValue) ? 'selected' : '';
+        dropdown += `<option value="${opt}" ${selected}>${opt}</option>`;
+    });
+    dropdown += `</select>`;
+    return dropdown;
+}
+
+$(document).ready(function () {
+    $('#dataTable tbody input').prop('disabled', true);
+
+    $('#searchBar').on('keyup', function () {
+        var searchTerm = this.value.toLowerCase();
+        $('#dataTable tbody tr').each(function () {
+            var nameCell = $(this).find('td:eq(0)').text().toLowerCase();
+            $(this).toggle(nameCell.includes(searchTerm));
+        });
+    });
+
+    $('.editButton').click(function () {
+        var row = $(this).closest('tr');
+        row.find('.contact_number, .whatsapp').prop('disabled', false);
+        $(this).hide();
+        row.find('.saveButton').show();
+    });
+
+    // SAVE BUTTON for Edit
+    $('.saveButton').click(function () {
+        var row = $(this).closest('tr');
+        var id = row.data('id');
+
+        var data = {
+            id: id,
+            data: {
+                contact_number: row.find('.contact_number').val(),
+                whatsapp: row.find('.whatsapp').val()
+            }
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '/save', // <-- Replace with your actual Flask endpoint
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                alert('Data saved successfully!');
+                row.find('.contact_number, .whatsapp').prop('disabled', true);
+                row.find('.saveButton').hide();
+                row.find('.editButton').show();
+            },
+            error: function (error) {
+                alert('Save failed!');
+                console.error(error);
+            }
+        });
+    });
+
+
+    $('.upgradeButton').click(function () {
+        var row = $(this).closest('tr');
+
+        row.find('.fees, .duration, .no_of_installments, .first_installment, .monthly_installment').prop('disabled', false);
+
+        let courseVal = row.find('span.course_name').attr('data-original') || row.find('span.course_name').text().trim();
+        let newTechVal = row.find('span.new_tech_course_name').attr('data-original') || row.find('span.new_tech_course_name').text().trim();
+        let shortTermVal = row.find('span.short_term_course_name').attr('data-original') || row.find('span.short_term_course_name').text().trim();
+        let payVal = row.find('span.payment_type').attr('data-original') || row.find('span.payment_type').text().trim();
+
+        const courseOptions = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term"];
+        const newTechOptions = ["Advance Excel","Advance Excel With VBA","Digital Marketing","Advance Python With Django","Full Stack Web Development","Node Js","Internet Of Things","Artificial Intelligence ","Data Analytics Using Python","Data Analytics Using R Lang ","Data Science","AI and ML","AI and ML With Python "];
+        const shortOptions = ["CCC", "MS Office And Internet", "MS Office with Tally Prime", "Tally Prime", "ProE", "MATLAB", "Corel Draw", "PageMaker", "Adobe Photoshop", "Web Page Designing","ASP.NET with MVC , LinQ AND JSON", "PHP and My SQL", "Javascript", "C", "C++", "App Development", "Python", "Core JAVA", "Advanced JAVA", "Cloud Computing"];
+        const payOptions = ["full", "installment"];
+
+        row.find('span.course_name').replaceWith(createDropdown(courseVal, courseOptions, 'course_name'));
+        
+        row.find('span.new_tech_course_name').replaceWith(createDropdown(newTechVal, newTechOptions, 'new_tech_course_name'));
+        
+        row.find('span.short_term_course_name').replaceWith(createDropdown(shortTermVal, shortOptions, 'short_term_course_name'));
+        
+
+        row.find('span.payment_type').replaceWith(createDropdown(payVal, payOptions, 'payment_type'));
+
+        $(this).hide();
+        row.find('.saveUpgrade').show();
+    });
+
+    $('.saveUpgrade').click(function () {
+        var row = $(this).closest('tr');
+        var id = row.data('id');
+
+        const getVal = (selector, originalSelector) => {
+            const dropdown = row.find(selector);
+            return dropdown.length ? dropdown.val() : row.find(originalSelector).attr('data-original');
+        };
+
+        var data = {
+            id: id,
+            data: {
+                course_name: getVal('select.course_name', 'span.course_name'),
+                new_tech_course_name: getVal('select.new_tech_course_name', 'span.new_tech_course_name'),
+                short_term_course_name: getVal('select.short_term_course_name', 'span.short_term_course_name'),
+                payment_type: getVal('select.payment_type', 'span.payment_type'),
+                fees: row.find('.fees').val(),
+                duration: row.find('.duration').val(),
+                no_of_installments: row.find('.no_of_installments').val(),
+                first_installment: row.find('.first_installment').val(),
+                monthly_installment: row.find('.monthly_installment').val(),
+            }
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '/save_upgrade',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+                alert('Record updated successfully!');
+                location.reload();
+            },
+            error: function (error) {
+                alert('Update failed.');
+                console.log(error);
+            }
+        });
+    });
+    
+    // DELETE BUTTON
+    $('.deleteButton').click(function () {
+        if (confirm("Are you sure you want to delete this student?")) {
+            var row = $(this).closest('tr');
+            var id = row.data('id');
+
+            $.ajax({
+                type: 'POST',
+                url: '/delete', // <-- Replace with your actual Flask endpoint
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id }),
+                success: function (response) {
+                    alert('Record deleted.');
+                    row.remove();
+                },
+                error: function (error) {
+                    alert('Delete failed!');
+                    console.error(error);
+                }
+            });
+        }
+    });
+});
 </script>
+
+
 
 </body>
 </html>

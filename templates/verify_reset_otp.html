@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify OTP - Forgot Password</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h3 class="mb-4">Enter OTP</h3>
+                {% if message %}
+                <div class="alert alert-danger">{{ message }}</div>
+                {% endif %}
+                <form method="POST">
+                    <div class="form-group mb-3">
+                        <label for="otp">OTP Code</label>
+                        <input type="text" class="form-control" name="otp" id="otp" required>
+                    </div>
+                    <button class="btn btn-primary w-100">Verify OTP</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
