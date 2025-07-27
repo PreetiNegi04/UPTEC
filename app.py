@@ -285,7 +285,7 @@ def monthlyreport():
             current_date = data.get('today_date') 
             # Convert string to datetime object
             current_date = datetime.strptime(current_date, "%Y-%m-%d")
-            get_short_term_course_report(current_date)
+            '''get_short_term_course_report()'''
         else:
             current_date = datetime.today()
         year = current_date.year
@@ -325,7 +325,7 @@ def monthlyreport():
         return render_template('monthlyreport.html', report=monthly_report, course_total=course_total, source_total=source_total, month = month, year = year)
 
     except Exception as e:
-        return "An error occurred"
+        return str(e)
 
 @app.route('/yearlyreport', methods=['POST', 'GET'] )
 def yearlyreport():
