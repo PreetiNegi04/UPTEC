@@ -1,600 +1,1292 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UPTEC Dashboard</title>
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/bootstrap.css" />
 
-    <link rel="stylesheet" href="\static\vendors\iconly\bold.css">
+    <link rel="stylesheet" href="\static\vendors\iconly\bold.css" />
 
-    <link rel="stylesheet" href="\static\vendors\perfect-scrollbar\perfect-scrollbar.css">
-    <link rel="stylesheet" href="\static\vendors\bootstrap-icons\bootstrap-icons.css">
-    <link rel="stylesheet" href="\static\css\app.css">
-    <link rel="shortcut icon" href="\static\images\favicon.svg" type="image/x-icon">
+    <link
+      rel="stylesheet"
+      href="\static\vendors\perfect-scrollbar\perfect-scrollbar.css"
+    />
+    <link
+      rel="stylesheet"
+      href="\static\vendors\bootstrap-icons\bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="\static\css\app.css" />
+    <link
+      rel="shortcut icon"
+      href="\static\images\favicon.svg"
+      type="image/x-icon"
+    />
     <style>
-        /* Common button styles */
-        .action-buttons a {
-            display: inline-block;
-            padding: 8px 12px;
-            margin: 5px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+      :root {
+        --primary-color: #4a5cc4;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --info-color: #0ea5e9;
+        --secondary-color: #6b7280;
+        --light-bg: #f9fafb;
+        --border-color: #e5e7eb;
+        --dark-text: #1f2937;
+      }
 
-        /* Edit button styles */
-        .action-buttons a.edit-btn {
-            background-color: #4CAF50; /* Green background */
-            color: white; /* White text */
-        }
+      * {
+        box-sizing: border-box;
+      }
 
-        .action-buttons a.edit-btn:hover {
-            background-color: #45a049; /* Darker green on hover */
-        }
+      body {
+        background-color: var(--light-bg);
+      }
 
-        /* Delete button styles */
-        .action-buttons a.delete-btn {
-            background-color: #f44336; /* Red background */
-            color: white; /* White text */
-        }
+      /* Card Styles */
+      .card {
+        border: 1px solid var(--border-color);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+        transition: box-shadow 0.2s ease;
+        overflow: hidden;
+      }
 
-        .action-buttons a.delete-btn:hover {
-            background-color: #e53935; /* Darker red on hover */
-        }
+      .card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
 
-        .action-buttons a.prospectus-btn {
-            background-color: #2bacf7; /* Blue background */
-            color: white; /* White text */
-        }
+      .card-header {
+        background-color: #ffffff;
+        border-bottom: 2px solid var(--primary-color);
+        padding: 1rem 1.25rem;
+        font-weight: 600;
+        color: var(--dark-text);
+      }
 
-        .action-buttons a.prospectus-btn:hover {
-            background-color: #1490d8; /* Darker blue on hover */
-        }
+      .card-body {
+        padding: 1.25rem;
+      }
+
+      /* Stats Card */
+      .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+      }
+
+      .stats-icon.purple {
+        background-color: #8b5cf6;
+      }
+
+      .stats-icon.blue {
+        background-color: var(--primary-color);
+      }
+
+      .stats-icon.green {
+        background-color: var(--success-color);
+      }
+
+      .stats-icon.red {
+        background-color: var(--danger-color);
+      }
+
+      /* Page Heading */
+      .page-heading {
+        margin-bottom: 1.5rem;
+        padding: 0 1rem;
+      }
+
+      .page-heading h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark-text);
+        margin: 0;
+      }
+
+      .page-heading p {
+        color: var(--secondary-color);
+        font-size: 0.95rem;
+      }
+
+      /* Table Styles */
+      .table {
+        margin-bottom: 0;
+        font-size: 0.95rem;
+      }
+
+      .table thead th {
+        background-color: #f3f4f6;
+        color: var(--dark-text);
+        font-weight: 600;
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.875rem;
+        text-transform: none;
+      }
+
+      .table tbody td {
+        padding: 0.875rem;
+        border-color: var(--border-color);
+        color: var(--dark-text);
+        vertical-align: middle;
+      }
+
+      .table tbody tr:hover {
+        background-color: #f9fafb;
+      }
+
+      /* Recent Message */
+      .recent-message {
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 0;
+      }
+
+      .recent-message:last-child {
+        border-bottom: none;
+      }
+
+      .recent-message .name h5 {
+        color: var(--dark-text);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .recent-message .name h6 {
+        color: var(--secondary-color);
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+      }
+
+      /* Buttons */
+      .action-buttons {
+        margin-top: 0.75rem;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .action-buttons a,
+      .action-buttons button {
+        display: inline-block;
+        padding: 0.45rem 0.75rem;
+        text-decoration: none;
+        font-size: 0.825rem;
+        font-weight: 500;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+      }
+
+      .action-buttons a.delete-btn {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+
+      .action-buttons a.delete-btn:hover {
+        background-color: #fecaca;
+      }
+
+      .action-buttons .btn-info {
+        background-color: #e0f2fe;
+        color: #0c4a6e;
+      }
+
+      .action-buttons .btn-info:hover {
+        background-color: #bae6fd;
+      }
+
+      .action-buttons .btn-success {
+        background-color: #dcfce7;
+        color: #166534;
+      }
+
+      .action-buttons .btn-success:hover {
+        background-color: #bbf7d0;
+      }
+
+      /* Avatar */
+      .avatar-xl {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid var(--border-color);
+      }
+
+      .avatar-xl img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* Modal Styles */
+      .modal-content {
+        border: 1px solid var(--border-color);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+      }
+
+      .modal-header {
+        background-color: #ffffff;
+        border-bottom: 2px solid var(--primary-color);
+        padding: 1.25rem;
+      }
+
+      .modal-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--dark-text);
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+        color: var(--dark-text);
+      }
+
+      .modal-body p {
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+      }
+
+      .modal-body strong {
+        color: var(--dark-text);
+        font-weight: 600;
+      }
+
+      /* Form Elements */
+      .form-label {
+        font-weight: 500;
+        color: var(--dark-text);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+      }
+
+      .form-control,
+      .form-select {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(74, 92, 196, 0.1);
+        outline: none;
+      }
+
+      /* Buttons */
+      .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+        padding: 0.625rem 1.25rem;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: #3d4aa3;
+        box-shadow: 0 4px 12px rgba(74, 92, 196, 0.25);
+      }
+
+      .btn-secondary {
+        background-color: #e5e7eb;
+        border: none;
+        color: var(--dark-text);
+        padding: 0.625rem 1.25rem;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }
+
+      .btn-secondary:hover {
+        background-color: #d1d5db;
+      }
+
+      .btn-danger {
+        background-color: var(--danger-color);
+        border: none;
+        padding: 0.625rem 1.25rem;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background-color: #dc2626;
+      }
+
+      /* Radio Buttons */
+      input[type="radio"],
+      input[type="checkbox"] {
+        margin-right: 0.5rem;
+        cursor: pointer;
+      }
+
+      label {
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--dark-text);
+      }
+
+      /* Alert Styles */
+      .alert {
+        border: none;
+        border-left: 4px solid;
+        border-radius: 4px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+
+      .alert-success {
+        background-color: #f0fdf4;
+        color: #166534;
+        border-left-color: var(--success-color);
+      }
+
+      .alert-danger {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border-left-color: var(--danger-color);
+      }
+
+      .alert-info {
+        background-color: #f0f9ff;
+        color: #0c4a6e;
+        border-left-color: var(--info-color);
+      }
+
+      /* Text Utilities */
+      .text-muted {
+        color: var(--secondary-color) !important;
+      }
+
+      .font-semibold {
+        font-weight: 600;
+      }
+
+      .font-extrabold {
+        font-weight: 700;
+        color: var(--dark-text);
+        font-size: 1.75rem;
+      }
+
+      /* Badges */
+      .badge {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      .badge.bg-light {
+        background-color: #f3f4f6 !important;
+        color: var(--dark-text) !important;
+      }
+
+      .badge.bg-primary {
+        background-color: var(--primary-color) !important;
+      }
+
+      .badge.bg-success {
+        background-color: var(--success-color) !important;
+      }
+
+      .badge.bg-info {
+        background-color: var(--info-color) !important;
+      }
     </style>
-    
-</head>
+  </head>
 
-
-<body>
+  <body>
     <div id="app">
-        <div id="sidebar" class="active">
-            <div class="sidebar-wrapper active">
-                <div class="sidebar-header">
-                    <div class="d-flex justify-content-between">
-                        <div class="logo">
-                            <a href="http://www.uptecnet.com/"><img style="width:220px ;height:60px"src="data:image/png;base64,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" alt="Logo" srcset=""></a>
-                        </div>
-                        <div class="toggler">
-                            <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="sidebar-menu">
-                    <ul class="menu">
-
-
-                        <li class="sidebar-item active ">
-                            <a href="" class='sidebar-link'>
-                                <i class="bi bi-grid-fill"></i>
-                                <span>Dashboard</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-title">Enquiries and Follow-Up</li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('contact') }}" class='sidebar-link'>
-                                <i class="bi bi-envelope-fill"></i>
-                                <span>Enquiries</span>
-                            </a>
-                        </li>
-
-            
-                        <li class="sidebar-title">Student Data and Reports </li>
-
-                     
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('dailyreport') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>Daily Report</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('monthlyreport') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>Monthly Report</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('yearlyreport') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>Yearly Report</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('get_short_term_course_report') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>Short Term Report</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('qualification_report') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>Qualification Report-Monthly</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('yearly_qualification_report') }}" class='sidebar-link'>
-                                <i class="bi bi-person-badge-fill"></i>
-                                <span>Qualification Report-Yearly</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('college_report') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>College Report-Monthly</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('yearly_college_report') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>College Report-Yearly</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('area_report') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>Area-Wise Report-Monthly</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('yearly_area_report') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>Area-Wise Report-Yearly</span>
-                            </a>
-                        </li>
-
-                       <li class="sidebar-title  ">Tables</li>
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('table') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-spreadsheet-fill"></i>
-                                <span>Registered Students Table</span>
-                            </a>
-                        </li>    
-
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('contact_table') }}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-spreadsheet-fill"></i>
-                                <span>Enquiry DataTable</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-title">Logout</li>
-                        <li class="sidebar-item  ">
-                            <a href="{{ url_for('logout') }}" class='sidebar-link'>
-                                <i class="bi bi-person-badge-fill"></i>
-                                <span>Logout</span>
-                            </a>
-                        </li> 
-                    </ul>
-                </div>
-                <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+      <div id="sidebar" class="active">
+        <div class="sidebar-wrapper active">
+          <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+              <div class="logo">
+                <a href="http://www.uptecnet.com/"
+                  ><img
+                    style="width: 220px; height: 60px"
+                    src="data:image/png;base64,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"
+                    alt="Logo"
+                    srcset=""
+                /></a>
+              </div>
+              <div class="toggler">
+                <a href="#" class="sidebar-hide d-xl-none d-block"
+                  ><i class="bi bi-x bi-middle"></i
+                ></a>
+              </div>
             </div>
-        </div>
-        <div id="main">
-            <header class="mb-3">
-                <a href="#" class="burger-btn d-block d-xl-none">
-                    <i class="bi bi-justify fs-3"></i>
+          </div>
+          <div class="sidebar-menu">
+            <ul class="menu">
+              <li class="sidebar-item active">
+                <a href="" class="sidebar-link">
+                  <i class="bi bi-grid-fill"></i>
+                  <span>Dashboard</span>
                 </a>
-            </header>
-            <!-- ✅ FLASH MESSAGES GO HERE -->
-            <div class="container">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-                {% endwith %}
-            </div>
-            <div class="page-heading">
-                <h3>Students and Enquiries Statistics</h3>
-            </div>
-            <div class="page-content">
-                <section class="row">
-                    <div class="col-12 col-lg-9">
-                        <div class="row">
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-3 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="stats-icon purple">
-                                                    <i class="iconly-boldShow"></i>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Total Registrations</h6>
-                                                <h6 class="font-extrabold mb-0">{{total_registration}}</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-3 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="stats-icon blue">
-                                                    <i class="iconly-boldProfile"></i>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Todays Registration</h6>
-                                                <h6 class="font-extrabold mb-0">{{total_today}}</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-3 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="stats-icon green">
-                                                    <i class="iconly-boldAdd-User"></i>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Total Enquiries</h6>
-                                                <h6 class="font-extrabold mb-0">{{total_enquiries}}</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-3 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="stats-icon red">
-                                                    <i class="iconly-boldBookmark"></i>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Pending Enquiries</h6>
-                                                <h6 class="font-extrabold mb-0">{{pending}}</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">    
-                            <div class="col-12 col-xl-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4> Today's Enquiries</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-hover table-lg">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Name</th>
-                                                        <th>Enquiry</th>
-                                                        <th>Contact Details</th>
-                                                        <th>Course</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <div class="recent-message d-flex px-4 py-3">
-                                                        {% for document in today_documents %}
-                                                        <div class="name ms-4">
-                                                                <td class="mb-1">{{ document['name'] }}</td>
-                                                                <td class="text-muted mb-0">{{ document['follow_up_status']['reason'] }}</td>
-                                                                <td class="text-muted mb-0">{{ document['contact_number'] }}</td>
-                                                                <td class="text-muted mb-0">{{ document['course_name'] }}</td>
-                                                        </div>
-                                                        {% endfor %}
-                                                    </div>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12 col-xl-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4>Pending Enquiries</h4>
-                                    </div>
-                                    <div class="card-content pb-4">
-                                        {% for document in pending_documents %}
-                                        <div class="recent-message d-flex px-4 py-3">
-                                            
-                                            <div class="name ms-4">
-                                                <h5 class="mb-1">{{ document['name'] }}</h5>
-                                                <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
-                                                <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
-                                                <h6 class="text-muted mb-0">Course : {{ document['course_name'] }}</h6>
-                                                <div class="action-buttons">
+              </li>
 
-                                                <button class="btn btn-sm btn-info"
-                                                    onclick="openProspectusModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['course_name'] }}')">
-                                                Prospectus
-                                            </button>
+              <li class="sidebar-title">Enquiries and Follow-Up</li>
 
-                                                <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
+              <li class="sidebar-item">
+                <a href="{{ url_for('contact') }}" class="sidebar-link">
+                  <i class="bi bi-envelope-fill"></i>
+                  <span>Enquiries</span>
+                </a>
+              </li>
 
-                            </div>
-                            <div class="col-12 col-xl-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4>Student's taken Prospectus</h4>
-                                    </div>
-                                    <div class="card-content pb-4">
-                                        {% for document in prospectus %}
-                                        <div class="recent-message d-flex px-4 py-3">
-                                            
-                                            <div class="name ms-4">
-                                                <h5 class="mb-1">{{ document['name'] }}</h5>
-                                                <h6 class="text-muted mb-0">Contact Number : {{ document['contact_number'] }}</h6>
-                                                <h6 class="text-muted mb-0">Follow Up Date : {{ document['follow_up_status']['date'] }}</h6>
-                                                <h6 class="text-muted mb-0">Course : {{ document['course_name'] }}</h6>
-                                                <div class="action-buttons">
-                                                <!-- Button to open modal -->
-                                                 {%if document['course_name'] == "Short Term" %}
-                                                <button class="btn btn-sm btn-success" 
-                                                    onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['short_term_course_name'] }}', '{{course_fees[document['short_term_course_name']][0]}}', '{{course_fees[document['short_term_course_name']][1]}}')">
-                                                    Register
-                                                </button>
-                                                {% elif document['course_name'] == "New Tech" %}
-                                                <button class="btn btn-sm btn-success"
-                                                    onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['new_tech_course_name'] }}', '{{course_fees[document['new_tech_course_name']][0]}}', '{{course_fees[document['new_tech_course_name']][1]}}')">
-                                                Register
-                                                </button>
-                                                {% else %}
-                                                <button class="btn btn-sm btn-success"
-                                                    onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['course_name'] }}', '{{course_fees[document['course_name']][0]}}', '{{course_fees[document['course_name']][1]}}')">
-                                                Register
-                                                </button>
-                                                {% endif %}
-                                                    
+              <li class="sidebar-title">Student Data and Reports</li>
 
-                                                <a href="/enquiry/{{document['_id']}}/action/delete" class="delete-btn">Cancel</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
+              <li class="sidebar-item">
+                <a href="{{ url_for('dailyreport') }}" class="sidebar-link">
+                  <i class="bi bi-file-earmark-medical-fill"></i>
+                  <span>Daily Report</span>
+                </a>
+              </li>
 
-                            </div>
+              <li class="sidebar-item">
+                <a href="{{ url_for('monthlyreport') }}" class="sidebar-link">
+                  <i class="bi bi-file-earmark-medical-fill"></i>
+                  <span>Monthly Report</span>
+                </a>
+              </li>
 
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 col-lg-3">
-                        <div class="card">
-                            <div class="card-body py-4 px-5">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar avatar-xl">
-                                        <img src="static\images\faces\1.jpg" alt="Face 1">
-                                    </div>
-                                    <div class="ms-3 name">
-                                        <h3>User Details</h3>
-                                        <h5 class="font-bold">{{username}}</h5>
-                                        {% if is_admin %}
-                                        <div class="mt-4">
-                                        <a href="{{ url_for('register') }}" class="btn btn-primary">Create User</a>
-                                        <button class="btn btn-danger btn-sm mt-2 ms-2" onclick="toggleDeleteCard()">Delete User</button>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- 🔽 Hidden Delete User Card -->
-                        <div id="deleteUserCard" class="card mt-4" style="display: none; max-width: 400px;">
-                        <div class="card-body">
-                            <h5 class="card-title">Delete User</h5>
-                            <form method="POST" action="{{ url_for('delete_user') }}">
-                            <div class="mb-3">
-                                <label for="deleteUsername" class="form-label">Username</label>
-                                <input type="text" class="form-control" name="username" id="deleteUsername" required>
-                            </div>
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                            <button type="button" class="btn btn-secondary ms-2" onclick="toggleDeleteCard()">Cancel</button>
-                            </form>
-                        </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Student Enquired on Different Courses</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    {% for course in courses %}
-                                    <div class="col-6">
-                                        <div class="d-flex align-items-center">
-                                            <svg class="bi text-primary" width="32" height="32" fill="blue"
-                                                style="width:10px">
-                                                <use
-                                                    xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
-                                            </svg>
-                                            <h5 class="mb-0 ms-3">{{course['_id']}}</h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <h5 class="mb-0">{{course['total_students']}}</h5>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Student Enquired from Different Area</h4>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    {% for data in area %}
-                                    <div class="col-6">
-                                        <div class="d-flex align-items-center">
-                                            <svg class="bi text-primary" width="32" height="32" fill="blue"
-                                                style="width:10px">
-                                                <use
-                                                    xlink:href="static\vendors\bootstrap-icons\bootstrap-icons.svg#circle-fill" />
-                                            </svg>
-                                            <h5 class="mb-0 ms-3">{{data['_id']}}</h5>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <h5 class="mb-0">{{data['total_students']}}</h5>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-            <!-- Prospectus Modal -->
-            <div class="modal fade" id="prospectusModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content p-3">
-                <form method="POST" action="/prospectus_update">
-                    <div class="modal-header">
-                    <h5 class="modal-title">Prospectus Entry</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+              <li class="sidebar-item">
+                <a href="{{ url_for('yearlyreport') }}" class="sidebar-link">
+                  <i class="bi bi-file-earmark-medical-fill"></i>
+                  <span>Yearly Report</span>
+                </a>
+              </li>
 
-                    <div class="modal-body">
-                    <input type="hidden" name="student_id" id="prospectusStudentId">
-                    <p><strong>Name:</strong> <span id="prospectusStudentName"></span></p>
-                    <p><strong>Course:</strong> <span id="prospectusCourseName"></span></p>
+              <li class="sidebar-item">
+                <a
+                  href="{{ url_for('get_short_term_course_report') }}"
+                  class="sidebar-link"
+                >
+                  <i class="bi bi-file-earmark-medical-fill"></i>
+                  <span>Short Term Report</span>
+                </a>
+              </li>
 
-                    <div class="mb-2">
-                        <label class="form-label">Prospectus Prefix</label>
-                        <select class="form-select" name="prospectus">
-                            <option value="O">O</option>
-                            <option value="PPS">PPS</option>
-                        
-                        </select>
-                    </div>
+              <li class="sidebar-item">
+                <a
+                  href="{{ url_for('qualification_report') }}"
+                  class="sidebar-link"
+                >
+                  <i class="bi bi-file-earmark-medical-fill"></i>
+                  <span>Qualification Report-Monthly</span>
+                </a>
+              </li>
 
-                    <div class="mb-2">
-                        <label class="form-label">Prospectus Number</label>
-                        <input type="text" id="prospectus_number" name="prospectus_number" pattern="^\d{6}$" maxlength="6" required title="Please enter exactly 6 digits.">
-                    </div>
-                    </div>
+              <li class="sidebar-item">
+                <a
+                  href="{{ url_for('yearly_qualification_report') }}"
+                  class="sidebar-link"
+                >
+                  <i class="bi bi-person-badge-fill"></i>
+                  <span>Qualification Report-Yearly</span>
+                </a>
+              </li>
 
-                    <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-                </div>
-            </div>
-            </div>
+              <li class="sidebar-item">
+                <a href="{{ url_for('college_report') }}" class="sidebar-link">
+                  <i class="bi bi-file-earmark-medical-fill"></i>
+                  <span>College Report-Monthly</span>
+                </a>
+              </li>
 
-            <!-- Modal -->
-            <div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content p-3">
-                    <form method="POST" action="/register_student">
-                        <div class="modal-header">
-                        <h5 class="modal-title">Register Student</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
+              <li class="sidebar-item">
+                <a
+                  href="{{ url_for('yearly_college_report') }}"
+                  class="sidebar-link"
+                >
+                  <i class="bi bi-file-earmark-medical-fill"></i>
+                  <span>College Report-Yearly</span>
+                </a>
+              </li>
 
-                        <div class="modal-body">
-                        <input type="hidden" name="student_id" id="modalStudentId">
-                        <p><strong>Name:</strong> <span id="modalStudentName"></span></p>
-                        <p><strong>Course:</strong> <span id="modalCourseName"></span></p>
+              <li class="sidebar-item">
+                <a href="{{ url_for('area_report') }}" class="sidebar-link">
+                  <i class="bi bi-file-earmark-medical-fill"></i>
+                  <span>Area-Wise Report-Monthly</span>
+                </a>
+              </li>
 
-                        <!--add total fees and duration -->
-                        <!-- Total Fees -->
-                        <div class="mb-2">
-                            <label class="form-label">Total Fees</label>
-                            <input id = "totalFees" type="number" name="totalFees" class="form-control" 
-                                pattern="^\d{3,6}$" maxlength="6" 
-                                title="Please enter only digits." 
-                                value="{{ totalFees }}"/>
-                        </div>
+              <li class="sidebar-item">
+                <a
+                  href="{{ url_for('yearly_area_report') }}"
+                  class="sidebar-link"
+                >
+                  <i class="bi bi-file-earmark-medical-fill"></i>
+                  <span>Area-Wise Report-Yearly</span>
+                </a>
+              </li>
 
-                        <!-- Duration -->
-                        <div class="mb-2">
-                            <label class="form-label">Duration</label>
-                            <input id = "courseDuration" type="text" name="courseDuration" class="form-control" 
-                                value="{{ courseDuration }}"/>
-                        </div>
+              <li class="sidebar-title">Tables</li>
 
-                        <div>
-                            <label><input type="radio" name="payment_type" value="full" onchange="toggleFields()"> Full Payment</label>
-                            <label class="ms-3"><input type="radio" name="payment_type" value="installment" onchange="toggleFields()"> Installment</label>
-                        </div>
+              <li class="sidebar-item">
+                <a href="{{ url_for('table') }}" class="sidebar-link">
+                  <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                  <span>Registered Students Table</span>
+                </a>
+              </li>
 
-                        <div id="fullPaymentFields" style="display:none;" class="mt-2">
-                            <label>Admission Fee: <input type="number" name="admission_fee" class="form-control" pattern="^\d{3,6}$" maxlength="6"  title="Please enter only digits."/></label>
-                        </div>
+              <li class="sidebar-item">
+                <a href="{{ url_for('contact_table') }}" class="sidebar-link">
+                  <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                  <span>Enquiry DataTable</span>
+                </a>
+              </li>
 
-                        <div id="installmentFields" style="display:none;" class="mt-2">
-                            <label>Admission Fee: <input type="number" name="admission_fee_i" class="form-control" pattern="^\d{3,6}$" maxlength="6"  title="Please enter only digits."/></label>
-                            <label>No. of Installments: <input type="number" name="no_of_installments" class="form-control" pattern="^\d{1,2}$" maxlength="2" title="Please enter only digits."/></label>
-                            <label>First Installment: <input type="number" name="first_installment" class="form-control" pattern="^\d{3,5}$" maxlength="6" title="Please enter only digits."/></label>
-                            <label>Monthly Installments: <input type="number" name="monthly_installment" class="form-control" pattern="^\d{3,5}$" maxlength="6" title="Please enter only digits."/></label>
-                        </div>
-                        </div>
-
-                        <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Save</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            </div>
-
-
-            <footer>
-               
-            </footer>
+              <li class="sidebar-title">Logout</li>
+              <li class="sidebar-item">
+                <a href="{{ url_for('logout') }}" class="sidebar-link">
+                  <i class="bi bi-person-badge-fill"></i>
+                  <span>Logout</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <button class="sidebar-toggler btn x">
+            <i data-feather="x"></i>
+          </button>
         </div>
+      </div>
+      <div id="main">
+        <header class="mb-3">
+          <a href="#" class="burger-btn d-block d-xl-none">
+            <i class="bi bi-justify fs-3"></i>
+          </a>
+        </header>
+        <!-- ✅ FLASH MESSAGES GO HERE -->
+        <div class="container-fluid px-4">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div
+            class="alert alert-{{ category }} alert-dismissible fade show"
+            role="alert"
+          >
+            <i class="bi bi-check-circle me-2"></i>
+            {{ message }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          {% endfor %} {% endif %} {% endwith %}
+        </div>
+        <div class="page-heading">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3>📊 Dashboard Overview</h3>
+              <p class="text-muted mb-0">
+                Welcome back! Here's your activity summary
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="page-content">
+          <section class="row g-4">
+            <div class="col-12 col-lg-9">
+              <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3 col-md-6">
+                  <div class="card border-0 h-100">
+                    <div class="card-body px-4 py-4">
+                      <div
+                        class="d-flex justify-content-between align-items-start"
+                      >
+                        <div class="flex-grow-1">
+                          <span class="text-muted font-semibold d-block mb-2"
+                            >📝 Total Registrations</span
+                          >
+                          <h4 class="font-extrabold mb-0">
+                            {{total_registration}}
+                          </h4>
+                          <small class="text-success">All time students</small>
+                        </div>
+                        <div class="stats-icon purple">
+                          <i class="iconly-boldShow"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6 col-lg-3 col-md-6">
+                  <div class="card border-0 h-100">
+                    <div class="card-body px-4 py-4">
+                      <div
+                        class="d-flex justify-content-between align-items-start"
+                      >
+                        <div class="flex-grow-1">
+                          <span class="text-muted font-semibold d-block mb-2"
+                            >📅 Today's Registration</span
+                          >
+                          <h4 class="font-extrabold mb-0">{{total_today}}</h4>
+                          <small class="text-info">Latest registrations</small>
+                        </div>
+                        <div class="stats-icon blue">
+                          <i class="iconly-boldProfile"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6 col-lg-3 col-md-6">
+                  <div class="card border-0 h-100">
+                    <div class="card-body px-4 py-4">
+                      <div
+                        class="d-flex justify-content-between align-items-start"
+                      >
+                        <div class="flex-grow-1">
+                          <span class="text-muted font-semibold d-block mb-2"
+                            >💬 Total Enquiries</span
+                          >
+                          <h4 class="font-extrabold mb-0">
+                            {{total_enquiries}}
+                          </h4>
+                          <small class="text-success">All inquiries</small>
+                        </div>
+                        <div class="stats-icon green">
+                          <i class="iconly-boldAdd-User"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6 col-lg-3 col-md-6">
+                  <div class="card border-0 h-100">
+                    <div class="card-body px-4 py-4">
+                      <div
+                        class="d-flex justify-content-between align-items-start"
+                      >
+                        <div class="flex-grow-1">
+                          <span class="text-muted font-semibold d-block mb-2"
+                            >⏳ Pending Enquiries</span
+                          >
+                          <h4 class="font-extrabold mb-0">{{pending}}</h4>
+                          <small class="text-danger">Requires follow-up</small>
+                        </div>
+                        <div class="stats-icon red">
+                          <i class="iconly-boldBookmark"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <div class="card">
+                    <div class="card-header">
+                      <div
+                        class="d-flex justify-content-between align-items-center"
+                      >
+                        <h5 class="mb-0">Today's Enquiries</h5>
+                        <span class="badge bg-primary"
+                          >{{today_documents|length}} New</span
+                        >
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th>Name</th>
+                              <th>Enquiry</th>
+                              <th>Contact Details</th>
+                              <th>Course</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for document in today_documents %}
+                            <tr>
+                              <td><strong>{{ document['name'] }}</strong></td>
+                              <td>
+                                <span class="badge bg-info"
+                                  >{{ document['follow_up_status']['reason']
+                                  }}</span
+                                >
+                              </td>
+                              <td>
+                                <a href="tel:{{ document['contact_number'] }}"
+                                  >{{ document['contact_number'] }}</a
+                                >
+                              </td>
+                              <td>{{ document['course_name'] }}</td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                        {% if not today_documents %}
+                        <div class="text-center py-4">
+                          <p class="text-muted mb-0">No enquiries today</p>
+                        </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row g-3">
+                <div class="col-12 col-xl-6">
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="mb-0">⏳ Pending Enquiries</h5>
+                    </div>
+                    <div class="card-body">
+                      {% for document in pending_documents %}
+                      <div class="recent-message">
+                        <div class="name">
+                          <h5 class="mb-2">
+                            <i class="bi bi-person-circle me-2"></i>{{
+                            document['name'] }}
+                          </h5>
+                          <div class="mb-2">
+                            <small class="d-block text-muted mb-1"
+                              ><i class="bi bi-telephone me-2"></i>{{
+                              document['contact_number'] }}</small
+                            >
+                            <small class="d-block text-muted mb-1"
+                              ><i class="bi bi-calendar-event me-2"></i>{{
+                              document['follow_up_status']['date'] }}</small
+                            >
+                            <small class="d-block text-muted mb-2"
+                              ><i class="bi bi-book me-2"></i>{{
+                              document['course_name'] }}</small
+                            >
+                          </div>
+                          <div class="action-buttons">
+                            <button
+                              class="btn btn-sm btn-info"
+                              onclick="openProspectusModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['course_name'] }}')"
+                            >
+                              <i class="bi bi-file-earmark me-1"></i>Prospectus
+                            </button>
+                            <a
+                              href="/enquiry/{{document['_id']}}/action/delete"
+                              class="delete-btn"
+                            >
+                              <i class="bi bi-trash me-1"></i>Cancel
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                      {% endfor %} {% if not pending_documents %}
+                      <div class="text-center py-4">
+                        <p class="text-muted mb-0">No pending enquiries</p>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-xl-6">
+                  <div class="card">
+                    <div class="card-header">
+                      <h5 class="mb-0">📄 Prospectus Shared</h5>
+                    </div>
+                    <div class="card-body">
+                      {% for document in prospectus %}
+                      <div class="recent-message">
+                        <div class="name">
+                          <h5 class="mb-2">
+                            <i class="bi bi-person-circle me-2"></i>{{
+                            document['name'] }}
+                          </h5>
+                          <div class="mb-2">
+                            <small class="d-block text-muted mb-1"
+                              ><i class="bi bi-telephone me-2"></i>{{
+                              document['contact_number'] }}</small
+                            >
+                            <small class="d-block text-muted mb-1"
+                              ><i class="bi bi-calendar-event me-2"></i>{{
+                              document['follow_up_status']['date'] }}</small
+                            >
+                            <small class="d-block text-muted mb-2"
+                              ><i class="bi bi-book me-2"></i>{{
+                              document['course_name'] }}</small
+                            >
+                          </div>
+                          <div class="action-buttons">
+                            {% if document['course_name'] == "Short Term" %}
+                            <button
+                              class="btn btn-sm btn-success"
+                              onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['short_term_course_name'] }}', '{{course_fees[document['short_term_course_name']][0]}}', '{{course_fees[document['short_term_course_name']][1]}}')"
+                            >
+                              <i class="bi bi-check-circle me-1"></i>Register
+                            </button>
+                            {% elif document['course_name'] == "New Tech" %}
+                            <button
+                              class="btn btn-sm btn-success"
+                              onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['new_tech_course_name'] }}', '{{course_fees[document['new_tech_course_name']][0]}}', '{{course_fees[document['new_tech_course_name']][1]}}')"
+                            >
+                              <i class="bi bi-check-circle me-1"></i>Register
+                            </button>
+                            {% else %}
+                            <button
+                              class="btn btn-sm btn-success"
+                              onclick="openModal('{{ document['_id'] }}', '{{ document['name'] }}', '{{ document['course_name'] }}', '{{course_fees[document['course_name']][0]}}', '{{course_fees[document['course_name']][1]}}')"
+                            >
+                              <i class="bi bi-check-circle me-1"></i>Register
+                            </button>
+                            {% endif %}
+
+                            <a
+                              href="/enquiry/{{document['_id']}}/action/delete"
+                              class="delete-btn"
+                            >
+                              <i class="bi bi-trash me-1"></i>Cancel
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                      {% endfor %} {% if not prospectus %}
+                      <div class="text-center py-4">
+                        <p class="text-muted mb-0">No prospectus shared yet</p>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-3">
+              <div class="card mb-3">
+                <div class="card-body p-3">
+                  <div class="d-flex align-items-center">
+                    
+                    <div class="flex-grow-1">
+                      <h5 class="mb-1">👤 User Profile</h5>
+                      <h6 class="font-bold mb-2">{{username}}</h6>
+                      <small class="text-muted d-block">Logged in user</small>
+                    </div>
+                  </div>
+                  {% if is_admin %}
+                  <div class="mt-3">
+                    <a
+                      href="{{ url_for('register') }}"
+                      class="btn btn-primary btn-sm w-100 mb-2"
+                    >
+                      <i class="bi bi-person-plus me-1"></i>Create User
+                    </a>
+                    <button
+                      class="btn btn-danger btn-sm w-100"
+                      onclick="toggleDeleteCard()"
+                    >
+                      <i class="bi bi-trash me-1"></i>Delete User
+                    </button>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+              <!-- 🔽 Hidden Delete User Card -->
+              <div id="deleteUserCard" class="card mb-3" style="display: none">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">🗑️ Delete User</h5>
+                  <form method="POST" action="{{ url_for('delete_user') }}">
+                    <div class="mb-3">
+                      <label for="deleteUsername" class="form-label"
+                        >Username</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="username"
+                        id="deleteUsername"
+                        required
+                      />
+                    </div>
+                    <div class="d-grid gap-2">
+                      <button type="submit" class="btn btn-danger btn-sm">
+                        Delete User
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        onclick="toggleDeleteCard()"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h5 class="mb-0">Enquiries by Course</h5>
+                </div>
+                <div class="card-body">
+                  <div class="space-y-2">
+                    {% for course in courses %}
+                    <div
+                      class="d-flex justify-content-between align-items-center pb-2 mb-2"
+                      style="border-bottom: 1px solid #e3e6f0"
+                    >
+                      <div class="d-flex align-items-center flex-grow-1">
+                        <div
+                          class="color-box"
+                          style="
+                            width: 8px;
+                            height: 8px;
+                            border-radius: 50%;
+                            background: linear-gradient(
+                              135deg,
+                              var(--primary-color) 0%,
+                              #7986ff 100%
+                            );
+                            margin-right: 10px;
+                          "
+                        ></div>
+                        <span class="text-muted">{{course['_id']}}</span>
+                      </div>
+                      <h6 class="mb-0 font-bold">
+                        {{course['total_students']}}
+                      </h6>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="mb-0">Enquiries by Area</h5>
+                </div>
+                <div class="card-body">
+                  <div class="space-y-2">
+                    {% for data in area %}
+                    <div
+                      class="d-flex justify-content-between align-items-center pb-2 mb-2"
+                      style="border-bottom: 1px solid #e3e6f0"
+                    >
+                      <div class="d-flex align-items-center flex-grow-1">
+                        <div
+                          class="color-box"
+                          style="
+                            width: 8px;
+                            height: 8px;
+                            border-radius: 50%;
+                            background: linear-gradient(
+                              135deg,
+                              #74b9ff 0%,
+                              #0984e3 100%
+                            );
+                            margin-right: 10px;
+                          "
+                        ></div>
+                        <span class="text-muted">{{data['_id']}}</span>
+                      </div>
+                      <h6 class="mb-0 font-bold">{{data['total_students']}}</h6>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <!-- Prospectus Modal -->
+        <div
+          class="modal fade"
+          id="prospectusModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <form method="POST" action="/prospectus_update">
+                <div class="modal-header">
+                  <h5 class="modal-title">
+                    <i class="bi bi-file-earmark me-2"></i>Prospectus Entry
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+
+                <div class="modal-body">
+                  <input
+                    type="hidden"
+                    name="student_id"
+                    id="prospectusStudentId"
+                  />
+                  <p class="mb-2">
+                    <strong>👤 Name:</strong>
+                    <span
+                      id="prospectusStudentName"
+                      class="badge bg-light text-dark"
+                    ></span>
+                  </p>
+                  <p class="mb-3">
+                    <strong>Course:</strong>
+                    <span
+                      id="prospectusCourseName"
+                      class="badge bg-light text-dark"
+                    ></span>
+                  </p>
+
+                  <div class="mb-3">
+                    <label class="form-label">Prospectus Prefix</label>
+                    <select class="form-select" name="prospectus" required>
+                      <option value="">-- Select --</option>
+                      <option value="O">O</option>
+                      <option value="PPS">PPS</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Prospectus Number</label>
+                    <input
+                      type="text"
+                      id="prospectus_number"
+                      name="prospectus_number"
+                      class="form-control"
+                      pattern="^\d{6}$"
+                      maxlength="6"
+                      required
+                      title="Please enter exactly 6 digits."
+                      placeholder="000000"
+                    />
+                  </div>
+                </div>
+
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-1"></i>Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registration Modal -->
+        <div
+          class="modal fade"
+          id="registrationModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <form method="POST" action="/register_student">
+                <div class="modal-header">
+                  <h5 class="modal-title">
+                    <i class="bi bi-person-check me-2"></i>Register Student
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+
+                <div class="modal-body">
+                  <input type="hidden" name="student_id" id="modalStudentId" />
+                  <p class="mb-2">
+                    <strong>Name:</strong>
+                    <span
+                      id="modalStudentName"
+                      class="badge bg-light text-dark"
+                    ></span>
+                  </p>
+                  <p class="mb-3">
+                    <strong>Course:</strong>
+                    <span
+                      id="modalCourseName"
+                      class="badge bg-light text-dark"
+                    ></span>
+                  </p>
+
+                  <div class="mb-3">
+                    <label class="form-label">Total Fees</label>
+                    <div class="input-group">
+                      <input
+                        id="totalFees"
+                        type="number"
+                        name="totalFees"
+                        class="form-control"
+                        pattern="^\d{3,6}$"
+                        maxlength="6"
+                        title="Please enter only digits."
+                        value="{{ totalFees }}"
+                        readonly
+                      />
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Duration</label>
+                    <div class="input-group">
+                      <input
+                        id="courseDuration"
+                        type="text"
+                        name="courseDuration"
+                        class="form-control"
+                        value="{{ courseDuration }}"
+                        readonly
+                      />
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Payment Type</label>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="payment_type"
+                        value="full"
+                        id="fullPayment"
+                        onchange="toggleFields()"
+                      />
+                      <label class="form-check-label" for="fullPayment">
+                        Full Payment
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="payment_type"
+                        value="installment"
+                        id="installmentPayment"
+                        onchange="toggleFields()"
+                      />
+                      <label class="form-check-label" for="installmentPayment">
+                        Installment
+                      </label>
+                    </div>
+                  </div>
+
+                  <div id="fullPaymentFields" style="display: none">
+                    <div class="mb-3">
+                      <label class="form-label">Admission Fee</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input
+                          type="number"
+                          name="admission_fee"
+                          class="form-control"
+                          pattern="^\d{3,6}$"
+                          maxlength="6"
+                          title="Please enter only digits."
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="installmentFields" style="display: none">
+                    <div class="mb-3">
+                      <label class="form-label">Admission Fee</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input
+                          type="number"
+                          name="admission_fee_i"
+                          class="form-control"
+                          pattern="^\d{3,6}$"
+                          maxlength="6"
+                          title="Please enter only digits."
+                        />
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">No. of Installments</label>
+                      <input
+                        type="number"
+                        name="no_of_installments"
+                        class="form-control"
+                        pattern="^\d{1,2}$"
+                        maxlength="2"
+                        title="Please enter only digits."
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">First Installment</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input
+                          type="number"
+                          name="first_installment"
+                          class="form-control"
+                          pattern="^\d{3,5}$"
+                          maxlength="6"
+                          title="Please enter only digits."
+                        />
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Monthly Installments</label>
+                      <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input
+                          type="number"
+                          name="monthly_installment"
+                          class="form-control"
+                          pattern="^\d{3,5}$"
+                          maxlength="6"
+                          title="Please enter only digits."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-1"></i>Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <footer></footer>
+      </div>
     </div>
     <script src="static\vendors\perfect-scrollbar\perfect-scrollbar.min.js"></script>
     <script src="static\js\bootstrap.bundle.min.js"></script>
@@ -604,46 +1296,53 @@
 
     <script src="static/js/main.js"></script>
     <script>
-        function openProspectusModal(id, name, course) {
-            document.getElementById('prospectusStudentId').value = id;
-            document.getElementById('prospectusStudentName').innerText = name;
-            document.getElementById('prospectusCourseName').innerText = course;
+      function openProspectusModal(id, name, course) {
+        document.getElementById("prospectusStudentId").value = id;
+        document.getElementById("prospectusStudentName").innerText = name;
+        document.getElementById("prospectusCourseName").innerText = course;
 
-            var modal = new bootstrap.Modal(document.getElementById('prospectusModal'), {
-                keyboard: false
-            });
-            modal.show();
-        }
+        var modal = new bootstrap.Modal(
+          document.getElementById("prospectusModal"),
+          {
+            keyboard: false,
+          },
+        );
+        modal.show();
+      }
     </script>
 
-
     <script>
-        function openModal(id, name, course, duration, fees) {
-            document.getElementById('modalStudentId').value = id;
-            document.getElementById('modalStudentName').innerText = name;
-            document.getElementById('modalCourseName').innerText = course;
-            document.getElementById('fullPaymentFields').style.display = 'none';
-            document.getElementById('installmentFields').style.display = 'none';
-            document.getElementById('totalFees').value = fees;
-            document.getElementById('courseDuration').value = duration;
+      function openModal(id, name, course, duration, fees) {
+        document.getElementById("modalStudentId").value = id;
+        document.getElementById("modalStudentName").innerText = name;
+        document.getElementById("modalCourseName").innerText = course;
+        document.getElementById("fullPaymentFields").style.display = "none";
+        document.getElementById("installmentFields").style.display = "none";
+        document.getElementById("totalFees").value = fees;
+        document.getElementById("courseDuration").value = duration;
 
-            var myModal = new bootstrap.Modal(document.getElementById('registrationModal'), {
-                keyboard: false
-            });
-            myModal.show();
-        }
+        var myModal = new bootstrap.Modal(
+          document.getElementById("registrationModal"),
+          {
+            keyboard: false,
+          },
+        );
+        myModal.show();
+      }
 
-        function toggleFields() {
-            const paymentType = document.querySelector('input[name="payment_type"]:checked').value;
-            document.getElementById('fullPaymentFields').style.display = paymentType === 'full' ? 'block' : 'none';
-            document.getElementById('installmentFields').style.display = paymentType === 'installment' ? 'block' : 'none';
-        }
-        function toggleDeleteCard() {
-            const card = document.getElementById("deleteUserCard");
-            card.style.display = card.style.display === "none" ? "block" : "none";
-        }
-</script>
-
-</body>
-
+      function toggleFields() {
+        const paymentType = document.querySelector(
+          'input[name="payment_type"]:checked',
+        ).value;
+        document.getElementById("fullPaymentFields").style.display =
+          paymentType === "full" ? "block" : "none";
+        document.getElementById("installmentFields").style.display =
+          paymentType === "installment" ? "block" : "none";
+      }
+      function toggleDeleteCard() {
+        const card = document.getElementById("deleteUserCard");
+        card.style.display = card.style.display === "none" ? "block" : "none";
+      }
+    </script>
+  </body>
 </html>

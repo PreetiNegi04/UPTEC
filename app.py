@@ -10,9 +10,6 @@ import calendar
 from collections import defaultdict
 from flask_mail import Mail, Message
 import random
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 
 app = Flask(__name__)
