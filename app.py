@@ -38,6 +38,7 @@ mongo = PyMongo(app)
 
 course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term", "Others"]
 
+
 course_fees = {
     "CCC": ["2 Month", 3000],
     "MS Office And Internet": ["1 Month", 3500],
@@ -78,6 +79,28 @@ course_fees = {
     "AI and ML With Python ":["3 Month", 15000]
 }
 
+import click
+
+@app.cli.command("create-admin")
+@click.argument("username")
+@click.argument("email")
+@click.argument("password")
+def create_admin(username, email, password):
+    """Creates the first admin user via the terminal."""
+    # Check if admin already exists
+    if mongo.db.user.find_one({'username': username}):
+        print(f"Error: User {username} already exists.")
+        return
+
+    # Create user dictionary
+    user_data = {
+        'username': username,
+        'email': email,
+        'password': hash_password(password), # Use your existing hashing function
+    }
+    
+    mongo.db.user.insert_one(user_data)
+    print(f"Successfully created admin: {username}")
 #routes 
 @app.route('/', methods=['POST', 'GET'])
 def start():
