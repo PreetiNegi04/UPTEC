@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - UPTEC Admin Dashboard</title>
+    <title>Sign Up - UPTEC Admin Dashboard</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap"
       rel="stylesheet"
@@ -11,10 +11,10 @@
     <link rel="stylesheet" href="static/css/app.css" />
     <style>
       :root {
-        --primary-color: #4a5cc4;
+        --primary: #4a5cc4;
         --muted: #6b7280;
         --bg: #f6f8fb;
-        --card: #ffffff;
+        --card: #fff;
         --border: #e6e9ef;
         --text: #1f2937;
       }
@@ -30,9 +30,8 @@
           -apple-system,
           "Segoe UI",
           Roboto,
-          "Helvetica Neue",
           Arial;
-        background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+        background: linear-gradient(180deg, #f7f9ff 0, #fbfcfe 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -42,35 +41,32 @@
       }
       .auth-card {
         width: 100%;
-        max-width: 480px;
+        max-width: 520px;
         background: var(--card);
         border-radius: 12px;
-        padding: 28px 28px;
-        box-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+        padding: 28px;
+        box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06);
         border: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
       }
       .auth-top {
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-bottom: 18px;
+        margin-bottom: 16px;
       }
       .auth-logo img {
-        max-width: 160px;
+        max-width: 150px;
         height: auto;
       }
       .auth-title {
-        font-size: 1.625rem;
+        font-size: 1.5rem;
         font-weight: 700;
-        margin: 14px 0 4px;
+        margin: 12px 0 6px;
       }
       .auth-subtitle {
         color: var(--muted);
-        font-size: 0.975rem;
-        margin: 0 0 14px;
+        font-size: 0.98rem;
+        margin: 0 0 12px;
         text-align: center;
       }
       .alert {
@@ -93,9 +89,7 @@
         color: var(--text);
         margin-bottom: 6px;
       }
-      input[type="text"],
-      input[type="password"],
-      input[type="email"] {
+      input {
         width: 100%;
         padding: 12px 14px;
         border-radius: 8px;
@@ -105,35 +99,34 @@
       }
       input:focus {
         outline: none;
-        box-shadow: 0 6px 18px rgba(74, 92, 196, 0.08);
-        border-color: var(--primary-color);
+        box-shadow: 0 6px 18px rgba(74, 92, 196, 0.07);
+        border-color: var(--primary);
       }
       .btn-primary {
-        background: var(--primary-color);
+        background: var(--primary);
         color: #fff;
         border: none;
-        padding: 12px 16px;
+        padding: 12px;
         border-radius: 8px;
         font-weight: 600;
         width: 100%;
         cursor: pointer;
       }
       .btn-primary:hover {
-        filter: brightness(0.95);
+        filter: brightness(0.96);
         transform: translateY(-1px);
       }
-      .small-link {
+      .small-meta {
         margin-top: 12px;
         text-align: center;
         color: var(--muted);
-        font-size: 0.95rem;
       }
-      .small-link a {
-        color: var(--primary-color);
-        text-decoration: none;
+      .small-meta a {
+        color: var(--primary);
         font-weight: 600;
+        text-decoration: none;
       }
-      @media (max-width: 480px) {
+      @media (max-width: 520px) {
         .auth-card {
           padding: 20px;
         }
@@ -149,23 +142,28 @@
       {% endif %}
 
       <div class="auth-top">
-        <div class="auth-logo">
-          <img src="./static/images/logo/logo.png" alt="UPTEC Logo" />
-        </div>
-        <h1 class="auth-title">Welcome Back</h1>
-        <p class="auth-subtitle">
-          Enter your credentials to access your dashboard
-        </p>
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">Sign up to get started with UPTEC</p>
       </div>
 
       <form method="post">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            required
+          />
+        </div>
         <div class="form-group">
           <label for="username">Username</label>
           <input
             type="text"
             id="username"
             name="username"
-            placeholder="Enter your username"
+            placeholder="Choose a username"
             required
           />
         </div>
@@ -175,18 +173,38 @@
             type="password"
             id="password"
             name="password"
-            placeholder="Enter your password"
+            placeholder="Enter a strong password"
             required
           />
         </div>
-        <button type="submit" class="btn-primary">Log In</button>
+        <div class="form-group">
+          <label for="confirm">Confirm Password</label>
+          <input
+            type="password"
+            id="confirm"
+            name="confirm"
+            placeholder="Re-enter your password"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="confirm">Token</label>
+          <input
+            type="password"
+            id="token"
+            name="token"
+            placeholder="Enter token"
+            required
+          />
+        </div>
+
+        <button type="submit" class="btn-primary">Sign Up</button>
       </form>
 
-      <div class="small-link">
-        <p><a href="/forget-password">Forgot your password?</a></p>
+      <div class="small-meta">
+        <p>Already have an account? <a href="/login">Log in</a></p>
       </div>
-      <div class="small-link">
-        <a href="/admin/register">Register admin</a></p>
     </div>
   </body>
 </html>

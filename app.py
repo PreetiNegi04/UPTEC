@@ -10,30 +10,34 @@ import calendar
 from collections import defaultdict
 from flask_mail import Mail, Message
 import random
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
 app = Flask(__name__)
 
 
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'uptec340@gmail.com'         # replace
-app.config['MAIL_PASSWORD'] = 'uemhceftizpiyull'            # app password (not Gmail password)
+app.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
+app.config['MAIL_PORT'] = os.getenv("MAIL_PORT")
+app.config['MAIL_USE_TLS'] = os.getenv("MAIL_USE_TLS")
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")     
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")            # app password (not Gmail password)
 
 mail = Mail(app)
 
-app.secret_key = 'your_secret_key'
+app.secret_key = os.getenv("SECRET_KEY")
 
-app.config['SESSION_COOKIE_SECURE'] = False  # True if using HTTPS
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = os.getenv("SESSION_COOKIE_SECURE") 
+app.config['SESSION_COOKIE_HTTPONLY'] = os.getenv("SESSION_COOKIE_HTTPONLY")
+app.config['SESSION_COOKIE_SAMESITE'] = os.getenv("SESSION_COOKIE_SAMESITE")
 
 
-client = MongoClient('mongodb://localhost:27017')
+client = MongoClient(os.getenv("MONGO"))
 db = client['mydatabase']
 collection = db['contacts'] 
-app.config['MONGO_URI'] = "mongodb://localhost:27017/mydatabase"
+app.config['MONGO_URI'] = os.getenv("MONGO_URI")
 mongo = PyMongo(app)
 
 course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term", "Others"]
@@ -79,28 +83,8 @@ course_fees = {
     "AI and ML With Python ":["3 Month", 15000]
 }
 
-import click
 
-@app.cli.command("create-admin")
-@click.argument("username")
-@click.argument("email")
-@click.argument("password")
-def create_admin(username, email, password):
-    """Creates the first admin user via the terminal."""
-    # Check if admin already exists
-    if mongo.db.user.find_one({'username': username}):
-        print(f"Error: User {username} already exists.")
-        return
 
-    # Create user dictionary
-    user_data = {
-        'username': username,
-        'email': email,
-        'password': hash_password(password), # Use your existing hashing function
-    }
-    
-    mongo.db.user.insert_one(user_data)
-    print(f"Successfully created admin: {username}")
 #routes 
 @app.route('/', methods=['POST', 'GET'])
 def start():
@@ -115,11 +99,15 @@ def register():
         email = data.get('email')
         password = data.get('password')
         confirm_password = data.get('confirm')
+        
 
         user_found = mongo.db.user.find_one({'username': username})
         email_found = mongo.db.user.find_one({'email': email})
-
-        if user_found:
+        admin_user = mongo.db.user.find_one({'role': 'admin'})
+        
+        if not admin_user:
+            message = "Registration currently unavailable (No Admin found)."
+        elif user_found:
             message = 'Username already exists!'
         elif email_found:
             message = 'Email already exists!'
@@ -137,7 +125,61 @@ def register():
             session['pending_registration'] = {
                 'username': username,
                 'email': email,
-                'password': password
+                'password': password,
+                'role': 'member'
+            }
+            session['otp'] = otp
+            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
+
+            # Send OTP via email
+            admin_email = admin_user['email']
+            msg = Message(subject="Action Required: New Member Registration",
+                          sender=app.config['MAIL_USERNAME'],
+                          recipients=[admin_email])
+            msg.body = f"Your OTP for registration is: {otp}\nIt will expire in 2 minutes."
+            mail.send(msg)
+
+            return redirect(url_for('verify_register_otp'))
+
+    return render_template('auth-register.html', message=message)
+
+#Admin register logic
+@app.route('/admin/register', methods=['GET', 'POST'])
+def admin_register():
+    message = ''
+    if request.method == 'POST':
+        data = request.form
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+        confirm_password = data.get('confirm')
+        token = data.get('token')
+
+        user_found = mongo.db.user.find_one({'username': username})
+        email_found = mongo.db.user.find_one({'email': email})
+
+        if user_found:
+            message = 'Username already exists!'
+        elif email_found:
+            message = 'Email already exists!'
+        elif not validate_email(email):
+            message = 'Invalid email!'
+        elif not validate_username(username):
+            message = 'Username must be at least 8 characters long and contain uppercase, lowercase, and digit!'
+        elif not validate_password(password):
+            message = 'Password must be at least 8 characters long and contain uppercase, lowercase, and digit!'
+        elif password != confirm_password:
+            message = 'Passwords do not match!'
+        elif token != os.getenv("TOKEN"):
+            message = 'Token is invalid'
+        else:
+            # All validations passed — send OTP
+            otp = str(random.randint(100000, 999999))
+            session['pending_registration'] = {
+                'username': username,
+                'email': email,
+                'password': password,
+                'role': 'admin'
             }
             session['otp'] = otp
             session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
@@ -151,7 +193,7 @@ def register():
 
             return redirect(url_for('verify_register_otp'))
 
-    return render_template('auth-register.html', message=message)
+    return render_template('auth-admin-register.html', message=message)
 
 @app.route('/verify_register_otp', methods=['GET', 'POST'])
 def verify_register_otp():
@@ -160,28 +202,31 @@ def verify_register_otp():
         input_otp = request.form.get('otp')
         real_otp = session.get('otp')
         expiry = session.get('otp_expiry')
+        user_data = session.get('pending_registration')
 
-        if not session.get('pending_registration'):
-            message = 'Session expired. Please register again.'
+        if not user_data:
             return redirect(url_for('register'))
 
         if datetime.utcnow() > datetime.fromisoformat(expiry):
             session.clear()
-            message = 'OTP expired. Please register again.'
             return redirect(url_for('register'))
 
         if input_otp == real_otp:
-            user_data = session.get('pending_registration')
-            email = user_data['email']
-            username = user_data['username']
-            password = user_data['password']
-            user_data['password'] = hash_password(password)  # Ensure password is hashed
+            # Hash password before saving
+            original_password = user_data['password']
+            user_data['password'] = hash_password(original_password)
+            
+            # Insert into MongoDB (includes the 'role' field automatically)
             mongo.db.user.insert_one(user_data)
-            send_registration_email(email, username, password)
-            session['username'] = 'Admin123'  # log the user in
-            session.pop('pending_registration', None)
-            session.pop('otp', None)
-            session.pop('otp_expiry', None)
+            
+            # Send success email
+            send_registration_email(user_data['email'], user_data['username'], original_password)
+            
+            # Log the user in dynamically
+            session.clear()
+            session['username'] = user_data['username']
+            session['role'] = user_data['role'] # 'admin' or 'member'
+            
             return redirect(url_for('index'))
         else:
             message = 'Invalid OTP!'
@@ -248,6 +293,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('username', None)
+    session.pop('role',None)
     session.pop('otp', None)
     session.pop('otp_expiry', None)
     session.pop('temp_user', None)
@@ -270,6 +316,7 @@ def verify_otp():
 
         if input_otp == stored_otp:
             session['username'] = mongo.db.user.find_one({'_id': ObjectId(session['temp_user'])})['username']
+            session['role'] = mongo.db.user.find_one({'_id': ObjectId(session['temp_user'])})['role']
             session.pop('otp', None)
             session.pop('otp_expiry', None)
             session.pop('temp_user', None)
@@ -280,19 +327,18 @@ def verify_otp():
 
 @app.route('/admin/delete_user', methods=['POST'])
 def delete_user():
-    if session.get('username') != "Admin123":
+    if session.get('role') != "admin":
         flash("Unauthorized access")
         return redirect(url_for('index'))
 
     username_to_delete = request.form.get('username')
-    if username_to_delete == 'Admin123':
-        flash("Cannot delete admin user!")
+
+    result = mongo.db.user.delete_one({'username': username_to_delete})
+        
+    if result.deleted_count > 0:
+        flash(f"User '{username_to_delete}' deleted successfully.")
     else:
-        result = mongo.db.user.delete_one({'username': username_to_delete})
-        if result.deleted_count > 0:
-            flash(f"User '{username_to_delete}' deleted successfully.")
-        else:
-            flash(f"User '{username_to_delete}' not found.")
+        flash(f"User '{username_to_delete}' not found.")
 
     return redirect(url_for('index'))
 
@@ -523,7 +569,7 @@ def index():
     if 'username' not in session:
         return redirect(url_for('login'))
     # Get the total number of documents in the collection
-    is_admin = session.get('username') == "Admin123"
+    is_admin = session.get('role') == "admin"
     query = {"r" : "1"}
     total_documents = collection.count_documents(query)
     total_enquiries = collection.count_documents({})
@@ -665,8 +711,8 @@ def success():
 
 @app.route('/document/<string:id>/action/delete')
 def delete_document(id):
-    username = session.get('username')
-    if username == "Admin123":
+    admin = session.get('role')
+    if admin== "admin":
         # Convert the string id to an ObjectId
         id = ObjectId(id)
         record = mongo.db.contacts.find_one({"_id": id})
@@ -674,14 +720,14 @@ def delete_document(id):
         mongo.db.form_data.insert_one(record)
 
     else:
-        # If the user is not "Admin123", redirect to the index page
+        # If the user is not admin, redirect to the index page
         flash("You do not have permission to delete this document.", "error")
     return redirect(url_for('table'))
 
 @app.route('/enquiry/<string:id>/action/delete')
 def delete_enquiry(id):
-    username = session.get('username')
-    if username == "Admin123":
+    admin = session.get('role')
+    if admin == "admin":
         # Convert the string id to an ObjectId
         id = ObjectId(id)
         # Delete the document with the given ID
@@ -690,7 +736,7 @@ def delete_enquiry(id):
         mongo.db.form_data.insert_one(record)
 
     else:
-        # If the user is not "Admin123", redirect to the index page
+        # If the user is not admin, redirect to the index page
         flash("You do not have permission to delete this document.", "error")
     return redirect(url_for('index'))
 
@@ -822,8 +868,8 @@ def save_upgrade():
 
 @app.route('/delete', methods=['POST'])
 def delete_record():
-    username = session.get('username')
-    if username != "Admin123":
+    admin= session.get('role')
+    if admin != "admin":
         return jsonify({'status': 'error', 'message': 'You do not have permission to delete this record.'}), 403
     else:
         try:
@@ -1291,8 +1337,8 @@ def area_report():
 
 @app.route('/enquiry/delete', methods=['POST'])
 def deleteEnquiry():
-    username = session.get('username')
-    if username != "Admin123":
+    admin = session.get('role')
+    if admin != "admin":
         return jsonify({'status': 'error', 'message': 'You do not have permission to delete this record.'}), 403
     else:
         try:
