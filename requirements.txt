@@ -1,0 +1,7 @@
+Flask==3.1.0
+Flask-PyMongo==3.0.1
+Flask-Mail==0.10.0
+python-dotenv==1.2.1
+pymongo==4.13.0
+bcrypt==4.3.0
+gunicorn==21.2.0
