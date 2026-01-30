@@ -178,102 +178,7 @@
 
 <h1>Registered Student Data</h1>  
 <div class="table-container">
-    <!--table id="dataTable">
-        <div class="search-container">
-            <label id="searchLabel">Search:</label>
-            <input type="text" id="searchBar" placeholder="Search by Name">
-        </div>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Contact Number</th>
-                <th>Whatsapp Number</th>
-                <th>Course Name</th>
-                <th>New Tech Course Name</th>
-                <th>Short Term Course Name</th>
-               
-                <th>Fees</th>
-                <th>Duration</th>
-                <th>Payment Type</th>
-                <th>number of Installments</th>
-                <th>Initial Installment</th>
-                <th>Monthly Installment</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for doc in all_documents %}
-            <tr data-id="{{ doc._id }}">
-                <td><input type="text" class="name" value="{{ doc.name }}"></td>
-                <td>
-  <input type="text" pattern="\d{10}" maxlength="10" minlength="10"
-         class="contact_number" value="{{ doc.contact_number }}"
-         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
-         title="Enter exactly 10 digits" required>
-</td>
-
-<td>
-  <input type="text" pattern="\d{10}" maxlength="10" minlength="10"
-         class="whatsapp" value="{{ doc.whatsapp }}"
-         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
-         title="Enter exactly 10 digits" required>
-</td>
-{% if doc.upgrade_course == ""%}
-<td><input type="text" class="course_name" value="{{ doc.course_name}}"></td>
-<td>
-  <select class="course_name">
-  <option value="O Level" {% if doc.course_name == 'O Level' or doc.upgrade_course == 'O Level' %}selected{% endif %}>O Level</option>
-  <option value="DCAC" {% if doc.course_name == 'DCAC' or doc.upgrade_course == 'DCAC' %}selected{% endif %}>DCAC</option>
-  <option value="DCA" {% if doc.course_name == 'DCA' or doc.upgrade_course == 'DCA' %}selected{% endif %}>DCA</option>
-  <option value="ADCA" {% if doc.course_name == 'ADCA' or doc.upgrade_course == 'ADCA' %}selected{% endif %}>ADCA</option>
-  <option value="Internship" {% if doc.course_name == 'Internship' or doc.upgrade_course == 'Internship' %}selected{% endif %}>Internship</option>
-</select>
-</td>
-{% else %}
-<td><input type="text" class="course_name" value="{{ doc.upgrade_course}}"></td>
-{% endif %}
-        <td><input type="text" class="new_tech_course_name" value="{{ doc.new_tech_course_name}}"></td>
-{%if doc.upgrade_short_term_course == ""%}
-                <td><input type="text" class="short_term_course_name" value="{{ doc.short_term_course_name}}"></td>
-{% else %}
-                <td><input type="text" class="short_term_course_name" value="{{ doc.upgrade_short_term_course}}"></td>
-{% endif %}
-               <td>
-  <input type="text" pattern="\d{6}" maxlength="6" minlength="6"
-         class="fees" value="{{ doc.fees }}"
-         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)"
-         title="Enter exactly 6 digits" required>
-</td>
-<td>
-    <input type="text" class="duration" value="{{ doc.duration }}"
-         oninput="this.value = this.value" required></td>
-<td>                
-    <input type="text" 
-         class="payment_type" value="{{ doc.payment_type }}"
-         oninput="this.value = this.value" required></td>
-<td>
-    <input type="text" pattern="\d{1,2}" maxlength="2" minlength="1"
-         class="no_of_installments" value="{{ doc.no_of_installments }}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2)" required>
-</td>
-<td>
-    <input type="text" pattern="\d{1,6}" maxlength="6" minlength="1"
-         class="first_installment" value="{{ doc.first_installment }}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" required>
-</td>
-<td>
-    <input type="text" pattern="\d{1,6}" maxlength="6" minlength="1"
-         class="monthly_installment" value="{{ doc.monthly_installment }}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" required>
-</td>
-                <td class="action-buttons">
-                    <button class="editButton" onclick="editRow(this)">Edit</button>
-                    <button class="upgradeButton" onclick="editRow(this)">Upgrade</button>
-                    <button class="saveButton" style="display:none;" onclick="saveRow(this)">Save</button>
-                    <button class="saveUpgrade" style="display:none;" onclick="saveRow(this)">Save Upgrade</button>
-                    <button class="deleteButton" onclick="deleteRow(this)">Delete</button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table-->
+   
     <table id="dataTable">
         <div class="search-container">
             <label id="searchLabel">Search:</label>
@@ -560,11 +465,25 @@ function createDropdown(currentValue, optionsArray, className) {
 $(document).ready(function () {
     $('#dataTable tbody input').prop('disabled', true);
 
-    $('#searchBar').on('keyup', function () {
+   /* $('#searchBar').on('keyup', function () {
         var searchTerm = this.value.toLowerCase();
         $('#dataTable tbody tr').each(function () {
             var nameCell = $(this).find('td:eq(0)').text().toLowerCase();
             $(this).toggle(nameCell.includes(searchTerm));
+        });
+    });*/
+
+     $('#searchBar').on('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        console.log("Search Term: ", searchTerm); // Debugging: Check search term
+
+        $('#dataTable tbody tr').each(function() {
+            var nameCell = $(this).find('td:eq(0) input').val().toLowerCase();
+            if (nameCell.includes(searchTerm)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
         });
     });
 
