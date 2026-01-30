@@ -659,13 +659,28 @@ function deleteRow(deleteButton) {
       $(document).ready(function () {
         $("#dataTable tbody input").prop("disabled", true);
 
-        $("#searchBar").on("keyup", function () {
-          var searchTerm = this.value.toLowerCase();
-          $("#dataTable tbody tr").each(function () {
-            var nameCell = $(this).find("td:eq(0)").text().toLowerCase();
+   /* $('#searchBar').on('keyup', function () {
+        var searchTerm = this.value.toLowerCase();
+        $('#dataTable tbody tr').each(function () {
+            var nameCell = $(this).find('td:eq(0)').text().toLowerCase();
             $(this).toggle(nameCell.includes(searchTerm));
           });
         });
+    });*/
+
+     $('#searchBar').on('keyup', function() {
+        var searchTerm = this.value.toLowerCase();
+        console.log("Search Term: ", searchTerm); // Debugging: Check search term
+
+        $('#dataTable tbody tr').each(function() {
+            var nameCell = $(this).find('td:eq(0) input').val().toLowerCase();
+            if (nameCell.includes(searchTerm)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
 
         $(".editButton").click(function () {
           var row = $(this).closest("tr");
