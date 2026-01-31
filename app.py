@@ -15,7 +15,6 @@ import os
 
 load_dotenv()
 
-
 app = Flask(__name__)
 
 
@@ -34,13 +33,17 @@ app.config['SESSION_COOKIE_HTTPONLY'] = os.getenv("SESSION_COOKIE_HTTPONLY")
 app.config['SESSION_COOKIE_SAMESITE'] = os.getenv("SESSION_COOKIE_SAMESITE")
 
 
-client = MongoClient(os.getenv("MONGO"))
-db = client['mydatabase']
-collection = db['contacts'] 
-app.config['MONGO_URI'] = os.getenv("MONGO_URI")
-mongo = PyMongo(app)
+uri = os.getenv("MONGO_URI")
+app.config['MONGO_URI'] = uri
 
-course_list = ["ADCA", "DCA", "O level", "DCAC", "Internship", "New Tech", "Short Term", "Others"]
+# This initializes EVERYTHING using the same connection
+mongo = PyMongo(app) 
+
+# These now point to your Atlas cluster correctly
+db = mongo.db 
+collection = mongo.db.contacts
+
+course_list = ["ADCA", "DCA", "O Level", "DCAC", "Internship", "New Tech", "Short Term", "Others"]
 
 
 course_fees = {
@@ -129,7 +132,7 @@ def register():
                 'role': 'member'
             }
             session['otp'] = otp
-            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
+            session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=2)).isoformat()
 
             # Send OTP via email
             admin_email = admin_user['email']
@@ -182,7 +185,7 @@ def admin_register():
                 'role': 'admin'
             }
             session['otp'] = otp
-            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
+            session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=2)).isoformat()
 
             # Send OTP via email
             msg = Message(subject="OTP Verification - Registration",
@@ -207,7 +210,7 @@ def verify_register_otp():
         if not user_data:
             return redirect(url_for('register'))
 
-        if datetime.utcnow() > datetime.fromisoformat(expiry):
+        if datetime.now(datetime.timezone.utc) > datetime.fromisoformat(expiry):
             session.clear()
             return redirect(url_for('register'))
 
@@ -277,7 +280,7 @@ def login():
             # Generate and save OTP
             otp = str(random.randint(100000, 999999))
             session['otp'] = otp
-            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
+            session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=2)).isoformat()
 
             # Send OTP
             msg = Message('Your OTP Code', sender=app.config['MAIL_USERNAME'], recipients=[user['email']])
@@ -309,7 +312,7 @@ def verify_otp():
         stored_otp = session.get('otp')
         expiry = session.get('otp_expiry')
 
-        if datetime.utcnow() > datetime.fromisoformat(expiry):
+        if datetime.now(datetime.timezone.utc) > datetime.fromisoformat(expiry):
             message = 'OTP expired. Please login again.'
             session.clear()
             return redirect(url_for('login'))
@@ -603,7 +606,7 @@ def forget_password():
             otp = str(random.randint(100000, 999999))
             session['reset_user_id'] = str(user['_id'])
             session['reset_otp'] = otp
-            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=5)).isoformat()
+            session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=5)).isoformat()
 
             msg = Message('OTP for Password Reset', sender=app.config['MAIL_USERNAME'], recipients=[email])
             msg.body = f"Your OTP to reset password is: {otp}. It will expire in 5 minutes."
@@ -622,7 +625,7 @@ def verify_reset_otp():
         stored_otp = session.get('reset_otp')
         expiry = session.get('otp_expiry')
 
-        if not stored_otp or datetime.utcnow() > datetime.fromisoformat(expiry):
+        if not stored_otp or datetime.now(datetime.timezone.utc) > datetime.fromisoformat(expiry):
             message = 'OTP expired or invalid. Please try again.'
             session.clear()
             return redirect(url_for('forget_password'))
@@ -1740,7 +1743,7 @@ def find_pending():
     "r": "0"
     }
     # Get the documents that match the query
-    pending_documents = collection.find(query).sort("follow_up_status.date", 1)
+    pending_documents = mongo.db.contacts.find(query).sort("follow_up_status.date", 1)
     return list(pending_documents)
 
 
@@ -1750,7 +1753,7 @@ def find_today():
 
     query = {"follow_up_status.date": today,"e": "1","p": "0","r": "0"}
     # Get the documents that match the query
-    today_documents = collection.find(query).sort("follow_up_status.date", 1)
+    today_documents = mongo.db.contacts.find(query).sort("follow_up_status.date", 1)
     return list(today_documents)
 
 def find_area():
@@ -1766,7 +1769,7 @@ def find_area():
 
 
     # Execute the aggregation pipeline
-    result = collection.aggregate(pipeline)
+    result = mongo.db.contacts.aggregate(pipeline)
     return result
 
 def find_courses():
@@ -1785,12 +1788,12 @@ def find_courses():
     ]
 
     # Execute the aggregation pipeline
-    result = collection.aggregate(pipeline)
+    result =mongo.db.contacts.aggregate(pipeline)
     return result
 
 def find_prospectus():
     query = {"p": "1", "r" : "0"}
-    total_prospectus = collection.find(query).sort("follow_up_status.date", 1)
+    total_prospectus = mongo.db.contacts.find(query).sort("follow_up_status.date", 1)
     return list(total_prospectus)
 
 
