@@ -191,6 +191,7 @@ def admin_register():
 
 
 
+
             # Send OTP via email
             msg = Message(subject="OTP Verification - Registration",
                           sender=app.config['MAIL_USERNAME'],
@@ -284,7 +285,9 @@ def login():
             # Generate and save OTP
             otp = str(random.randint(100000, 999999))
             session['otp'] = otp
-            session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=2)).isoformat()
+            #session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=2)).isoformat()
+            session['otp_expiry'] = (datetime.now(timezone.utc) + timedelta(minutes=2)).isoformat()
+
 
             # Send OTP
             msg = Message('Your OTP Code', sender=app.config['MAIL_USERNAME'], recipients=[user['email']])
@@ -316,7 +319,7 @@ def verify_otp():
         stored_otp = session.get('otp')
         expiry = session.get('otp_expiry')
 
-        if datetime.now(datetime.timezone.utc) > datetime.fromisoformat(expiry):
+        if datetime.now(timezone.utc) > datetime.fromisoformat(expiry):
             message = 'OTP expired. Please login again.'
             session.clear()
             return redirect(url_for('login'))
@@ -610,7 +613,8 @@ def forget_password():
             otp = str(random.randint(100000, 999999))
             session['reset_user_id'] = str(user['_id'])
             session['reset_otp'] = otp
-            session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=5)).isoformat()
+            datetime.now(timezone.utc) > datetime.fromisoformat(session['otp_expiry'])
+
 
             msg = Message('OTP for Password Reset', sender=app.config['MAIL_USERNAME'], recipients=[email])
             msg.body = f"Your OTP to reset password is: {otp}. It will expire in 5 minutes."
