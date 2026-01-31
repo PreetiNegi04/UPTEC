@@ -185,7 +185,9 @@ def admin_register():
                 'role': 'admin'
             }
             session['otp'] = otp
-            session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=2)).isoformat()
+            #session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=2)).isoformat()
+            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
+
 
             # Send OTP via email
             msg = Message(subject="OTP Verification - Registration",
