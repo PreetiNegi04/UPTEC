@@ -3,7 +3,7 @@ from flask_pymongo import PyMongo
 from pymongo import MongoClient
 import re
 import bcrypt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from bson import ObjectId
 from flask import jsonify
 import calendar
@@ -186,7 +186,9 @@ def admin_register():
             }
             session['otp'] = otp
             #session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=2)).isoformat()
-            session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
+            #session['otp_expiry'] = (datetime.utcnow() + timedelta(minutes=2)).isoformat()
+            session['otp_expiry'] = (datetime.now(timezone.utc) + timedelta(minutes=2)).isoformat()
+
 
 
             # Send OTP via email
