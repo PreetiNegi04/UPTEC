@@ -282,6 +282,7 @@
           <label id="searchLabel">Search:</label>
           <input type="text" id="searchBar" placeholder="Search by Name" />
         </div>
+        
         <thead>
           <tr>
             <th>Name</th>
@@ -645,6 +646,8 @@ function deleteRow(deleteButton) {
 
 </script-->
     <script>
+
+        
       function createDropdown(currentValue, optionsArray, className) {
         let dropdown = `<select class="${className}">`;
         dropdown += `<option value="">None</option>`; // None option
@@ -658,6 +661,15 @@ function deleteRow(deleteButton) {
 
       $(document).ready(function () {
         $("#dataTable tbody input").prop("disabled", true);
+         var table = $('#dataTable').DataTable({
+        "pageLength": 10,
+        "lengthMenu": [5, 10, 25, 50],
+        "searching": false,
+        "paging": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false
+    });
 
    /* $('#searchBar').on('keyup', function () {
         var searchTerm = this.value.toLowerCase();
