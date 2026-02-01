@@ -132,7 +132,7 @@ def register():
                 'role': 'member'
             }
             session['otp'] = otp
-            session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=2)).isoformat()
+            session['otp_expiry'] = (datetime.now(timezone.utc) + timedelta(minutes=2)).isoformat()
 
             # Send OTP via email
             admin_email = admin_user['email']
@@ -215,7 +215,7 @@ def verify_register_otp():
         if not user_data:
             return redirect(url_for('register'))
 
-        if datetime.now(datetime.timezone.utc) > datetime.fromisoformat(expiry):
+        if datetime.now(timezone.utc) > datetime.fromisoformat(expiry):
             session.clear()
             return redirect(url_for('register'))
 
@@ -613,7 +613,6 @@ def forget_password():
             otp = str(random.randint(100000, 999999))
             session['reset_user_id'] = str(user['_id'])
             session['reset_otp'] = otp
-            datetime.now(timezone.utc) > datetime.fromisoformat(session['otp_expiry'])
 
 
             msg = Message('OTP for Password Reset', sender=app.config['MAIL_USERNAME'], recipients=[email])
@@ -1357,7 +1356,7 @@ def deleteEnquiry():
             record_id = data.get('id')
             data = mongo.db.contacts.find_one({'_id': ObjectId(record_id)})
             result = mongo.db.contacts.delete_one({'_id': ObjectId(record_id)})
-            mongo.db.form_data.insert_one({data})
+            mongo.db.form_data.insert_one(data)
 
             if result.deleted_count > 0:
                 return jsonify({'status': 'success', 'message': 'Record deleted successfully!'})
