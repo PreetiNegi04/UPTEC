@@ -89,9 +89,12 @@ course_fees = {
 
 
 #routes 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/')
 def start():
+    if 'user_id' in session:
+        return redirect(url_for('index'))
     return redirect(url_for('login'))
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -267,73 +270,87 @@ def send_registration_email(to_email, username, password):
 
 
 
-@app.route('/login', methods=['POST', 'GET'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    if 'username' in session:
+    if 'user_id' in session:
         return redirect(url_for('index'))
+
     message = ''
+
     if request.method == 'POST':
-        data = request.form
-        username = data.get('username')
-        password = data.get('password')
+        username = request.form.get('username')
+        password = request.form.get('password')
 
         user = mongo.db.user.find_one({'username': username})
 
         if user and check_password(user['password'], password):
-            session['temp_user'] = str(user['_id'])  # Save user id temporarily
+            session.clear()
 
-            # Generate and save OTP
-            otp = str(random.randint(100000, 999999))
-            session['otp'] = otp
-            #session['otp_expiry'] = (datetime.now(datetime.timezone.utc) + timedelta(minutes=2)).isoformat()
-            session['otp_expiry'] = (datetime.now(timezone.utc) + timedelta(minutes=2)).isoformat()
+            session['temp_user'] = str(user['_id'])
+            session['login_otp'] = str(random.randint(100000, 999999))
+            session['login_otp_expiry'] = (
+                datetime.now(timezone.utc) + timedelta(minutes=2)
+            ).isoformat()
 
-
-            # Send OTP
-            msg = Message('Your OTP Code', sender=app.config['MAIL_USERNAME'], recipients=[user['email']])
-            msg.body = f"Your OTP is: {otp}\nIt will expire in 2 minutes."
+            msg = Message(
+                'Your OTP Code',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[user['email']]
+            )
+            msg.body = f"Your OTP is {session['login_otp']}"
             mail.send(msg)
+
             return redirect(url_for('verify_otp'))
-        else:
-            message = 'Invalid username or password!'
+
+        message = 'Invalid username or password!'
 
     return render_template('auth-login.html', message=message)
 
 
+
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
-    session.pop('role',None)
-    session.pop('otp', None)
-    session.pop('otp_expiry', None)
-    session.pop('temp_user', None)
     session.clear()
     return redirect(url_for('login'))
+
 
 
 @app.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
     message = ''
+
+    if (
+        'temp_user' not in session or
+        'login_otp' not in session or
+        'login_otp_expiry' not in session
+    ):
+        session.clear()
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
         input_otp = request.form.get('otp')
-        stored_otp = session.get('otp')
-        expiry = session.get('otp_expiry')
 
-        if datetime.now(timezone.utc) > datetime.fromisoformat(expiry):
-            message = 'OTP expired. Please login again.'
+        if datetime.now(timezone.utc) > datetime.fromisoformat(session['login_otp_expiry']):
             session.clear()
             return redirect(url_for('login'))
 
-        if input_otp == stored_otp:
-            session['username'] = mongo.db.user.find_one({'_id': ObjectId(session['temp_user'])})['username']
-            session['role'] = mongo.db.user.find_one({'_id': ObjectId(session['temp_user'])})['role']
-            session.pop('otp', None)
-            session.pop('otp_expiry', None)
-            session.pop('temp_user', None)
+        if input_otp == session['login_otp']:
+            user = mongo.db.user.find_one(
+                {'_id': ObjectId(session['temp_user'])},
+                {'username': 1, 'role': 1}
+            )
+
+            session.clear()
+            session['user_id'] = str(user['_id'])
+            session['username'] = user['username']
+            session['role'] = user['role']
+
             return redirect(url_for('index'))
-        else:
-            message = 'Invalid OTP!'
+
+        message = 'Invalid OTP!'
+
     return render_template('verify_otp.html', message=message)
+
 
 @app.route('/admin/delete_user', methods=['POST'])
 def delete_user():
@@ -573,80 +590,108 @@ def dailyreport():
 
     return render_template('dailyreport.html', enquiry = enquiry, registration = registration, prospectus = prospectus, upgrade = upgrade , total = total, sources = sources, date = today)
 
-
 @app.route('/index')
 def index():
-    if 'username' not in session:
+    if 'user_id' not in session:
         return redirect(url_for('login'))
-    # Get the total number of documents in the collection
+
     is_admin = session.get('role') == "admin"
-    query = {"r" : "1"}
-    total_documents = collection.count_documents(query)
+
+    total_documents = collection.count_documents({"r": "1"})
     total_enquiries = collection.count_documents({})
-    query = {"e": "1", "p": "0", "r": "0"}
-    pending = collection.count_documents(query)
+    pending = collection.count_documents({"e": "1", "p": "0", "r": "0"})
 
     pending_documents = find_pending()
-
     today_documents = find_today()
-  
     area = find_area()
     courses = find_courses()
-    # Get the current date and calculate the start and end of today
-    today = datetime.today().strftime("%Y-%m-%d")
-    # Query to count documents with 'today_date' of today
-    query = {"register_date": today, "r" : "1"}
-    total_today = collection.count_documents(query)
-
     prospectus = find_prospectus()
-    return render_template('index.html',  username = session['username'], total_registration = total_documents, total_today = total_today, total_enquiries = total_enquiries, pending = pending, pending_documents = pending_documents, today_documents = today_documents, area = area, courses = courses, prospectus = prospectus, course_fees = course_fees, is_admin = is_admin) 
 
+    today = datetime.today().strftime("%Y-%m-%d")
+    total_today = collection.count_documents({"register_date": today, "r": "1"})
+
+    return render_template(
+        'index.html',
+        username=session['username'],
+        total_registration=total_documents,
+        total_today=total_today,
+        total_enquiries=total_enquiries,
+        pending=pending,
+        pending_documents=pending_documents,
+        today_documents=today_documents,
+        area=area,
+        courses=courses,
+        prospectus=prospectus,
+        course_fees=course_fees,
+        is_admin=is_admin
+    )
+ 
 
 @app.route('/forget-password', methods=['GET', 'POST'])
 def forget_password():
     message = ''
+
     if request.method == 'POST':
         email = request.form.get('email')
         user = mongo.db.user.find_one({'email': email})
 
         if user:
-            otp = str(random.randint(100000, 999999))
+            session.clear()
             session['reset_user_id'] = str(user['_id'])
-            session['reset_otp'] = otp
+            session['reset_otp'] = str(random.randint(100000, 999999))
+            session['reset_otp_expiry'] = (
+                datetime.now(timezone.utc) + timedelta(minutes=5)
+            ).isoformat()
 
-
-            msg = Message('OTP for Password Reset', sender=app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f"Your OTP to reset password is: {otp}. It will expire in 5 minutes."
+            msg = Message(
+                'OTP for Password Reset',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[email]
+            )
+            msg.body = f"Your OTP is {session['reset_otp']}"
             mail.send(msg)
 
             return redirect(url_for('verify_reset_otp'))
-        else:
-            message = "Email doesn't exist!"
+
+        message = "Email doesn't exist!"
+
     return render_template('auth-forgot-password.html', message=message)
+
 
 @app.route('/verify-reset-otp', methods=['GET', 'POST'])
 def verify_reset_otp():
     message = ''
+
+    if (
+        'reset_user_id' not in session or
+        'reset_otp' not in session or
+        'reset_otp_expiry' not in session
+    ):
+        session.clear()
+        return redirect(url_for('forget_password'))
+
     if request.method == 'POST':
         input_otp = request.form.get('otp')
-        stored_otp = session.get('reset_otp')
-        expiry = session.get('otp_expiry')
 
-        if not stored_otp or datetime.now(datetime.timezone.utc) > datetime.fromisoformat(expiry):
-            message = 'OTP expired or invalid. Please try again.'
+        if datetime.now(timezone.utc) > datetime.fromisoformat(session['reset_otp_expiry']):
             session.clear()
             return redirect(url_for('forget_password'))
 
-        if input_otp == stored_otp:
-            # OTP is correct, allow password reset
+        if input_otp == session['reset_otp']:
             return redirect(url_for('reset_password'))
-        else:
-            message = 'Invalid OTP!'
+
+        message = 'Invalid OTP!'
+
     return render_template('verify_reset_otp.html', message=message)
+
 
 @app.route('/reset-password', methods=['GET', 'POST'])
 def reset_password():
     message = ''
+
+    if 'reset_user_id' not in session:
+        return redirect(url_for('forget_password'))
+
     if request.method == 'POST':
         password = request.form.get('password')
         confirm = request.form.get('confirm')
@@ -654,16 +699,15 @@ def reset_password():
         if password != confirm:
             message = 'Passwords do not match!'
         else:
-            user_id = session.get('reset_user_id')
-            if user_id:
-                password = hash_password(password)  # Ensure password is hashed
-                mongo.db.user.update_one({'_id': ObjectId(user_id)}, {'$set': {'password': password}})
-                session.clear()
-                message = 'Password reset successfully!'
-                return redirect(url_for('login'))
-            else:
-                message = 'Session expired. Please try again.'
+            mongo.db.user.update_one(
+                {'_id': ObjectId(session['reset_user_id'])},
+                {'$set': {'password': hash_password(password)}}
+            )
+            session.clear()
+            return redirect(url_for('login'))
+
     return render_template('reset_password.html', message=message)
+
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
